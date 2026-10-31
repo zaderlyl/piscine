@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+#editeur {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#onglets {
+  display: flex;
+  background: #eee;
+}
+
+#onglets button {
+  border: 0;
+  background: none;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+#onglets button.actif {
+  background: white;
+  font-weight: bold;
+}
+
+#zones {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.zone {
+  position: absolute;
+  inset: 0;
+}
+
+.cache {
+  display: none;
+}
+
+#apercu {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+}
