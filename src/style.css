@@ -43,8 +43,22 @@ body {
 }
 
 #apercu {
-  width: 100%;
-  height: 100%;
+  flex: 1;
   border: 0;
   background: white;
+}
+
+#droite {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#resultat {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  background: #F5F5F5;
+  font-family: monospace;
 }
