@@ -17,6 +17,8 @@ const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
 
+let urlApercu = null;
+
 const types = {
   html: "text/html",
   css: "text/css",
