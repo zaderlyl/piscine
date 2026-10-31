@@ -16,7 +16,6 @@ const fichier = {
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
-let urls = [];
 
 const types = {
   html: "text/html",
@@ -25,26 +24,31 @@ const types = {
 };
 // affichage du code dans iframe avec URL temporaire
 
-function creerURL(code, type) {
-  const url = URL.createObjectURL(new Blob([code], { type }));
-  urls.push(url);
-  return url;
-}
 
+// Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
-  urls.forEach((u) => URL.revokeObjectURL(u));
-  urls = [];
-
   let code = editeurs["index.html"].state.doc.toString();
+
   for (const nom of Object.keys(fichier)) {
     if (nom === "index.html") continue;
+    const contenu = editeurs[nom].state.doc.toString();
     const extension = nom.split(".").pop();
-    const url = creerURL(editeurs[nom].state.doc.toString(), types[extension]);
-    code = code.replaceAll(`src="${nom}"`, `src="${url}"`).replaceAll(`href="${nom}"`, `href="${url}"`); 
-  }
-apercu.src = creerURL(code, "text/html");
+    const echapper = nom.replace(".", "\\.");
 
+    if (extension === "css") {
+      const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
+      code = code.replace(lien, () => `<style>${contenu}</style>`);
+    } else if (extension === "js") {
+      const balise = new RegExp(`<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`, "g");
+      code = code.replace(balise, () => `<script>${contenu}<\/script>`);
+    }
+  }
+
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
+  apercu.src = urlApercu;
 }
+
 
 const theme = EditorView.theme({
   "&": {
