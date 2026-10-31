@@ -24,8 +24,12 @@ const types = {
   css: "text/css",
   js: "text/javascript",
 };
-// affichage du code dans iframe avec URL temporaire
 
+const CLE_BROUILLON = "piscine-brouillon";
+
+let minuteur = null;
+
+// affichage du code dans iframe avec URL temporaire
 
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
@@ -41,7 +45,10 @@ function afficherApercu() {
       const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
       code = code.replace(lien, () => `<style>${contenu}</style>`);
     } else if (extension === "js") {
-      const balise = new RegExp(`<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`, "g");
+      const balise = new RegExp(
+        `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
+        "g",
+      );
       code = code.replace(balise, () => `<script>${contenu}<\/script>`);
     }
   }
@@ -50,7 +57,6 @@ function afficherApercu() {
   urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
   apercu.src = urlApercu;
 }
-
 
 const theme = EditorView.theme({
   "&": {
@@ -63,6 +69,8 @@ const theme = EditorView.theme({
 const ecoute = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
     afficherApercu();
+    clearTimeout(minuteur);
+    minuteur = setTimeout(sauvegarderBrouillon, 1000);
   }
 });
 
@@ -75,6 +83,28 @@ function afficherFichier(nom) {
   }
 }
 
+function lireBrouillon() {
+  try {
+    return JSON.parse(localStorage.getItem(CLE_BROUILLON)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function sauvegarderBrouillon() {
+  const brouillon = {};
+  for (const nom in editeurs) {
+    brouillon[nom] = editeurs[nom].state.doc.toString();
+  }
+  try {
+    localStorage.setItem(CLE_BROUILLON, JSON.stringify(brouillon));
+  } catch {
+    console.error("Erreur lors de la sauvegarde du brouillon");
+  }
+}
+
+const brouillon = lireBrouillon();
+
 for (const [nom, langage] of Object.entries(fichier)) {
   const zone = document.createElement("div");
   zone.className = "zone cache";
@@ -82,7 +112,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
   zonesParNom[nom] = zone;
 
   editeurs[nom] = new EditorView({
-    doc: "",
+    doc: brouillon[nom] || "",
     extensions: [basicSetup, langage(), theme, ecoute],
     parent: zone,
   });
@@ -95,3 +125,5 @@ for (const [nom, langage] of Object.entries(fichier)) {
 }
 
 afficherFichier("index.html");
+
+afficherApercu();
