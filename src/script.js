@@ -206,6 +206,31 @@ const exo = lireExo(await reponse.text());
 testsExo = lireCode(exo["Tests"]);
 panneauEnonce.textContent = exo["Énoncé"].trim();
 
+// remplace le code des editeurs par la solution de reference
+
+function chargerSolution() {
+  for (const [tire, contenu] of Object.entries(exo)) {
+    if (!tire.startsWith("Solution : ")) continue;
+    const editeur = editeurs[tire.slice("Solution : ".length)];
+    if (!editeur) continue;
+    editeur.dispatch({
+      changes: { from: 0, to: editeur.state.doc.length, insert: lireCode(contenu) },
+    });
+  }
+}
+
+
+
+// Mode auteur ( acces via ?auteur ) bouton pour verif solution
+
+if (new URLSearchParams(location.search).has("auteur")) {
+  const boutonSolution = document.createElement("button");
+  boutonSolution.textContent = "Charger la solution";
+  boutonSolution.addEventListener("click", chargerSolution);
+  onglets.append(boutonSolution);
+}
+
+
 afficherFichier("index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
