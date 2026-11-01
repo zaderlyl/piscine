@@ -6,6 +6,7 @@ import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
+const panneauResultat = document.getElementById("resultat");
 
 const fichier = {
   "index.html": html,
@@ -29,7 +30,25 @@ const CLE_BROUILLON = "piscine-brouillon";
 
 let minuteur = null;
 
-// affichage du code dans iframe avec URL temporaire
+
+const testsDemo = `assert($("h1")), "Il faut une balise h1"`;
+
+
+// execution des resultat de page
+
+function construireTests(tests){
+return `<script>window.addEventListener("load",() => {
+  const resultats = [];
+  const $ = (selecteur) => document.querySelector(selecteur);
+  const assert = (condiction, message) => resultats.push({ ok: !!condiction, message });
+  try {
+    ${tests}
+    } catch (erreur) {
+     resultats.push({ok: false, message: "Erreur dans les testes : " + erreur.message},
+     "*";
+     )};
+     <\/script>`;
+}
 
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
