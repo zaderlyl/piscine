@@ -30,23 +30,26 @@ const CLE_BROUILLON = "piscine-brouillon";
 
 let minuteur = null;
 
-const testsDemo = `assert($("h1")), "Il faut une balise h1"`;
+const testsDemo = `assert($("h1"), "Il faut une balise h1")`;
 
 // execution des resultat de page
 
 function construireTests(tests) {
-  return `<script>window.addEventListener("load",() => {
-  const resultats = [];
-  const $ = (selecteur) => document.querySelector(selecteur);
-  const assert = (condiction, message) => resultats.push({ ok: !!condiction, message });
-  try {
-    ${tests}
-    } catch (erreur) {
-     resultats.push({ok: false, message: "Erreur dans les testes : " + erreur.message},
-     "*";
-     )};
-     <\/script>`;
+  return `<script>
+    window.addEventListener("load", () => {
+      const resultats = [];
+      const $ = (selecteur) => document.querySelector(selecteur);
+      const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+      try {
+        ${tests}
+      } catch (erreur) {
+        resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
+      }
+      parent.postMessage({ type: "tests", resultats }, "*");
+    });
+  <\/script>`;
 }
+
 
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
