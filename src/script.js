@@ -7,9 +7,12 @@ const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
+const panneauEnonce = document.getElementById("enonce");
+
 const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 
+const FICHIER_EXO = "../exos/html/vanilla/04.md";
 
 const editeurs = {};
 const zonesParNom = {};
@@ -29,15 +32,6 @@ const types = {
   js: "text/javascript",
 };
 
-const testsDemo = `
-  assert($("h1"), "Il faut une balise h1");
-  assert(style("h1", "color") === "rgb(255, 0, 0)", "Le h1 doit être rouge");
-  assert($$("input").length === 1, "Il faut un seul champ de saisie");
-  type("#nom", "Lilian");
-  click("#valider");
-  await wait(100);
-  assert($("#message")?.textContent === "Bonjour Lilian", "Après le clic sur #valider, #message devrait afficher « Bonjour Lilian »");
-`;
 
 
 
@@ -45,6 +39,27 @@ let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
 
+let testsExo = "";
+
+
+
+
+// decoupage fichier exo en section -> ("##Titre")
+
+function LireExo(text){
+  const section = {};
+  let courant = null;
+for (const ligne of texte.split("\n")) {
+  const titre = ligne.match(/^##\s*(.*)/);
+  if (titre) {
+    courant = titre[1].trim();
+    section[courant] = "";
+  } else if (courant) {
+    section[courant] += ligne + "\n";
+  }
+}
+return section;
+}
 
 // execution des resultat de page
 
@@ -179,6 +194,13 @@ for (const [nom, langage] of Object.entries(fichier)) {
   onglets.append(bouton);
   boutons[nom] = bouton;
 }
+
+// recuperer cotenu d'un section
+function lireCode(section){
+  const bloc = section.match(/```(\w+)?\n([\s\S]*?)```/);
+  return bloc ? bloc[1] : "";
+}
+
 
 afficherFichier("index.html");
 
