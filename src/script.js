@@ -2,6 +2,7 @@ import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
+import expand from "https://esm.sh/emmet@2.4.11";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -11,6 +12,7 @@ const panneauEnonce = document.getElementById("enonce");
 
 const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
+const CLE_EMMET = "piscine-emmet";
 
 const FICHIER_EXO = "../exos/html/vanilla/04.md";
 
@@ -169,6 +171,48 @@ function sauvegarderBrouillon() {
 
 const brouillon = lireBrouillon();
 
+// abreviation lock au start puis deblocable
+function lireEmmet() {
+  try {
+    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [false];
+  } catch {
+    return [];
+  }
+}
+
+const emmet = lireEmmet();
+
+// raccourcis clavier pour Emmet
+const emmetTab = EditorView.domEventHandlers({
+  keydown(event, view) {
+    if (event.key !== "Tab" || event.shiftKey) return false;
+    const { from, to } = view.state.selection.main;
+    if (from !== to) return false;
+
+    const ligne = view.state.doc.lineAt(from);
+    const abreviation = ligne.text
+      .slice(0, from - ligne.from)
+      .match(/\S+$/)?.[0];
+    if (!abreviation) return false;
+    if (!emmetDebloque.includes(abreviation)) return false;
+    
+    let resultat;
+    try {
+      resultat = expand(abreviation);
+    } catch {
+      return false;
+    }
+
+    event.preventDefault();
+    const debut = from - abreviation.length;
+    view.dispatch({
+      changes: { from: debut, to: from, insert: resultat },
+      selection: { anchor: debut + resultat.length },
+    });
+    return true;
+  },
+});
+
 for (const [nom, langage] of Object.entries(fichier)) {
   const zone = document.createElement("div");
   zone.className = "zone cache";
@@ -177,7 +221,13 @@ for (const [nom, langage] of Object.entries(fichier)) {
 
   editeurs[nom] = new EditorView({
     doc: brouillon[nom] || "",
-    extensions: [basicSetup, langage(), theme, ecoute],
+    extensions: [
+      basicSetup,
+      langage(),
+      theme,
+      ecoute,
+      ...(nom === "index.html" ? [emmetTab] : []),
+    ],
     parent: zone,
   });
 
