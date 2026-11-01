@@ -32,33 +32,27 @@ const types = {
   js: "text/javascript",
 };
 
-
-
-
 let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
 
 let testsExo = "";
 
-
-
-
 // decoupage fichier exo en section -> ("##Titre")
 
 function lireExo(texte) {
   const section = {};
   let courant = null;
-for (const ligne of texte.split("\n")) {
-  const titre = ligne.match(/^##\s*(.*)/);
-  if (titre) {
-    courant = titre[1].trim();
-    section[courant] = "";
-  } else if (courant) {
-    section[courant] += ligne + "\n";
+  for (const ligne of texte.split("\n")) {
+    const titre = ligne.match(/^##\s*(.*)/);
+    if (titre) {
+      courant = titre[1].trim();
+      section[courant] = "";
+    } else if (courant) {
+      section[courant] += ligne + "\n";
+    }
   }
-}
-return section;
+  return section;
 }
 
 // execution des resultat de page
@@ -93,8 +87,7 @@ function construireTests(tests) {
   <\/script>`;
 }
 
-
-function arreterApercu(){
+function arreterApercu() {
   sauvegarderBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
   location.reload();
@@ -196,7 +189,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
 }
 
 // recuperer cotenu d'un section
-function lireCode(section){
+function lireCode(section) {
   const bloc = section.match(/```(\w+)?\n([\s\S]*?)```/);
   return bloc ? bloc[2] : "";
 }
@@ -210,16 +203,18 @@ panneauEnonce.textContent = exo["Énoncé"].trim();
 
 function chargerSolution() {
   for (const [tire, contenu] of Object.entries(exo)) {
-    if (!tire.startsWith("Solution : ")) continue;
-    const editeur = editeurs[tire.slice("Solution : ".length)];
+    if (!tire.startsWith("Solution: ")) continue;
+    const editeur = editeurs[tire.slice("Solution: ".length).trim()];
     if (!editeur) continue;
     editeur.dispatch({
-      changes: { from: 0, to: editeur.state.doc.length, insert: lireCode(contenu) },
+      changes: {
+        from: 0,
+        to: editeur.state.doc.length,
+        insert: lireCode(contenu),
+      },
     });
   }
 }
-
-
 
 // Mode auteur ( acces via ?auteur ) bouton pour verif solution
 
@@ -230,7 +225,6 @@ if (new URLSearchParams(location.search).has("auteur")) {
   onglets.append(boutonSolution);
 }
 
-
 afficherFichier("index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
@@ -240,8 +234,6 @@ if (localStorage.getItem(CLE_SUSPENDU)) {
 } else {
   afficherApercu();
 }
-
-
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
