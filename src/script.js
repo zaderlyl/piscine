@@ -30,14 +30,12 @@ const CLE_BROUILLON = "piscine-brouillon";
 
 let minuteur = null;
 
-
 const testsDemo = `assert($("h1")), "Il faut une balise h1"`;
-
 
 // execution des resultat de page
 
-function construireTests(tests){
-return `<script>window.addEventListener("load",() => {
+function construireTests(tests) {
+  return `<script>window.addEventListener("load",() => {
   const resultats = [];
   const $ = (selecteur) => document.querySelector(selecteur);
   const assert = (condiction, message) => resultats.push({ ok: !!condiction, message });
@@ -71,7 +69,7 @@ function afficherApercu() {
       code = code.replace(balise, () => `<script>${contenu}<\/script>`);
     }
   }
-
+  code += construireTests(testsDemo);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
   urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
   apercu.src = urlApercu;
@@ -146,3 +144,12 @@ for (const [nom, langage] of Object.entries(fichier)) {
 afficherFichier("index.html");
 
 afficherApercu();
+
+// Affiche les résultats envoyés par l'aperçu
+window.addEventListener("message", (e) => {
+  if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
+  const echecs = e.data.resultats.filter((r) => !r.ok);
+  panneauResultats.textContent = echecs.length
+    ? echecs.map((r) => "❌ " + r.message).join("\n")
+    : "✅ Tous les tests passent";
+});
