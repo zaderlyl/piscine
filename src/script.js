@@ -121,7 +121,7 @@ function afficherApercu() {
       code = code.replace(balise, () => `<script>${contenu}<\/script>`);
     }
   }
-  code += construireTests(testsDemo);
+  code += construireTests(testsExo);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
   urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
   apercu.src = urlApercu;
@@ -201,13 +201,17 @@ function lireCode(section){
   return bloc ? bloc[1] : "";
 }
 
+const reponse = await fetch(FICHIER_EXO);
+const exo = lireExo(await reponse.text());
+testsExo = lireCode(exo["Tests"]);
+panneauEnonce.textContent = exo["Énoncé"].trim();
 
 afficherFichier("index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
   localStorage.removeItem(CLE_SUSPENDU);
   panneauResultats.textContent =
-    "⏱ Aperçu suspendu : ton code semble tourner à l'infini. Corrige-le pour relancer.";
+    "Aperçu suspendu : ton code semble tourner à l'infini. Corrige-le pour relancer.";
 } else {
   afficherApercu();
 }
