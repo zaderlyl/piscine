@@ -46,7 +46,7 @@ let testsExo = "";
 
 // decoupage fichier exo en section -> ("##Titre")
 
-function LireExo(texte){
+function lireExo(texte) {
   const section = {};
   let courant = null;
 for (const ligne of texte.split("\n")) {
