@@ -110,6 +110,8 @@ function afficherApercu() {
   if (urlApercu) URL.revokeObjectURL(urlApercu);
   urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
   apercu.src = urlApercu;
+  clearTimeout(minuteurTests);
+  minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
 
 const theme = EditorView.theme({
@@ -180,11 +182,20 @@ for (const [nom, langage] of Object.entries(fichier)) {
 
 afficherFichier("index.html");
 
-afficherApercu();
+if (localStorage.getItem(CLE_SUSPENDU)) {
+  localStorage.removeItem(CLE_SUSPENDU);
+  panneauResultats.textContent =
+    "⏱ Aperçu suspendu : ton code semble tourner à l'infini. Corrige-le pour relancer.";
+} else {
+  afficherApercu();
+}
+
+
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
   if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
+  clearTimeout(minuteurTests);
   const echecs = e.data.resultats.filter((r) => !r.ok);
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
