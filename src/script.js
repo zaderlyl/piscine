@@ -147,7 +147,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
 
   editeurs[nom] = new EditorView({
     doc: brouillon[nom] || "",
-    extensions: [basicSetup, langage(), theme, ecoute],
+    extensions: [basicSetup, langage(), theme, ecoute, ...(nom === "index.html" ? [emmetTab] : [])],
     parent: zone,
   });
 
