@@ -7,6 +7,15 @@ const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
+const CLE_BROUILLON = "piscine-brouillon";
+const CLE_SUSPENDU = "piscine-apercyu-suspendu";
+
+
+const editeurs = {};
+const zonesParNom = {};
+const boutons = {};
+
+const DELAI_SUSPENDU = 5000;
 
 const fichier = {
   "index.html": html,
@@ -14,21 +23,11 @@ const fichier = {
   "script.js": javascript,
 };
 
-const editeurs = {};
-const zonesParNom = {};
-const boutons = {};
-
-let urlApercu = null;
-
 const types = {
   html: "text/html",
   css: "text/css",
   js: "text/javascript",
 };
-
-const CLE_BROUILLON = "piscine-brouillon";
-
-let minuteur = null;
 
 const testsDemo = `
   assert($("h1"), "Il faut une balise h1");
@@ -39,6 +38,13 @@ const testsDemo = `
   await wait(100);
   assert($("#message")?.textContent === "Bonjour Lilian", "Après le clic sur #valider, #message devrait afficher « Bonjour Lilian »");
 `;
+
+
+
+let minuteurTests = null;
+let minuteur = null;
+let urlApercu = null;
+
 
 // execution des resultat de page
 
@@ -72,6 +78,12 @@ function construireTests(tests) {
   <\/script>`;
 }
 
+
+function arreterApercu(){
+  sauvegarderBrouillon();
+  localStorage.setItem(CLE_SUSPENDU, "1");
+  location.reload();
+}
 
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
