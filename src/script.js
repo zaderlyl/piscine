@@ -30,7 +30,15 @@ const CLE_BROUILLON = "piscine-brouillon";
 
 let minuteur = null;
 
-const testsDemo = `assert($("h1"), "Il faut une balise h1")`;
+const testsDemo = `
+  assert($("h1"), "Il faut une balise h1");
+  assert(style("h1", "color") === "rgb(255, 0, 0)", "Le h1 doit être rouge");
+  assert($$("input").length === 1, "Il faut un seul champ de saisie");
+  type("#nom", "Lilian");
+  click("#valider");
+  await wait(100);
+  assert($("#message")?.textContent === "Bonjour Lilian", "Après le clic sur #valider, #message devrait afficher « Bonjour Lilian »");
+`;
 
 // execution des resultat de page
 
