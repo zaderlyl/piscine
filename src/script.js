@@ -109,7 +109,7 @@ const brouillon = lireBrouillon();
 
 // raccourcis clavier pour Emmet
 
-const emmetTab = editorView.domEventHandlers ({
+const emmetTab = EditorView.domEventHandlers ({
   keydown(event, view) {
     if (event.key !== "Tab" || event.shiftKey) return false;
     const { from, to } =view.state.selection.main;
@@ -121,13 +121,13 @@ const emmetTab = editorView.domEventHandlers ({
 
     let resultat;
     try {
-      resultat = expand(abreviation, { type: "html" });
+      resultat = expand(abreviation);
     } catch {
       return false;
     }
 
     event.preventDefault();
-    const debut = from - abreviation.lenght;
+    const debut = from - abreviation.length;
     view.dispatch({
       changes: { from: debut, to: from, insert: resultat},
       selection: { anchor: debut + resultat.length },
