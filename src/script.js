@@ -6,7 +6,7 @@ import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
-const panneauResultat = document.getElementById("resultat");
+const panneauResultats = document.getElementById("resultat");
 
 const fichier = {
   "index.html": html,
