@@ -46,7 +46,7 @@ let testsExo = "";
 
 // decoupage fichier exo en section -> ("##Titre")
 
-function LireExo(text){
+function LireExo(texte){
   const section = {};
   let courant = null;
 for (const ligne of texte.split("\n")) {
@@ -198,7 +198,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
 // recuperer cotenu d'un section
 function lireCode(section){
   const bloc = section.match(/```(\w+)?\n([\s\S]*?)```/);
-  return bloc ? bloc[1] : "";
+  return bloc ? bloc[2] : "";
 }
 
 const reponse = await fetch(FICHIER_EXO);
