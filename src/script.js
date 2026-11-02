@@ -2,13 +2,21 @@ import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
+import { marked } from "https://esm.sh/marked@12.0.2";
+
+
 import expand from "https://esm.sh/emmet@2.4.11";
+
+
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
+const docOnglet = document.getElementById("doc-onglet");
+
+
 
 const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
@@ -19,6 +27,15 @@ const FICHIER_EXO = "../exos/html/vanilla/04.md";
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
+const boutonsDoc = {};
+
+
+
+const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
+
+
+
+
 
 const DELAI_SUSPENDU = 5000;
 
@@ -124,11 +141,14 @@ function afficherApercu() {
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
 
+
 const theme = EditorView.theme({
   "&": {
     height: "100%",
   },
 });
+
+
 
 // mise a jour a chaque modif
 
@@ -247,7 +267,26 @@ function lireCode(section) {
 const reponse = await fetch(FICHIER_EXO);
 const exo = lireExo(await reponse.text());
 testsExo = lireCode(exo["Tests"]);
-panneauEnonce.textContent = exo["Énoncé"].trim();
+
+// Panneau doc : un onglet par section de l'exo
+function afficherDoc(nom) {
+  panneauEnonce.innerHTML = marked.parse((exo[nom] || "").trim());
+  for (const [n, bouton] of Object.entries(boutonsDoc)) {
+    bouton.classList.toggle("actif", n === nom);
+  }
+}
+
+for (const nom of SECTION_DOC) {
+  if (!exo[nom]) continue;
+  const bouton = document.createElement("button");
+  bouton.textContent = nom;
+  bouton.addEventListener("click", () => afficherDoc(nom));
+  docOnglet.append(bouton);
+  boutonsDoc[nom] = bouton;
+}
+
+afficherDoc("Énoncé");
+
 
 // remplace le code des editeurs par la solution de reference
 
