@@ -15,7 +15,6 @@ body {
   max-height: 160px;
   overflow: auto;
   padding: 8px 12px;
-  white-space: pre-wrap;
   background: #fffbe6;
 font-family: sans-serif;
 }

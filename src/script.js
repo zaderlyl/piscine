@@ -2,7 +2,12 @@ import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
+import { marked } from "https://esm.sh/marked@12.0.2";
+
+
 import expand from "https://esm.sh/emmet@2.4.11";
+
+
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -247,8 +252,7 @@ function lireCode(section) {
 const reponse = await fetch(FICHIER_EXO);
 const exo = lireExo(await reponse.text());
 testsExo = lireCode(exo["Tests"]);
-panneauEnonce.textContent = exo["Énoncé"].trim();
-
+panneauEnonce.innerHTML = marked.parse(exo["Enoncé"].trim());
 // remplace le code des editeurs par la solution de reference
 
 function chargerSolution() {
