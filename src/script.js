@@ -252,7 +252,7 @@ function lireCode(section) {
 const reponse = await fetch(FICHIER_EXO);
 const exo = lireExo(await reponse.text());
 testsExo = lireCode(exo["Tests"]);
-panneauEnonce.innerHTML = marked.parse(exo["Enoncé"].trim());
+panneauEnonce.innerHTML = marked.parse(exo["Énoncé"].trim());
 // remplace le code des editeurs par la solution de reference
 
 function chargerSolution() {
