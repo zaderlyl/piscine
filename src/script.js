@@ -101,7 +101,7 @@ function injecterTests(code, tests) {
     code.match(/<head(\s[^>]*)?>/i) ||
     code.match(/<body(\s[^>]*)?>/i) ||
     code.match(/^\s*<!doctype[^>]*>/i);
-  if (!ouverture) return code + code;
+  if (!ouverture) return bloc + code;
   const fin = ouverture.index + ouverture[0].length;
   return code.slice(0, fin) + bloc + code.slice(fin);
 }
