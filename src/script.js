@@ -14,6 +14,9 @@ const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
+const docOnglet = document.getElementById("doc-onglet");
+
+
 
 const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
@@ -24,6 +27,15 @@ const FICHIER_EXO = "../exos/html/vanilla/04.md";
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
+const boutonsDoc = {};
+
+
+
+const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
+
+
+
+
 
 const DELAI_SUSPENDU = 5000;
 
@@ -129,11 +141,33 @@ function afficherApercu() {
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
 
+
+function afficherDoc(nom){
+  panneauEnonce.innerHTML = marked.parse((exo[nom] || "").trim());
+  for (const [n, bouton] of Object.entries(boutonsDoc)){
+    bouton.classList.toggle("actif", n === nom);
+  }
+}
+
+for (const nom of SECTION_DOC){
+  if (!exo[nom]) continue;
+  const bouton = document.createElement("button");
+  bouton.textContent = nom;
+  bouton.addEventListener("click", () => afficherDoc(nom));
+  docOnglet.append(bouton);
+  boutonsDoc[nom] = bouton;
+}
+
+
+
+
 const theme = EditorView.theme({
   "&": {
     height: "100%",
   },
 });
+
+
 
 // mise a jour a chaque modif
 
@@ -252,7 +286,8 @@ function lireCode(section) {
 const reponse = await fetch(FICHIER_EXO);
 const exo = lireExo(await reponse.text());
 testsExo = lireCode(exo["Tests"]);
-panneauEnonce.innerHTML = marked.parse(exo["Énoncé"].trim());
+
+
 // remplace le code des editeurs par la solution de reference
 
 function chargerSolution() {
@@ -298,3 +333,6 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
 });
+
+
+afficherDoc("Énoncé");
