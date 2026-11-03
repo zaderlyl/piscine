@@ -112,6 +112,19 @@ function arreterApercu() {
   location.reload();
 }
 
+// Insère le code de test au début du document (après <head>, <body> ou le doctype),
+// car il serait ignoré après un </frameset>
+function injecterTests(code, tests) {
+  const bloc = construireTests(tests);
+  const ouverture =
+    code.match(/<head(\s[^>]*)?>/i) ||
+    code.match(/<body(\s[^>]*)?>/i) ||
+    code.match(/^\s*<!doctype[^>]*>/i);
+  if (!ouverture) return bloc + code;
+  const fin = ouverture.index + ouverture[0].length;
+  return code.slice(0, fin) + bloc + code.slice(fin);
+}
+
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
   let code = editeurs["index.html"].state.doc.toString();
@@ -133,9 +146,9 @@ function afficherApercu() {
       code = code.replace(balise, () => `<script>${contenu}<\/script>`);
     }
   }
-  code += construireTests(testsExo);
+  code = injecterTests(code, testsExo);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html" }));
+  urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html;charset=utf-8" }));
   apercu.src = urlApercu;
   clearTimeout(minuteurTests);
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
