@@ -7,6 +7,9 @@ import { marked } from "https://esm.sh/marked@12.0.2";
 
 import expand from "https://esm.sh/emmet@2.4.11";
 
+import { analyserScript, afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
+import { glissable } from "./redimensionner.js";
+
 
 
 const apercu = document.getElementById("apercu");
@@ -128,6 +131,7 @@ function injecterTests(code, tests) {
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
   let code = editeurs["index.html"].state.doc.toString();
+  let analyse = analyserScript("");
 
   for (const nom of Object.keys(fichier)) {
     if (nom === "index.html") continue;
@@ -139,13 +143,15 @@ function afficherApercu() {
       const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
       code = code.replace(lien, () => `<style>${contenu}</style>`);
     } else if (extension === "js") {
+      analyse = analyserScript(contenu);
       const balise = new RegExp(
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
-      code = code.replace(balise, () => `<script>${contenu}<\/script>`);
+      code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
     }
   }
+  afficherVariables(analyse);
   code = injecterTests(code, testsExo);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
   urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html;charset=utf-8" }));
@@ -336,6 +342,25 @@ if (localStorage.getItem(CLE_SUSPENDU)) {
 } else {
   afficherApercu();
 }
+
+ecouterValeurs(apercu);
+
+// Barres pour agrandir ou réduire les colonnes et les panneaux de droite
+glissable(document.getElementById("separateur-v"), document.getElementById("editeur"), {
+  axe: "x",
+  variable: "--largeur-gauche",
+  min: 200,
+});
+glissable(document.getElementById("separateur-a"), apercu, {
+  axe: "y",
+  variable: "--h-apercu",
+  min: 80,
+});
+glissable(document.getElementById("separateur-b"), document.getElementById("variables"), {
+  axe: "y",
+  variable: "--h-variables",
+  min: 60,
+});
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {

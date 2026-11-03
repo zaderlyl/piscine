@@ -2,7 +2,25 @@ body {
   margin: 0;
   height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: var(--largeur-gauche, 1fr) 6px 1fr;
+}
+
+.barre {
+  background: #ccc;
+  flex: none;
+}
+
+.barre-v {
+  cursor: col-resize;
+}
+
+.barre-h {
+  height: 6px;
+  cursor: row-resize;
+}
+
+.barre:hover {
+  background: #999;
 }
 
 #editeur {
@@ -51,7 +69,9 @@ font-family: sans-serif;
 }
 
 #apercu {
-  flex: 1;
+  flex: none;
+  height: var(--h-apercu, 320px);
+  min-height: 0;
   border: 0;
   background: white;
 }
@@ -62,8 +82,44 @@ font-family: sans-serif;
   flex-direction: column;
 }
 
+#variables {
+  box-sizing: border-box;
+  height: var(--h-variables, 180px);
+  flex: none;
+  overflow: auto;
+  padding: 8px 12px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+  font-family: monospace;
+}
+
+#variables .message {
+  margin: 0;
+  color: #777;
+}
+
+.variable {
+  padding: 4px 0;
+  border-bottom: 1px dotted #ddd;
+}
+
+.variable .valeur {
+  color: #1565c0;
+}
+
+.variable small {
+  margin-left: 6px;
+  color: #777;
+}
+
+.variable.non-connectee {
+  opacity: 0.55;
+}
+
 #resultat {
-  height: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
   margin: 0;
   padding: 0;
   overflow: auto;
