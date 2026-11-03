@@ -18,6 +18,7 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [ ] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
+- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) et de Git : voir [visualisation-logique.md](visualisation-logique.md)
 
 ## Contenu (exos)
 
