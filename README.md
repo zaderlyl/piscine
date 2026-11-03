@@ -2,6 +2,7 @@
 
 > Document de cadrage issu du brainstorming : il décrit le projet visé. Le code avance par prototypes (voir `src/`).
 > **Contribuer** : [CONTRIBUTING.md](CONTRIBUTING.md) · [Lancer le projet](docs/lancer-le-projet.md) · [Écrire un exo](docs/ecrire-un-exo.md) · [Feuille de route](docs/feuille-de-route.md)
+> **Licence** : tous droits réservés, voir [LICENSE](LICENSE).
 > Les valeurs chiffrées (probabilités, seuils, délais) sont des points de départ, à régler lors d'un pilote.
 
 ---
