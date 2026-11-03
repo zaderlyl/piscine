@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Dépendances et builds (pour plus tard)
+node_modules/
+dist/
+
+# Fichiers locaux
+*.log
+.env
