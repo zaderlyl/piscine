@@ -56,13 +56,15 @@ La numérotation est **propre à chaque ressource**. En interne, la ressource de
 | # | Module | Ressources | Remarque |
 |---|---|---|---|
 | 1 | **HTML** | vanilla | Structure, balises, formulaires |
-| 2 | **CSS** | vanilla, Bootstrap | |
+| 2 | **CSS** | vanilla, Bootstrap | Responsive (media queries), accessibilité (WCAG) |
 | 3 | **SVG** | vanilla, SMIL | Position à confirmer (module à part ou ressource de HTML) |
-| 4 | **JS** | vanilla, Alpine.js, Chart.js, Phaser | Le plus gros module |
+| 4 | **JS** | vanilla, Alpine.js, Chart.js, Phaser | Le plus gros module. DOM, événements, tris, filtres et agrégation de tableaux |
 | 5 | **Bash** | vanilla | Léger, bases uniquement, après JS |
-| 6 | **PHP** | vanilla | WordPress reporté |
-| 7 | **MySQL** | SQL + phpMyAdmin | Sur SQLite en simulation |
+| 6 | **PHP** | vanilla | WordPress reporté. POO, MVC, validation des données côté serveur |
+| 7 | **MySQL** | SQL + phpMyAdmin | Sur SQLite en simulation. Modélisation MCD puis MPD, formats JSON, CSV et XML |
+| 8 | **Git** | ligne de commande | Gestion de versions : commits, branches, fusions. Module transversal, lié à l'éditeur visuel |
 
+- Les notions retenues et celles écartées, avec leur source dans le référentiel national, sont dans [docs/referentiel-mmi.md](docs/referentiel-mmi.md).
 - Le nombre d'exos varie selon la ressource (pas 20 partout).
 - Le contenu des années 2 et 3 reste à définir ; il s'écrit au fil de l'eau.
 - Ordre des ressources dans un module : vanilla d'abord, puis les autres ; chacune se termine par son palier et son projet.
