@@ -14,6 +14,7 @@ Le référentiel ne nomme aucun langage. Les langages du projet (HTML, CSS, JS, 
 | Module | Ressources | État |
 |---|---|---|
 | HTML | vanilla | 42 exos prévus, 1 écrit (`04`) |
+| Algorithmique | pseudo-code, puis JS | Non commencé. Vue juste avant JS |
 | CSS | vanilla, Bootstrap | Non commencé |
 | SVG | vanilla, SMIL | Position à confirmer |
 | JS | vanilla, Alpine.js, Chart.js, Phaser | Non commencé |

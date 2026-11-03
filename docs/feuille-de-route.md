@@ -22,6 +22,8 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 
 ## Contenu (exos)
 
+Ordre des langages et notions attendues : [programme-par-langage.md](programme-par-langage.md).
+
 Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 
 - [x] `04` : Titres h1 à h6

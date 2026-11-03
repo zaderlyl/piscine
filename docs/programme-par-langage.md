@@ -35,6 +35,8 @@ Les étapes sont une **proposition**, à valider. Le principe : chaque notion ar
 
 Notion transversale (R1.11) : HTML sémantique et accessibilité, avec `alt` et balises de structure.
 
+Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire une première erreur avant de corriger.
+
 ## 2. CSS
 
 - Sélecteurs, cascade et spécificité
@@ -54,10 +56,11 @@ Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directe
 - Conditions : `if` et `else`
 - Boucles : `for` et `while`
 - Fonctions : paramètres, retour, portée des variables
-- Tableaux : parcours, ajout, accès par index
+- Tableaux : parcours, ajout, accès par index (tris, filtres et agrégation : voir JS)
 - Objets : clés et valeurs
+- Débogage : poser un point d'arrêt, afficher des valeurs dans la console
 
-Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) ».
+Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
 
 ## 4. JavaScript
 
@@ -98,6 +101,7 @@ Référentiel : R4.DWeb-DI.08, « création de scripts ».
 - Requêtes préparées et échappement des données, pour la sécurité
 - Sessions
 - POO et MVC (R2.13, R3.12)
+- Serveur local (R1.13) : installer un environnement PHP et MySQL en local (XAMPP, Laragon ou Docker, voir [lancer le projet](lancer-le-projet.md))
 
 WordPress est reporté (README).
 
