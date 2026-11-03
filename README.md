@@ -1,6 +1,7 @@
 # Piscine MMI : plateforme d'apprentissage par exercices
 
-> Document de cadrage issu du brainstorming. Rien n'est encore codé : ce fichier sert de référence pour reprendre le projet sans rien perdre.
+> Document de cadrage issu du brainstorming : il décrit le projet visé. Le code avance par prototypes (voir `src/`).
+> **Contribuer** : [CONTRIBUTING.md](CONTRIBUTING.md) · [Lancer le projet](docs/lancer-le-projet.md) · [Écrire un exo](docs/ecrire-un-exo.md)
 > Les valeurs chiffrées (probabilités, seuils, délais) sont des points de départ, à régler lors d'un pilote.
 
 ---
