@@ -13,6 +13,10 @@ const commande = document.getElementById("commande");
 const sortie = document.getElementById("sortie");
 const verdict = document.getElementById("verdict");
 const liste = document.getElementById("ecarts");
+const suivant = document.getElementById("suivant");
+
+// Ordre des exos Git : le bouton « Exo suivant » suit cette liste. À compléter à chaque nouvel exo.
+const ORDRE = ["git/visuel/01", "git/visuel/02", "git/visuel/03"];
 
 const COURS_LIBRE = `Dans ce bac à sable, il n'y a pas d'exo. Tu pars d'un dossier qui contient
 \`index.html\` et \`style.css\`, sans dépôt Git. Crée ton dépôt avec \`git init\`, puis essaie ce que tu veux.`;
@@ -54,6 +58,8 @@ let depart = [];
 let sansDepot = false; // l'exo commence dans un dossier sans dépôt (depot: aucun)
 // Ce qui était affiché avant la dernière commande, pour mettre en évidence ce qui change
 let precedent = { commits: new Set(), pointeurs: {} };
+let derniereErreur = false; // la dernière commande a échoué (sortie en rouge)
+let ecartsPrecedents = null; // nombre d'écarts à l'affichage précédent, pour voir si ça avance
 
 // Échappe le texte avant de l'insérer dans le HTML ou le SVG
 function echapper(texte) {
@@ -139,20 +145,36 @@ function afficher({ marquer = true } = {}) {
   document.getElementById("graphe").innerHTML = dessinerArbre(depot, marques);
   precedent = instantane(depot);
 
-  const reussi = cible && depot && signature(depot) === signature(cible);
+  const reussi = Boolean(cible && depot && signature(depot) === signature(cible));
   let messages = [];
   if (cible && !depot) messages = ["Il n'y a pas encore de dépôt : lance « git init »."];
   else if (cible && !reussi) messages = ecarts(depot, cible);
   if (cible && !reussi && !messages.length) messages = ["Le graphe n'est pas encore celui attendu."];
 
+  // Vert quand ça avance (moins d'écarts qu'avant) ou que c'est bon, rouge quand la commande a échoué
+  // Sans dépôt, la distance compte un écart de plus, pour que « git init » soit vu comme un progrès
+  const distance = messages.length + (cible && !depot ? 1 : 0);
+  const avance = ecartsPrecedents !== null && distance < ecartsPrecedents;
+  ecartsPrecedents = distance;
+  sortie.className = derniereErreur ? "mauvais" : avance || reussi ? "bon" : "";
+  liste.className = derniereErreur && !reussi ? "mauvais" : "";
+
+  verdict.className = reussi ? "bon" : "";
   verdict.textContent = reussi ? "Réussi : ton graphe correspond à la cible." : "";
   liste.innerHTML = messages.map((m) => `<li>${echapper(m)}</li>`).join("");
+
+  // Bouton vers l'exo suivant, seulement après la réussite
+  const suite = ORDRE[ORDRE.indexOf(EXO) + 1];
+  suivant.hidden = !(reussi && suite && !LIBRE);
+  suivant.dataset.exo = suite ?? "";
 }
 
 // Remet le dépôt dans l'état de départ : aucun dépôt en bac à sable, le départ de l'exo sinon
 function recommencer() {
   depot = LIBRE || sansDepot ? null : jouer(nouveauDepot(), depart);
   sortie.textContent = "";
+  derniereErreur = false;
+  ecartsPrecedents = null;
   afficher({ marquer: false });
 }
 
@@ -208,13 +230,16 @@ document.getElementById("formulaire").addEventListener("submit", (e) => {
     if (ligne === "git init") {
       depot = nouveauDepot();
       sortie.textContent = `$ ${ligne}\nDépôt Git vide initialisé dans ce dossier.`;
+      derniereErreur = false;
     } else {
       sortie.textContent = `$ ${ligne}\nfatal : pas de dépôt Git ici. Lance « git init » d'abord.`;
+      derniereErreur = true;
     }
   } else {
     const resultat = executer(depot, ligne);
     depot = resultat.depot;
     sortie.textContent = `$ ${ligne}\n${resultat.sortie}`;
+    derniereErreur = resultat.erreur;
   }
   commande.value = "";
   afficher();
@@ -225,7 +250,12 @@ document.getElementById("recommencer").addEventListener("click", recommencer);
 document.getElementById("solution").addEventListener("click", () => {
   depot = jouer(depot ?? nouveauDepot(), solution);
   sortie.textContent = "Solution chargée.";
+  derniereErreur = false;
   afficher();
+});
+
+suivant.addEventListener("click", () => {
+  if (suivant.dataset.exo) location.search = `?exo=${suivant.dataset.exo}`;
 });
 
 charger();
