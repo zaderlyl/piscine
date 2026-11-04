@@ -8,6 +8,10 @@ import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
 import expand from "https://esm.sh/emmet@2.4.11";
 
+
+import { lireExo, lireCode } from "./exo.js";
+
+
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
 const zones = document.getElementById("zones");
