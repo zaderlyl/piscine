@@ -18,11 +18,15 @@ const docOnglet = document.getElementById("doc-onglet");
 
 
 
-const CLE_BROUILLON = "piscine-brouillon";
+// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 04)
+const exoChoisi = new URLSearchParams(location.search).get("exo");
+const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
+
+const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
-const FICHIER_EXO = "../exos/html/vanilla/04.md";
+const FICHIER_EXO = `../exos/${EXO}.md`;
 
 const editeurs = {};
 const zonesParNom = {};
