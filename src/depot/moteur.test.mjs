@@ -1,6 +1,6 @@
 // Tests du moteur de graphe : node src/depot/moteur.test.mjs
 import assert from "node:assert/strict";
-import { nouveauDepot, executer, executerScript, signature, rendre, ecarts } from "./moteur.js";
+import { nouveauDepot, executer, executerScript, signature, rendre, ecarts, condition } from "./moteur.js";
 
 // Lance une suite de commandes et renvoie le dépôt final (erreurs comprises).
 function lancer(commandes, depot = nouveauDepot()) {
@@ -329,6 +329,31 @@ const tests = [
     const a = lancer(["git add index.html", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git"]);
     const b = lancer(["git add index.html", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git", "git push -u origin main"]);
     assert.notEqual(signature(a), signature(b));
+  }],
+  // Conditions d'étapes
+  ["condition commit et sans", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    assert.equal(condition(d, 'commit "A"'), true);
+    assert.equal(condition(d, 'sans "A"'), false);
+    assert.equal(condition(d, 'sans "Z"'), true);
+  }],
+  ["condition meme : ff faite", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git switch -c menu", "git add style.css", 'git commit -m "B"', "git switch main"]);
+    assert.equal(condition(d, "meme main menu"), false);
+    assert.equal(condition(lancer(["git merge menu"], d), "meme main menu"), true);
+  }],
+  ["condition propre après un commit", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git add style.css", 'git commit -m "B"']);
+    assert.equal(condition(d, "propre"), true);
+  }],
+  ["condition fusion : commit de fusion", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "A"', "git switch -c menu", "git add style.css", 'git commit -m "B"',
+      "git switch main", "edit index.html",
+    ]);
+    const f = lancer(["git add index.html", 'git commit -m "C"', "git merge menu"], d);
+    assert.equal(condition(f, "fusion"), true);
+    assert.equal(condition(d, "fusion"), false);
   }],
   ["le script ne peut pas être tapé par l'élève", () => {
     const r = executer(nouveauDepot(), "edit style.css");

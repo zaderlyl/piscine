@@ -21,7 +21,7 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
 - [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) : voir [visualisation-logique.md](visualisation-logique.md)
-- [ ] Module Git visuel : niveaux 1 à 3 faits (moteur, page, exos 01 à 03). Reste : niveaux 4 à 7, intégration en panneau, refonte de l'affichage (issue [#36](https://github.com/zaderlyl/piscine/issues/36)) : voir [git-apprentissage.md](git-apprentissage.md)
+- [ ] Module Git visuel : niveaux 1 à 7 faits (moteur, page, exos 01 à 11). Reste : intégration en panneau (dépend de #29), retours pédagogiques affinés, test avec des élèves (issue [#36](https://github.com/zaderlyl/piscine/issues/36)) : voir [git-apprentissage.md](git-apprentissage.md)
 
 ## Contenu (exos)
 

@@ -570,6 +570,38 @@ export function ecarts(depot, cible) {
   return messages;
 }
 
+// Vérifie une étape d'exo, écrite en texte. Forme : « commit "msg" », « sans "msg" », « branche nom »,
+// « meme a b » (deux branches sur le même commit), « head nom », « index f », « travail f », « propre »,
+// « origine nom », « suivi nom », « fusion », « conflit », « pr ouverte | approuvee | fusionnee ».
+export function condition(depot, texte) {
+  const t = texte.trim();
+  const tete = depot.branches[depot.head];
+  const messages = () => [...ancetres(depot, tete)].map((id) => depot.commits[id].message);
+  let m;
+  if ((m = t.match(/^commit "(.*)"$/))) return tete ? messages().includes(m[1]) : false;
+  if ((m = t.match(/^sans "(.*)"$/))) return tete ? !messages().includes(m[1]) : true;
+  if ((m = t.match(/^branche (\S+)$/))) return m[1] in depot.branches;
+  if ((m = t.match(/^meme (\S+) (\S+)$/))) {
+    const a = depot.branches[m[1]];
+    return Boolean(a) && a === depot.branches[m[2]];
+  }
+  if ((m = t.match(/^head (\S+)$/))) return depot.head === m[1];
+  if ((m = t.match(/^index (\S+)$/))) return depot.index.includes(m[1]);
+  if ((m = t.match(/^travail (\S+)$/))) return depot.travail.includes(m[1]);
+  if (t === "propre") return depot.travail.length === 0 && depot.index.length === 0 && !depot.fusion;
+  if ((m = t.match(/^origine (\S+)$/))) return Boolean(depot.distant?.[m[1]]);
+  if ((m = t.match(/^suivi (\S+)$/))) return Boolean(depot.suivi[m[1]]);
+  if ((m = t.match(/^serveur (\S+)$/))) {
+    return Boolean(depot.distant?.[m[1]]) && depot.distant[m[1]] === depot.branches[m[1]];
+  }
+  if (t === "fusion") return !depot.fusion && Boolean(tete) && depot.commits[tete].parents.length === 2;
+  if (t === "conflit") return Boolean(depot.fusion);
+  if (t === "pr ouverte") return depot.prs.some((p) => p.etat === "ouverte");
+  if (t === "pr approuvee") return depot.prs.some((p) => p.approuvee);
+  if (t === "pr fusionnee") return depot.prs.some((p) => p.etat === "fusionnée");
+  return false;
+}
+
 // Affichage texte du graphe : un commit par ligne, du plus récent au plus ancien.
 export function rendre(depot) {
   if (!depot.ordre.length) return "(aucun commit)";

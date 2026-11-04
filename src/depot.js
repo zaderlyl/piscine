@@ -1,7 +1,7 @@
 // Page du module Git : un exo = un fichier Markdown dans exos/git/visuel/.
 // Mode bac à sable (?libre) : pas d'exo, pas de cible, on part d'un dossier sans dépôt.
 import { marked } from "https://esm.sh/marked@12.0.2";
-import { nouveauDepot, executer, executerScript, signature, ecarts } from "./depot/moteur.js";
+import { nouveauDepot, executer, executerScript, signature, ecarts, condition } from "./depot/moteur.js";
 
 const params = new URLSearchParams(location.search);
 const LIBRE = params.has("libre");
@@ -63,6 +63,42 @@ let sansDepot = false; // l'exo commence dans un dossier sans dépôt (depot: au
 let precedent = { commits: new Set(), pointeurs: {} };
 let derniereErreur = false; // la dernière commande a échoué (sortie en rouge)
 let ecartsPrecedents = null; // nombre d'écarts à l'affichage précédent, pour voir si ça avance
+let etapes = []; // étapes de l'exo : { condition, texte, indice }
+let avancement = 0; // nombre d'étapes faites, dans l'ordre
+let indiceGeneral = ""; // indice de tout l'exo, affiché quand il n'y a plus d'étape à faire
+
+// Étapes : une par ligne « - condition | texte | indice »
+function lireEtapes(section = "") {
+  return section
+    .split("\n")
+    .map((ligne) => ligne.trim())
+    .filter((ligne) => ligne.startsWith("- "))
+    .map((ligne) => {
+      const [condition, texte = "", indice = ""] = ligne.slice(2).split(" | ").map((s) => s.trim());
+      return { condition, texte, indice };
+    });
+}
+
+// Coche les étapes atteintes, dans l'ordre : une étape ne se coche qu'après la précédente
+function verifierEtapes() {
+  while (depot && avancement < etapes.length && condition(depot, etapes[avancement].condition)) avancement++;
+}
+
+// Liste des étapes et indice de l'étape en cours
+function afficherEtapes() {
+  const liste = document.getElementById("etapes");
+  liste.hidden = etapes.length === 0;
+  liste.innerHTML = etapes
+    .map((e, i) => {
+      const repere = i < avancement ? "✓" : i === avancement ? "→" : "○";
+      const texte = marked.parseInline(e.texte);
+      return `<li>${repere} ${i === avancement ? `<b>${texte}</b>` : texte}</li>`;
+    })
+    .join("");
+  const enCours = etapes[avancement];
+  const indice = enCours && enCours.indice ? enCours.indice : indiceGeneral;
+  document.getElementById("indice").innerHTML = marked.parse(indice);
+}
 
 // Échappe le texte avant de l'insérer dans le HTML ou le SVG
 function echapper(texte) {
@@ -178,6 +214,9 @@ function afficher({ marquer = true } = {}) {
   sortie.className = derniereErreur ? "mauvais" : avance || reussi ? "bon" : "";
   liste.className = derniereErreur && !reussi ? "mauvais" : "";
 
+  verifierEtapes();
+  afficherEtapes();
+
   verdict.className = reussi ? "bon" : "";
   verdict.textContent = reussi ? "Réussi : ton graphe correspond à la cible." : "";
   liste.innerHTML = messages.map((m) => `<li>${echapper(m)}</li>`).join("");
@@ -194,6 +233,7 @@ function recommencer() {
   sortie.textContent = "";
   derniereErreur = false;
   ecartsPrecedents = null;
+  avancement = 0;
   afficher({ marquer: false });
 }
 
@@ -209,6 +249,7 @@ async function charger() {
     document.getElementById("cours").innerHTML = marked.parse(COURS_LIBRE);
     document.getElementById("enonce").textContent = "Pas de consigne : essaie les commandes à ton rythme.";
     document.getElementById("indice").closest("details").hidden = true;
+    etapes = [];
     recommencer();
     afficherCible();
     return;
@@ -229,7 +270,8 @@ async function charger() {
   document.getElementById("titre").textContent = titre;
   document.getElementById("cours").innerHTML = marked.parse((exo["Cours"] ?? "").trim());
   document.getElementById("enonce").innerHTML = marked.parse((exo["Énoncé"] ?? "").trim());
-  document.getElementById("indice").innerHTML = marked.parse((exo["Indice"] ?? "").trim());
+  etapes = lireEtapes(exo["Étapes"]);
+  indiceGeneral = (exo["Indice"] ?? "").trim();
 
   depart = lireCommandes(exo["Départ"]);
   solution = lireCommandes(exo["Solution"]);
