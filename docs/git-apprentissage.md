@@ -82,6 +82,7 @@ Le graphe cible est lu par le moteur, pas par l'élève. Une fois l'exo réussi,
 - **Sections** : `## Cours`, `## Énoncé`, `## Départ`, `## Cible`, `## Indice`, puis `## Solution` (suite de commandes, jamais envoyée à l'élève).
 - **Pas de section `## Tests` en JavaScript.** La vérification vient de la comparaison de graphes. Un exo reste donc lisible sans savoir coder.
 - **Solution obligatoire** : la suite de commandes doit mener du départ à la cible, sinon l'exo est refusé à l'import (voir [ecrire-un-exo.md](ecrire-un-exo.md)).
+- **Départ et cible en commandes** (version implémentée) : `## Départ` et `## Solution` contiennent des suites de commandes `git …`. Le graphe cible est calculé en jouant le départ puis la solution : pas besoin de l'écrire à la main. L'exemple ci-dessus, avec le graphe écrit, est une version antérieure.
 - **Exception à la règle « pas de `## Départ` »** de [ecrire-un-exo.md](ecrire-un-exo.md) : ici, le départ est un graphe, pas un éditeur vide. Cette règle devra être précisée si ce module est retenu.
 
 ## Limites assumées

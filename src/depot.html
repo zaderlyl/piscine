@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piscine : Git</title>
+  <style>
+    body { font-family: sans-serif; margin: 16px; max-width: 760px; }
+    pre { background: #f4f4f4; padding: 8px; min-height: 1em; }
+    input { width: 70%; font-family: monospace; }
+    .verdict { font-weight: bold; color: green; }
+  </style>
+</head>
+<body>
+  <h1 id="titre"></h1>
+  <div id="enonce"></div>
+
+  <h2>Ton dépôt</h2>
+  <pre id="graphe"></pre>
+
+  <h2>Cible</h2>
+  <pre id="cible"></pre>
+
+  <form id="formulaire">
+    <input id="commande" placeholder="git status" autocomplete="off">
+    <button>Lancer</button>
+    <button type="button" id="recommencer">Recommencer</button>
+    <button type="button" id="solution" hidden>Charger la solution</button>
+  </form>
+  <pre id="sortie"></pre>
+  <p id="verdict" class="verdict"></p>
+
+  <script type="module" src="depot.js"></script>
+</body>
+</html>
