@@ -21,6 +21,10 @@ const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
+const moteurPhp = new PhpWeb();
+const exoDemande = new URLSearchParams(location.search).get("exo");
+
+
 const FICHIER_EXO = /^[a-z]+\/[a-z]+\/\d+$/.test(exoDemande || "")
   ? `../exos/${exoDemande}.md`
   : "../exos/html/vanilla/04.md";
@@ -31,9 +35,6 @@ const boutons = {};
 const boutonsDoc = {};
 
 const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
-
-const moteurPhp = new PhpWeb();
-const exoDemande = new URLSearchParams(location.search).get("exo");
 
 const DELAI_SUSPENDU = 5000;
 
