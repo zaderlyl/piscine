@@ -76,6 +76,13 @@ Le README dit : le déclenchement a lieu **au prochain exo éligible** après qu
 25. **Texte du bilan en dur** : « repos : 0 % en dessous de 3 » est écrit à la main, il ne vient pas de `PARAMETRES`.
 26. **Pas de scénarios nommés** : impossible de relancer « 30 élèves dont 10 absents » ou « pic en fin de séance » sans éditer le code.
 
+### G. Doublons et données réelles
+27. **La même paire revient plusieurs fois** : en 3000 ticks, la paire la plus répétée apparaît 4 à 5 fois (graines 1, 2, 3 et 42). Le README demande « pas les mêmes paires en boucle », mais la pénalité ne dure que 300 ticks (`fenetrePaire`) et rien n'interdit la répétition après.
+28. **Un même élève peut être compté deux fois** : ouvert dans deux onglets ou sur deux appareils, il apparaîtrait deux fois parmi les connectés. Le README ne précise pas ce cas. À régler par un dédoublonnage sur l'identifiant de l'élève (voir section 8).
+29. **Pas de données réelles** : les élèves sont créés au hasard en mémoire. Dans la vraie app, ils viennent de la base (voir section 8).
+30. **Compteur initial toujours à zéro** : un élève qui arrive avec un compteur déjà avancé (session précédente, redoublement) n'est pas modélisé. Son compteur est stocké en base (`ptp_counters`).
+31. **Pas de notion de session réelle** : le pool est un seul ensemble, alors qu'il peut y avoir plusieurs sessions ouvertes en parallèle, dans des salles différentes (README §8).
+
 ---
 
 ## 4. Logique cible (ce qu'il faut construire)
@@ -135,3 +142,56 @@ Ordre des demandes : **mélangé à chaque tick**.
 ## 7. Ce qui reste juste
 
 Le prototype actuel vérifie déjà une chose utile : la règle de repos (3 exos minimum entre deux échanges reçus) et l'absence d'auto-correction. Il ne prouve rien d'autre. Il sert de base, mais la logique ci-dessus doit le remplacer en grande partie.
+
+---
+
+## 8. D'où viennent les élèves
+
+Dans la version finale, les élèves viennent de la base de données décrite dans le README (§16). Le simulateur doit pouvoir lire la même structure, sinon on simule un monde qui n'existe pas.
+
+### Tables utiles (README §16)
+
+| Table | Ce qu'on y prend pour le simulateur |
+|---|---|
+| `users` | Identifiant, prénom, nom, rôle (élève ou prof), promo, date de suppression |
+| `cohorts` | Promo et niveau courant (l'année de l'élève) |
+| `sessions_pool` | Sessions ouvertes, salle, statut |
+| `attendance` | Qui est connecté, dans quelle session, dernière activité (heartbeat) |
+| `ptp_counters` | Compteur d'équité de chaque élève (exos validés depuis le dernier PTP) |
+| `ptp_exchanges` | Historique des échanges : sert à l'équité et à la règle des paires |
+
+### Requête type : qui est disponible maintenant
+
+Exemple à aligner sur le schéma réel, qui n'existe pas encore dans le dépôt :
+
+```sql
+SELECT DISTINCT
+  u.id,
+  u.prenom,
+  u.nom,
+  c.niveau_courant AS annee,
+  COALESCE(pc.compteur, 0) AS compteur
+FROM users u
+JOIN cohorts c            ON c.id = u.cohort_id
+JOIN attendance a         ON a.user_id = u.id
+JOIN sessions_pool s      ON s.id = a.session_id
+LEFT JOIN ptp_counters pc ON pc.user_id = u.id
+WHERE s.statut = 'ouverte'
+  AND u.role = 'eleve'
+  AND u.date_suppression IS NULL
+  AND a.derniere_activite >= (NOW() - INTERVAL 60 SECOND);  -- heartbeat récent
+```
+
+- `DISTINCT` sur `u.id` règle le cas des deux onglets (point 28) : un élève n'apparaît qu'une fois.
+- Le filtre sur `derniere_activite` détermine qui est vraiment présent (un heartbeat récent), pas seulement qui a une ligne dans `attendance`.
+- Un élève ne doit être que dans une session à la fois : si la base le permet, la contrainte vient de là, sinon le `DISTINCT` tranche.
+
+### Étapes
+
+1. **Aujourd'hui** : pas de base dans le dépôt (le prototype est statique, la base est l'étape 2 de la roadmap). Le simulateur lit un fichier JSON `prototypes/ptp/donnees/eleves.json` qui reprend ces champs, généré à la main ou depuis un export.
+2. **Ensuite** : le même fichier est produit par la requête ci-dessus sur la base réelle, pour que la simulation parte de vraies données.
+3. **Enfin** : le simulateur peut lire une base SQLite de test, pour rejouer une vraie séance.
+
+### Pourquoi c'est important
+
+Sans cette source, on ne peut pas tester les cas du pilote : un élève absent est une ligne qui n'a pas de heartbeat récent, pas un tirage au hasard. Le simulateur doit donc partir de la même définition de « présent » que l'application.
