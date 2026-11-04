@@ -74,11 +74,11 @@ function calculerMarques() {
   };
 }
 
-// Arbre en SVG : le plus ancien en haut, le plus récent en bas.
-// Une colonne par branche ; une courbe relie chaque commit à ses parents (deux pour une fusion).
+// Arbre en SVG, noir et blanc : le plus ancien en haut, le plus récent en bas.
+// Une colonne par branche ; une ligne relie chaque commit à ses parents (deux pour une fusion).
 function dessinerArbre(d, marques = {}) {
-  if (!d) return `<p class="discret">Pas de dépôt Git dans ce dossier. Lance « git init ».</p>`;
-  if (!d.ordre.length) return `<p class="discret">Aucun commit pour l'instant.</p>`;
+  if (!d) return `<p>Pas de dépôt Git dans ce dossier. Lance « git init ».</p>`;
+  if (!d.ordre.length) return `<p>Aucun commit pour l'instant.</p>`;
 
   const noms = Object.keys(d.branches);
   const nouveaux = marques.commits ?? new Set();
@@ -101,49 +101,41 @@ function dessinerArbre(d, marques = {}) {
   const liens = d.ordre.flatMap((id) =>
     d.commits[id].parents.map((parent) => {
       const milieu = (Y(parent) + Y(id)) / 2;
-      return `<path d="M${X(parent)} ${Y(parent)} C${X(parent)} ${milieu} ${X(id)} ${milieu} ${X(id)} ${Y(id)}" fill="none" style="stroke:var(--discret)" stroke-width="2"/>`;
+      return `<path d="M${X(parent)} ${Y(parent)} C${X(parent)} ${milieu} ${X(id)} ${milieu} ${X(id)} ${Y(id)}" fill="none" stroke="#000" stroke-width="2"/>`;
     }),
   );
 
   const noeuds = d.ordre.map((id) => {
     const surHead = d.branches[d.head] === id;
-    const nouveau = nouveaux.has(id);
-    const remplissage = surHead ? "var(--succes)" : "var(--carte)";
-    const contour = nouveau ? "var(--attention)" : "var(--texte)";
-    const rayon = nouveau ? 10 : 8;
+    const epaisseur = nouveaux.has(id) ? 4 : 2;
+    const rayon = nouveaux.has(id) ? 10 : 8;
     const pastilles = noms
       .filter((nom) => d.branches[nom] === id)
       .map((nom, i) => {
         const x = xEtiquettes + i * 100;
         const libelle = nom === d.head ? `HEAD → ${nom}` : nom;
-        const contourPastille = bougees.has(nom) ? "var(--attention)" : "var(--accent)";
-        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" rx="6" style="fill:var(--fond);stroke:${contourPastille}" stroke-width="2"/>
-      <text x="${x + 46}" y="${Y(id) + 4}" text-anchor="middle" font-size="12" font-weight="600" style="fill:var(--texte)">${echapper(libelle)}</text>`;
+        const epaisseurCadre = bougees.has(nom) ? 4 : 1.5;
+        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" fill="#fff" stroke="#000" stroke-width="${epaisseurCadre}"/>
+      <text x="${x + 46}" y="${Y(id) + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">${echapper(libelle)}</text>`;
       })
       .join("");
-    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" style="fill:${remplissage};stroke:${contour}" stroke-width="2.5"/>
-      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" style="fill:var(--texte)">${echapper(d.commits[id].message)}</text>${pastilles}`;
+    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" fill="${surHead ? "#000" : "#fff"}" stroke="#000" stroke-width="${epaisseur}"/>
+      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" fill="#000">${echapper(d.commits[id].message)}</text>${pastilles}`;
   });
 
-  return `<svg viewBox="0 0 ${largeur} ${hauteur}" role="img" aria-label="Graphe des commits">${liens.join("")}${noeuds.join("")}</svg>`;
+  return `<svg viewBox="0 0 ${largeur} ${hauteur}" width="100%" role="img" aria-label="Graphe des commits">${liens.join("")}${noeuds.join("")}</svg>`;
 }
 
-// Ligne de statut : remplace l'affichage des zones de travail
-function statutHtml(d) {
-  if (!d) return `<span class="puce">Pas de dépôt</span>`;
-  const modifies = d.travail.length;
-  const prets = d.index.length;
-  return [
-    `<span class="puce">Branche : <b>${echapper(d.head)}</b></span>`,
-    `<span class="puce ${modifies ? "attention" : ""}">Modifiés : ${modifies}</span>`,
-    `<span class="puce ${prets ? "attention" : ""}">Prêts (ajoutés) : ${prets}</span>`,
-  ].join("");
+// Ligne de statut : une phrase, sans mise en forme
+function statutTexte(d) {
+  if (!d) return "Pas de dépôt.";
+  return `Branche : ${d.head} · Modifiés : ${d.travail.length} · Prêts (ajoutés) : ${d.index.length}`;
 }
 
 // Affiche l'état courant. marquer = false pour un nouveau départ, sans rien mettre en évidence.
 function afficher({ marquer = true } = {}) {
   const marques = marquer ? calculerMarques() : {};
-  document.getElementById("statut").innerHTML = statutHtml(depot);
+  document.getElementById("statut").textContent = statutTexte(depot);
   document.getElementById("graphe").innerHTML = dessinerArbre(depot, marques);
   precedent = instantane(depot);
 
@@ -153,8 +145,7 @@ function afficher({ marquer = true } = {}) {
   else if (cible && !reussi) messages = ecarts(depot, cible);
   if (cible && !reussi && !messages.length) messages = ["Le graphe n'est pas encore celui attendu."];
 
-  verdict.classList.toggle("reussi", Boolean(reussi));
-  verdict.textContent = reussi ? "✅ Ton graphe correspond à la cible" : "";
+  verdict.textContent = reussi ? "Réussi : ton graphe correspond à la cible." : "";
   liste.innerHTML = messages.map((m) => `<li>${echapper(m)}</li>`).join("");
 }
 
@@ -166,7 +157,8 @@ function recommencer() {
 }
 
 function afficherCible() {
-  document.getElementById("bloc-cible").hidden = !cible;
+  document.getElementById("titre-cible").hidden = !cible;
+  document.getElementById("cible").hidden = !cible;
   if (cible) document.getElementById("cible").innerHTML = dessinerArbre(cible);
 }
 
@@ -175,7 +167,7 @@ async function charger() {
     document.getElementById("titre").textContent = "Bac à sable";
     document.getElementById("cours").innerHTML = marked.parse(COURS_LIBRE);
     document.getElementById("enonce").textContent = "Pas de consigne : essaie les commandes à ton rythme.";
-    document.querySelector("details:has(#indice)").hidden = true;
+    document.getElementById("indice").closest("details").hidden = true;
     recommencer();
     afficherCible();
     return;
@@ -213,7 +205,6 @@ document.getElementById("formulaire").addEventListener("submit", (e) => {
   if (!ligne) return;
   if (!depot) {
     // Pas de dépôt : seule la commande git init est acceptée
-    sortie.classList.toggle("erreur", ligne !== "git init");
     if (ligne === "git init") {
       depot = nouveauDepot();
       sortie.textContent = `$ ${ligne}\nDépôt Git vide initialisé dans ce dossier.`;
@@ -224,7 +215,6 @@ document.getElementById("formulaire").addEventListener("submit", (e) => {
     const resultat = executer(depot, ligne);
     depot = resultat.depot;
     sortie.textContent = `$ ${ligne}\n${resultat.sortie}`;
-    sortie.classList.toggle("erreur", resultat.erreur);
   }
   commande.value = "";
   afficher();
