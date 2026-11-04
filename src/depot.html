@@ -7,61 +7,59 @@
   <title>Piscine : Git</title>
   <style>
     body { font-family: sans-serif; background: #fff; color: #000; margin: 16px; }
-    .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .grille, .graphes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
     .carte { border: 1px solid #000; padding: 12px 14px; margin-bottom: 16px; }
     .carte h2 { margin-top: 0; }
     .bon { color: #2a7a2a; }
     .mauvais { color: #b00020; }
-    @media (max-width: 800px) { .grille { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .grille, .graphes { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body bgcolor="#ffffff" text="#000000">
   <h1 id="titre"></h1>
 
   <div class="grille">
-    <div>
-      <section class="carte">
-        <h2>Ta mission</h2>
-        <div id="enonce"></div>
-        <details>
-          <summary>Le cours en bref</summary>
-          <div id="cours"></div>
-        </details>
-        <details>
-          <summary>Besoin d'un indice ?</summary>
-          <div id="indice"></div>
-        </details>
-      </section>
+    <section class="carte">
+      <h2>Ta mission</h2>
+      <div id="enonce"></div>
+      <details>
+        <summary>Le cours en bref</summary>
+        <div id="cours"></div>
+      </details>
+      <details>
+        <summary>Besoin d'un indice ?</summary>
+        <div id="indice"></div>
+      </details>
+    </section>
 
-      <section class="carte">
-        <h2>Terminal</h2>
-        <form id="formulaire">
-          <input id="commande" placeholder="git status" autocomplete="off" aria-label="Commande git">
-          <button>Lancer</button>
-          <button type="button" id="recommencer">Recommencer</button>
-          <button type="button" id="solution" hidden>Charger la solution</button>
-        </form>
-        <pre id="sortie"></pre>
-        <p id="verdict"></p>
-        <ul id="ecarts"></ul>
-        <button type="button" id="suivant" hidden>Exo suivant →</button>
-      </section>
-    </div>
-
-    <div>
-      <section class="carte">
-        <h2>Ton dépôt</h2>
-        <div id="statut" aria-live="polite"></div>
-        <div id="graphe"></div>
-        <p>○ commit · ● commit courant (HEAD) · étiquette encadrée : branche · trait épais : vient de changer</p>
-      </section>
-
-      <section class="carte">
-        <h2 id="titre-cible">Ce qu'on attend</h2>
-        <div id="cible"></div>
-      </section>
-    </div>
+    <section class="carte">
+      <h2>Terminal</h2>
+      <form id="formulaire">
+        <input id="commande" placeholder="git status" autocomplete="off" aria-label="Commande git">
+        <button>Lancer</button>
+        <button type="button" id="recommencer">Recommencer</button>
+        <button type="button" id="solution" hidden>Charger la solution</button>
+      </form>
+      <pre id="sortie"></pre>
+      <p id="verdict"></p>
+      <ul id="ecarts"></ul>
+      <button type="button" id="suivant" hidden>Exo suivant →</button>
+    </section>
   </div>
+
+  <div class="graphes">
+    <section class="carte">
+      <h2>Ton dépôt</h2>
+      <div id="statut" aria-live="polite"></div>
+      <div id="graphe"></div>
+    </section>
+
+    <section class="carte">
+      <h2 id="titre-cible">Ce qu'on attend</h2>
+      <div id="cible"></div>
+    </section>
+  </div>
+  <p>○ commit · ● commit courant (HEAD) · étiquette encadrée : branche · trait épais : vient de changer · pointillés : ne correspond pas à la cible</p>
 
   <script type="module" src="depot.js"></script>
 </body>

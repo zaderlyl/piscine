@@ -1,7 +1,7 @@
 // Page du module Git : un exo = un fichier Markdown dans exos/git/visuel/.
 // Mode bac à sable (?libre) : pas d'exo, pas de cible, on part d'un dossier sans dépôt.
 import { marked } from "https://esm.sh/marked@12.0.2";
-import { nouveauDepot, executer, signature, ecarts } from "./depot/moteur.js";
+import { nouveauDepot, executer, executerScript, signature, ecarts } from "./depot/moteur.js";
 
 const params = new URLSearchParams(location.search);
 const LIBRE = params.has("libre");
@@ -16,7 +16,10 @@ const liste = document.getElementById("ecarts");
 const suivant = document.getElementById("suivant");
 
 // Ordre des exos Git : le bouton « Exo suivant » suit cette liste. À compléter à chaque nouvel exo.
-const ORDRE = ["git/visuel/01", "git/visuel/02", "git/visuel/03"];
+const ORDRE = [
+  "git/visuel/01", "git/visuel/02", "git/visuel/03", "git/visuel/04", "git/visuel/05", "git/visuel/06",
+  "git/visuel/07", "git/visuel/08", "git/visuel/09", "git/visuel/10", "git/visuel/11",
+];
 
 const COURS_LIBRE = `Dans ce bac à sable, il n'y a pas d'exo. Tu pars d'un dossier qui contient
 \`index.html\` et \`style.css\`, sans dépôt Git. Crée ton dépôt avec \`git init\`, puis essaie ce que tu veux.`;
@@ -37,17 +40,17 @@ function lireExo(texte) {
   return section;
 }
 
-// Les lignes « git … » d'une section (Départ ou Solution)
+// Les lignes de commande d'une section (Départ ou Solution) : git, gh, et les lignes de script edit / autre-dev
 function lireCommandes(section = "") {
   return section
     .split("\n")
     .map((ligne) => ligne.trim())
-    .filter((ligne) => ligne.startsWith("git "));
+    .filter((ligne) => /^(git|gh|edit|autre-dev) /.test(ligne));
 }
 
 // Joue une suite de commandes sur un dépôt et renvoie le dépôt final
 function jouer(depot, commandes) {
-  for (const ligne of commandes) depot = executer(depot, ligne).depot;
+  for (const ligne of commandes) depot = executerScript(depot, ligne).depot;
   return depot;
 }
 
@@ -82,13 +85,16 @@ function calculerMarques() {
 
 // Arbre en SVG, noir et blanc : le plus ancien en haut, le plus récent en bas.
 // Une colonne par branche ; une ligne relie chaque commit à ses parents (deux pour une fusion).
-function dessinerArbre(d, marques = {}) {
+function dessinerArbre(d, marques = {}, reference = null) {
   if (!d) return `<p>Pas de dépôt Git dans ce dossier. Lance « git init ».</p>`;
   if (!d.ordre.length) return `<p>Aucun commit pour l'instant.</p>`;
 
   const noms = Object.keys(d.branches);
   const nouveaux = marques.commits ?? new Set();
   const bougees = marques.branches ?? new Set();
+  // Repères des différences avec la cible : trait en pointillés pour ce qui ne correspond pas
+  const messagesAttendus = reference ? new Set(Object.values(reference.commits).map((c) => c.message)) : null;
+  const pointe = (x, nom) => (x.branches[nom] ? x.commits[x.branches[nom]].message : null);
 
   // Colonne d'un commit : celle de la branche qui pointe dessus, sinon celle de son premier parent
   const colonne = {};
@@ -121,12 +127,16 @@ function dessinerArbre(d, marques = {}) {
         const x = xEtiquettes + i * 100;
         const libelle = nom === d.head ? `HEAD → ${nom}` : nom;
         const epaisseurCadre = bougees.has(nom) ? 4 : 1.5;
-        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" fill="#fff" stroke="#000" stroke-width="${epaisseurCadre}"/>
+        const differente = reference && pointe(d, nom) !== pointe(reference, nom);
+        const pointilles = differente ? ` stroke-dasharray="4 3"` : "";
+        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" fill="#fff" stroke="#000" stroke-width="${epaisseurCadre}"${pointilles}/>
       <text x="${x + 46}" y="${Y(id) + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">${echapper(libelle)}</text>`;
       })
       .join("");
-    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" fill="${surHead ? "#000" : "#fff"}" stroke="#000" stroke-width="${epaisseur}"/>
-      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" fill="#000">${echapper(d.commits[id].message)}</text>${pastilles}`;
+    const message = d.commits[id].message;
+    const pointilleCommit = messagesAttendus && !messagesAttendus.has(message) ? ` stroke-dasharray="4 3"` : "";
+    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" fill="${surHead ? "#000" : "#fff"}" stroke="#000" stroke-width="${epaisseur}"${pointilleCommit}/>
+      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" fill="#000">${echapper(message)}</text>${pastilles}`;
   });
 
   return `<svg viewBox="0 0 ${largeur} ${hauteur}" width="100%" role="img" aria-label="Graphe des commits">${liens.join("")}${noeuds.join("")}</svg>`;
@@ -135,14 +145,23 @@ function dessinerArbre(d, marques = {}) {
 // Ligne de statut : une phrase, sans mise en forme
 function statutTexte(d) {
   if (!d) return "Pas de dépôt.";
-  return `Branche : ${d.head} · Modifiés : ${d.travail.length} · Prêts (ajoutés) : ${d.index.length}`;
+  const morceaux = [`Branche : ${d.head}`, `Modifiés : ${d.travail.length}`, `Prêts (ajoutés) : ${d.index.length}`];
+  if (d.fusion) {
+    const conflits = d.fusion.conflits.length ? d.fusion.conflits.join(", ") : "aucun";
+    morceaux.push(`Fusion de « ${d.fusion.de} » en cours, conflits : ${conflits}`);
+  }
+  if (d.distant) morceaux.push(`origin : ${Object.keys(d.distant).join(", ") || "vide"}`);
+  for (const pr of d.prs.filter((p) => p.etat === "ouverte")) {
+    morceaux.push(`Pull request : ${pr.de} → ${pr.vers}${pr.approuvee ? " (approuvée)" : ""}`);
+  }
+  return morceaux.join(" · ");
 }
 
 // Affiche l'état courant. marquer = false pour un nouveau départ, sans rien mettre en évidence.
 function afficher({ marquer = true } = {}) {
   const marques = marquer ? calculerMarques() : {};
   document.getElementById("statut").textContent = statutTexte(depot);
-  document.getElementById("graphe").innerHTML = dessinerArbre(depot, marques);
+  document.getElementById("graphe").innerHTML = dessinerArbre(depot, marques, cible);
   precedent = instantane(depot);
 
   const reussi = Boolean(cible && depot && signature(depot) === signature(cible));
