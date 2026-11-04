@@ -326,13 +326,7 @@ if (new URLSearchParams(location.search).has("auteur")) {
   onglets.append(boutonSolution);
 }
 
-// PHP dans le navigateur : la sortie s'affiche en texte (console) et en HTML (aperçu)
-moteurPhp.addEventListener("output", (e) => {
-  sortiePhp += e.detail;
-});
-moteurPhp.addEventListener("error", (e) => {
-  sortiePhp += e.detail;
-});
+
 
 async function testerPhp(sortie) {
   const resultats = [];
