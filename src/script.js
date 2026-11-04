@@ -22,6 +22,9 @@ const docOnglet = document.getElementById("doc-onglet");
 const exoChoisi = new URLSearchParams(location.search).get("exo");
 const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
 
+// ordre des exos pour le bouton « Exo suivant » (à compléter à chaque nouvel exo)
+const ORDRE_EXOS = ["html/vanilla/00", "html/vanilla/01", "html/vanilla/02", "html/vanilla/03", "html/vanilla/04"];
+
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
@@ -341,6 +344,20 @@ if (localStorage.getItem(CLE_SUSPENDU)) {
   afficherApercu();
 }
 
+// Ajoute le bouton « Exo suivant » après la réussite, s'il existe un exo après celui-ci
+function afficherExoSuivant() {
+  const rang = ORDRE_EXOS.indexOf(EXO);
+  const suivant = ORDRE_EXOS[rang + 1];
+  if (rang < 0 || !suivant || document.getElementById("exo-suivant")) return;
+  const bouton = document.createElement("button");
+  bouton.id = "exo-suivant";
+  bouton.textContent = "Exo suivant →";
+  bouton.addEventListener("click", () => {
+    location.href = `?exo=${suivant}`;
+  });
+  onglets.append(bouton);
+}
+
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
   if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
@@ -349,4 +366,5 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
+  if (!echecs.length && testsExo) afficherExoSuivant();
 });
