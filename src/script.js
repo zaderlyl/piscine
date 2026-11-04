@@ -25,12 +25,7 @@ const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
-const exoDemande = new URLSearchParams(location.search).get("exo");
-
-
-const FICHIER_EXO = /^[a-z]+\/[a-z]+\/\d+$/.test(exoDemande || "")
-  ? `../exos/${exoDemande}.md`
-  : "../exos/html/vanilla/04.md";
+const FICHIER_EXO = `../exos/${EXO}.md`;
 
 const editeurs = {};
 const zonesParNom = {};
