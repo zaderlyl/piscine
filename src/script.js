@@ -256,12 +256,6 @@ for (const [nom, langage] of Object.entries(fichier)) {
   boutons[nom] = bouton;
 }
 
-// recuperer cotenu d'un section
-function lireCode(section) {
-  const bloc = section.match(/```(\w+)?\n([\s\S]*?)```/);
-  return bloc ? bloc[2] : "";
-}
-
 const reponse = await fetch(FICHIER_EXO);
 // les fins de ligne Windows (CRLF) cassent la lecture des blocs de code : on les remplace par LF
 const exo = lireExo((await reponse.text()).replace(/\r\n/g, "\n"));
