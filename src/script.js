@@ -21,7 +21,6 @@ const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
-const moteurPhp = new PhpWeb();
 const exoDemande = new URLSearchParams(location.search).get("exo");
 
 
@@ -54,6 +53,7 @@ const types = {
 let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
+let moteurPhp = null;
 
 let testsExo = "";
 let sortiePhp = "";
@@ -351,9 +351,16 @@ async function testerPhp(sortie) {
 }
 
 async function lancerPhp() {
-  panneauResultats.textContent = "Exécution de PHP...";
+  panneauResultats.textContent = "Exécution en cours...";
   sortiePhp = "";
-  await moteurPhp.binary;
+  moteurPhp = new PhpWeb();
+  moteurPhp.addEventListener("output", (e) => {
+    sortiePhp += e.detail;
+  });
+  moteurPhp.addEventListener("error", (e) => {
+    sortiePhp += e.detail;
+  });
+
   await moteurPhp.run(editeurs["index.php"].state.doc.toString());
 
   const echecs = (await testerPhp(sortiePhp)).filter((r) => !r.ok);
