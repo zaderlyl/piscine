@@ -1,10 +1,16 @@
 // Tests du moteur de graphe : node src/depot/moteur.test.mjs
 import assert from "node:assert/strict";
-import { nouveauDepot, executer, signature, rendre, ecarts } from "./moteur.js";
+import { nouveauDepot, executer, executerScript, signature, rendre, ecarts } from "./moteur.js";
 
 // Lance une suite de commandes et renvoie le dépôt final (erreurs comprises).
 function lancer(commandes, depot = nouveauDepot()) {
   for (const ligne of commandes) depot = executer(depot, ligne).depot;
+  return depot;
+}
+
+// Une suite de lignes de script (edit, autre-dev, git) : même rôle que les Départ des exos.
+function scripter(lignes, depot = nouveauDepot()) {
+  for (const ligne of lignes) depot = executerScript(depot, ligne).depot;
   return depot;
 }
 
@@ -76,6 +82,29 @@ const tests = [
     assert.equal(r.erreur, true);
     assert.match(r.sortie, /pas encore au programme/);
   }],
+  ["signature ignore les identifiants et l'ordre des branches", () => {
+    const a = lancer(["git add .", 'git commit -m "A"', "git switch -c menu", 'git commit -m "B"']);
+    const b = lancer(["git add .", 'git commit -m "A"', "git switch -c menu", 'git commit -m "B"']);
+    b.branches = { menu: b.branches.menu, main: b.branches.main };
+    assert.equal(signature(a), signature(b));
+  }],
+  ["signature voit une différence de message", () => {
+    const a = lancer(["git add .", 'git commit -m "A"']);
+    const b = lancer(["git add .", 'git commit -m "X"']);
+    assert.notEqual(signature(a), signature(b));
+  }],
+  ["signature voit une différence de HEAD", () => {
+    const a = lancer(["git add .", 'git commit -m "A"', "git branch menu"]);
+    const b = lancer(["git add .", 'git commit -m "A"', "git switch -c menu"]);
+    assert.notEqual(signature(a), signature(b));
+  }],
+  ["une erreur ne change pas le dépôt", () => {
+    const d = lancer(["git add .", 'git commit -m "A"']);
+    const r = executer(d, "git switch nope");
+    assert.deepEqual(r.depot, d);
+  }],
+
+  // Niveau 3 : fusion
   ["merge en avance rapide : main avance, pas de nouveau commit", () => {
     const d = lancer(["git add index.html", 'git commit -m "A"', "git switch -c menu", "git add style.css", 'git commit -m "B"', "git switch main", "git merge menu"]);
     assert.equal(Object.keys(d.commits).length, 2);
@@ -131,26 +160,179 @@ const tests = [
     const d = lancer(["git add index.html", 'git commit -m "A"']);
     assert.ok(ecarts(d, cible).includes("Il manque 1 commit."));
   }],
-  ["signature ignore les identifiants et l'ordre des branches", () => {
-    const a = lancer(["git add .", 'git commit -m "A"', "git switch -c menu", 'git commit -m "B"']);
-    const b = lancer(["git add .", 'git commit -m "A"', "git switch -c menu", 'git commit -m "B"']);
-    b.branches = { menu: b.branches.menu, main: b.branches.main };
-    assert.equal(signature(a), signature(b));
+
+  // Niveau 4 : conflits
+  ["fusion à trois sans conflit : aucun fichier touché deux fois", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "Ajoute la page"',
+      "git switch -c menu", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git switch main", "edit index.html",
+    ]);
+    const r = lancer(["git add index.html", 'git commit -m "Change la page"', "git merge menu"], d);
+    assert.equal(r.fusion, null);
+    assert.equal(Object.keys(r.commits[r.branches.main].contenu).length, 2);
   }],
-  ["signature voit une différence de message", () => {
-    const a = lancer(["git add .", 'git commit -m "A"']);
-    const b = lancer(["git add .", 'git commit -m "X"']);
-    assert.notEqual(signature(a), signature(b));
+  ["conflit : même fichier modifié des deux côtés", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "Ajoute la page"',
+      "git switch -c menu", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git switch main", "edit style.css",
+    ]);
+    const c = lancer(["git add style.css", 'git commit -m "Ajoute le style"'], d);
+    const r = executer(c, "git merge menu");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /CONFLIT/);
+    assert.deepEqual(r.depot.fusion.conflits, ["style.css"]);
+    assert.equal(r.depot.branches.main, c.branches.main, "la branche ne bouge pas pendant le conflit");
   }],
-  ["signature voit une différence de HEAD", () => {
-    const a = lancer(["git add .", 'git commit -m "A"', "git branch menu"]);
-    const b = lancer(["git add .", 'git commit -m "A"', "git switch -c menu"]);
-    assert.notEqual(signature(a), signature(b));
+  ["commit refusé tant que le conflit n'est pas résolu", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "Ajoute la page"',
+      "git switch -c menu", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git switch main", "edit style.css",
+    ]);
+    let r = lancer(["git add style.css", 'git commit -m "Ajoute le style"', "git merge menu"], d);
+    assert.equal(executer(r, 'git commit -m "Fusion"').erreur, true);
   }],
-  ["une erreur ne change pas le dépôt", () => {
+  ["résoudre le conflit puis commit crée le commit de fusion", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "Ajoute la page"',
+      "git switch -c menu", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git switch main", "edit style.css",
+    ]);
+    let r = lancer(["git add style.css", 'git commit -m "Ajoute le style"', "git merge menu", "git add style.css"], d);
+    assert.equal(r.fusion.conflits.length, 0);
+    r = executer(r, 'git commit -m "Fusionne le menu"').depot;
+    assert.equal(r.fusion, null);
+    assert.equal(r.commits[r.branches.main].parents.length, 2);
+    assert.equal(r.commits[r.branches.main].message, "Fusionne le menu");
+  }],
+  ["merge --abort annule la fusion en conflit", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "Ajoute la page"',
+      "git switch -c menu", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git switch main", "edit style.css",
+    ]);
+    const c = lancer(["git add style.css", 'git commit -m "Ajoute le style"', "git merge menu"], d);
+    const r = executer(c, "git merge --abort");
+    assert.equal(r.erreur, false);
+    assert.equal(r.depot.fusion, null);
+  }],
+
+  // Niveau 5 : restore, reset, revert
+  ["restore annule la modification d'un fichier", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    const r = executer(d, "git restore style.css");
+    assert.deepEqual(r.depot.travail, []);
+  }],
+  ["restore d'un fichier non modifié refusé", () => {
     const d = lancer(["git add .", 'git commit -m "A"']);
-    const r = executer(d, "git switch nope");
-    assert.deepEqual(r.depot, d);
+    assert.equal(executer(d, "git restore style.css").erreur, true);
+  }],
+  ["restore --staged sort un fichier de la zone de préparation", () => {
+    const d = lancer(["git add style.css"]);
+    const r = executer(d, "git restore --staged style.css");
+    assert.deepEqual(r.depot.index, []);
+    assert.ok(r.depot.travail.includes("style.css"));
+  }],
+  ["reset --soft HEAD~1 garde les modifications prêtes", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git add style.css", 'git commit -m "B"']);
+    const r = executer(d, "git reset --soft HEAD~1");
+    assert.equal(Object.keys(r.depot.commits).length, 1);
+    assert.deepEqual(r.depot.index, ["style.css"]);
+    assert.deepEqual(r.depot.travail, []);
+  }],
+  ["reset HEAD~1 (mixte) remet les modifications en non indexées", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git add style.css", 'git commit -m "B"']);
+    const r = executer(d, "git reset HEAD~1");
+    assert.deepEqual(r.depot.index, []);
+    assert.deepEqual(r.depot.travail, ["style.css"]);
+  }],
+  ["reset au-delà du premier commit refusé", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    assert.equal(executer(d, "git reset --soft HEAD~3").erreur, true);
+  }],
+  ["revert HEAD ajoute un commit qui annule le précédent", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git add style.css", 'git commit -m "B"', "git revert HEAD"]);
+    assert.equal(Object.keys(d.commits).length, 3);
+    const tete = d.commits[d.branches.main];
+    assert.equal(tete.message, "Revert « B »");
+    assert.equal(tete.parents.length, 1);
+    assert.equal("style.css" in tete.contenu, false);
+  }],
+
+  // Niveau 6 : dépôt distant
+  ["push sans dépôt distant refusé", () => {
+    const d = lancer(["git add .", 'git commit -m "A"']);
+    assert.equal(executer(d, "git push").erreur, true);
+  }],
+  ["push -u envoie la branche sur origin", () => {
+    const d = lancer(["git add .", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git", "git push -u origin main"]);
+    assert.equal(d.distant.main, d.branches.main);
+    assert.equal(d.branches["origin/main"], d.branches.main);
+    assert.equal(d.suivi.main, true);
+  }],
+  ["push refusé si origin a des commits que tu n'as pas", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "A"',
+      "git remote add origin https://exemple.test/p.git", "git push -u origin main",
+      'autre-dev push "Ajoute la doc"',
+    ]);
+    const local = lancer(["git add style.css", 'git commit -m "B"'], d);
+    assert.equal(executer(local, "git push").erreur, true);
+  }],
+  ["fetch fait apparaître origin/main", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "A"',
+      "git remote add origin https://exemple.test/p.git", "git push -u origin main",
+      'autre-dev push "Ajoute la doc"',
+    ]);
+    const r = executer(d, "git fetch");
+    assert.equal(r.depot.branches["origin/main"], r.depot.distant.main);
+    assert.equal(r.depot.branches.main !== r.depot.branches["origin/main"], true);
+  }],
+  ["pull fait avancer main jusqu'à origin/main", () => {
+    const d = scripter([
+      "git add index.html", 'git commit -m "A"',
+      "git remote add origin https://exemple.test/p.git", "git push -u origin main",
+      'autre-dev push "Ajoute la doc"',
+    ]);
+    const r = executer(d, "git pull");
+    assert.equal(r.erreur, false);
+    assert.equal(r.depot.branches.main, r.depot.distant.main);
+  }],
+  ["pull sans branche suivie refusé", () => {
+    const d = scripter(["git add index.html", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git"]);
+    assert.equal(executer(d, "git pull").erreur, true);
+  }],
+
+  // Niveau 7 : pull request simulée
+  ["gh pr create demande une branche déjà sur origin", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    assert.equal(executer(d, "gh pr create").erreur, true);
+  }],
+  ["pull request : ouverte, approuvée, fusionnée sur origin", () => {
+    let d = scripter([
+      "git add index.html", 'git commit -m "A"',
+      "git remote add origin https://exemple.test/p.git", "git push -u origin main",
+      "git switch -c menu", "edit style.css", "git add style.css", 'git commit -m "Ajoute le menu"',
+      "git push -u origin menu",
+    ]);
+    d = lancer(["gh pr create"], d);
+    assert.equal(d.prs.length, 1);
+    assert.equal(executer(d, "gh pr merge").erreur, true, "pas de fusion sans relecture");
+    d = lancer(["gh pr review --approve", "gh pr merge"], d);
+    assert.equal(d.prs[0].etat, "fusionnée");
+    assert.equal(d.distant.main, d.distant.menu);
+  }],
+  ["signature voit la copie distante", () => {
+    const a = lancer(["git add index.html", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git"]);
+    const b = lancer(["git add index.html", 'git commit -m "A"', "git remote add origin https://exemple.test/p.git", "git push -u origin main"]);
+    assert.notEqual(signature(a), signature(b));
+  }],
+  ["le script ne peut pas être tapé par l'élève", () => {
+    const r = executer(nouveauDepot(), "edit style.css");
+    assert.equal(r.erreur, true);
   }],
 ];
 
