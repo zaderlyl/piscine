@@ -9,8 +9,7 @@ import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 import expand from "https://esm.sh/emmet@2.4.11";
 
 
-import { lireExo, lireCode } from "./exo.js";
-
+import { lireCode, chargerExo } from "./exo.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -60,23 +59,6 @@ let moteurPhp = null;
 
 let testsExo = "";
 let sortiePhp = "";
-
-// decoupage fichier exo en section -> ("##Titre")
-
-function lireExo(texte) {
-  const section = {};
-  let courant = null;
-  for (const ligne of texte.split("\n")) {
-    const titre = ligne.match(/^##\s*(.*)/);
-    if (titre) {
-      courant = titre[1].trim();
-      section[courant] = "";
-    } else if (courant) {
-      section[courant] += ligne + "\n";
-    }
-  }
-  return section;
-}
 
 // execution des resultat de page
 
@@ -293,14 +275,6 @@ function afficherDoc(nom) {
   }
 }
 
-for (const nom of SECTION_DOC) {
-  if (!exo[nom]) continue;
-  const bouton = document.createElement("button");
-  bouton.textContent = nom;
-  bouton.addEventListener("click", () => afficherDoc(nom));
-  docOnglet.append(bouton);
-  boutonsDoc[nom] = bouton;
-}
 
 afficherDoc("Énoncé");
 
