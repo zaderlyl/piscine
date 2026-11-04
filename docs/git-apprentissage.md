@@ -4,7 +4,7 @@ Git est difficile parce que son fonctionnement est invisible : l'historique, les
 
 Il développe la partie « Git » de [visualisation-logique.md](visualisation-logique.md) et la place proposée dans [programme-par-langage.md](programme-par-langage.md). Référentiel : R4, « gestion de versions » (voir [referentiel-mmi.md](referentiel-mmi.md)).
 
-Ce document est une proposition, à valider. Rien n'est développé.
+Ce document est une proposition. **Statut** : niveaux 1 à 3 développés (moteur, page `src/depot.html`, exos 01 à 03). Le reste est suivi dans l'issue [#36](https://github.com/zaderlyl/piscine/issues/36).
 
 ## Principes
 
@@ -17,11 +17,12 @@ Ce document est une proposition, à valider. Rien n'est développé.
 
 ## L'interface
 
-Le module tient dans un seul panneau, avec trois zones :
+Le module tient dans une page, en deux colonnes :
 
-1. **Le graphe** (à gauche) : les commits, les branches, `HEAD`. Le commit courant est entouré. Un commit fusionné a deux liens entrants.
-2. **Les zones de travail** (en bas) : répertoire de travail, zone de préparation (`add`), dépôt (`commit`). Chaque commande déplace les fichiers d'une zone à l'autre, comme dans [visualisation-logique.md](visualisation-logique.md).
-3. **La commande** (à droite) : un champ de saisie avec quelques commandes reconnues, et la liste des commandes déjà tapées.
+1. **La consigne** (à gauche) : la mission, puis le cours et l'indice repliés, pour ne pas surcharger l'écran.
+2. **Le terminal** (à gauche, sous la consigne) : un champ de saisie, la sortie de la commande, et la liste des écarts avec la cible (« Il manque 1 commit », « La branche « menu » n'existe pas encore »).
+3. **Le graphe** (à droite) : les commits du plus ancien (en haut) au plus récent (en bas), une colonne par branche, les étiquettes de branche à côté du commit qu'elles pointent, et le commit courant en vert. Ce qui vient de changer est entouré en orange.
+4. **Le statut** (au-dessus du graphe) : la branche courante, le nombre de fichiers modifiés et le nombre de fichiers prêts à être enregistrés. Il remplace l'affichage des zones de travail, qui n'est pas prévu pour l'instant.
 
 La consigne de l'exo reste visible en haut, avec le graphe cible affiché à côté du graphe de l'élève pour comparer.
 
@@ -33,7 +34,7 @@ Le module n'implémente que les commandes nécessaires à chaque niveau. Une com
 |---|---|---|
 | 1 | Premier commit | `status`, `add`, `commit`, `log` |
 | 2 | Branches | `branch`, `switch`, `switch -c` (ou `checkout -b`) |
-| 3 | Fusion | `merge` (avance rapide, puis fusion à trois) |
+| 3 | Fusion (développé, exo 03) | `merge` (avance rapide, puis fusion à trois) |
 | 4 | Conflit | `merge` avec conflit, résolution, `add`, `commit` |
 | 5 | Revenir en arrière | `restore`, `reset` (doux, mixte), `revert` |
 | 6 | Dépôt distant | `remote`, `push`, `fetch`, `pull` (avec un second graphe « origin ») |
