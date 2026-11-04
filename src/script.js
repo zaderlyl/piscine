@@ -26,7 +26,7 @@ const CLE_BROUILLON = "piscine-brouillon";
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
-const FICHIER_EXO = "../exos/html/vanilla/04.md";
+const FICHIER_EXO = "../exos/php/vanilla/00.md";
 
 const editeurs = {};
 const zonesParNom = {};
