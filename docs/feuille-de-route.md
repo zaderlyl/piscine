@@ -13,18 +13,82 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [x] Emmet limité, débloqué par la réussite des exos
 - [x] Éléments HTML obsolètes (`font`, `center`, `marquee`, `frameset`) : testés
 - [x] Documentation dans un panneau (Énoncé, Cours, Méthode, Indice)
-- [ ] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
+- [x] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
 - [ ] PHP dans le navigateur (php-wasm)
 - [ ] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
+- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) et de Git : voir [visualisation-logique.md](visualisation-logique.md)
 
 ## Contenu (exos)
 
+Ordre des langages et notions attendues : [programme-par-langage.md](programme-par-langage.md).
+
 Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 
+**Squelette**
+- [ ] `00` : À quoi sert HTML
+- [ ] `01` : Squelette à la main
+- [ ] `02` : `head` (title, meta)
+- [ ] `03` : Le squelette en un raccourci (débloque `!`)
+
+**Texte**
 - [x] `04` : Titres h1 à h6
-- [ ] Les 41 autres
+- [ ] `05` : Paragraphes, `hr` (débloque `lorem`)
+- [ ] `06` : Gras et italique
+- [ ] `07` : Titre en gras ou en italique : qui contient qui ?
+- [ ] `08` : Autres balises de texte
+- [ ] `09` : Balises de sens (`abbr`, `cite`, `code`…)
+- [ ] `10` : Reproduire un modèle de texte
+
+**Couleurs**
+- [ ] `11` : Noms, hexadécimal, `rgb`
+- [ ] `12` : HTML à l'ancienne (`font`, `center`, `marquee`), à tester avant d'écrire
+
+**Listes**
+- [ ] `13` : Listes à puces et numérotées (débloque `ul>li*3`)
+- [ ] `14` : Options des listes et listes de définitions
+- [ ] `15` : Listes imbriquées
+
+**Liens**
+- [ ] `16` : Liens externes
+- [ ] `17` : Ancres dans la page
+- [ ] `18` : Liens vers un deuxième espace
+- [ ] `19` : `mailto`, `tel`, `download`
+
+**Images**
+- [ ] `20` : Images (`src`, `alt`)
+- [ ] `21` : `figure`, `figcaption`, `picture`
+- [ ] `22` : Image cliquable
+- [ ] `23` : Zones cliquables (`map`, `area`)
+
+**Tableaux**
+- [ ] `24` : Tableau simple (débloque `table>tr*3>td*3`)
+- [ ] `25` : Tableau complet
+- [ ] `26` : Cellules fusionnées
+
+**Structure**
+- [ ] `27` : `div` et `span`
+- [ ] `28` : `header`, `nav`, `main`, `section`, `article`, `footer`
+- [ ] `29` : Cadres `iframe` et `frameset` (historique, à tester)
+
+**Formulaires**
+- [ ] `30` : `form`, `input`, `label`
+- [ ] `31` : Types d'input
+- [ ] `32` : `select`, `option`, `datalist`
+- [ ] `33` : `textarea`, `button`, `fieldset`
+- [ ] `34` : Validation (`required`, `pattern`)
+- [ ] `35` : Formulaire complet
+
+**Interactifs et médias**
+- [ ] `36` : `details`, `dialog`, `progress`, `meter`
+- [ ] `37` : `audio`, `video`, `canvas`
+
+**Finitions**
+- [ ] `38` : Caractères spéciaux
+- [ ] `39` : Attributs globaux
+- [ ] `40` : Palier : une page complète à cahier des charges
+- [ ] `41` : Projet : page personnelle
 
 L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
