@@ -207,13 +207,13 @@ const brouillon = lireBrouillon();
 // abreviation lock au start puis deblocable
 function lireEmmet() {
   try {
-    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [false];
+    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [];
   } catch {
     return [];
   }
 }
 
-const emmet = lireEmmet();
+const emmetDebloque = lireEmmet();
 
 // raccourcis clavier pour Emmet
 const emmetTab = EditorView.domEventHandlers({
