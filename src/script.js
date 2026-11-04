@@ -282,7 +282,8 @@ function lireCode(section) {
 }
 
 const reponse = await fetch(FICHIER_EXO);
-const exo = lireExo(await reponse.text());
+// les fins de ligne Windows (CRLF) cassent la lecture des blocs de code : on les remplace par LF
+const exo = lireExo((await reponse.text()).replace(/\r\n/g, "\n"));
 testsExo = lireCode(exo["Tests"]);
 
 // Panneau doc : un onglet par section de l'exo
