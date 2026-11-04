@@ -101,7 +101,7 @@ function dessinerArbre(d, marques = {}) {
   const liens = d.ordre.flatMap((id) =>
     d.commits[id].parents.map((parent) => {
       const milieu = (Y(parent) + Y(id)) / 2;
-      return `<path d="M${X(parent)} ${Y(parent)} C${X(parent)} ${milieu} ${X(id)} ${milieu} ${X(id)} ${Y(id)}" fill="none" stroke="#000" stroke-width="2"/>`;
+      return `<path d="M${X(parent)} ${Y(parent)} C${X(parent)} ${milieu} ${X(id)} ${milieu} ${X(id)} ${Y(id)}" fill="none" stroke="#666" stroke-width="2"/>`;
     }),
   );
 
@@ -115,12 +115,12 @@ function dessinerArbre(d, marques = {}) {
         const x = xEtiquettes + i * 100;
         const libelle = nom === d.head ? `HEAD → ${nom}` : nom;
         const epaisseurCadre = bougees.has(nom) ? 4 : 1.5;
-        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" fill="#fff" stroke="#000" stroke-width="${epaisseurCadre}"/>
-      <text x="${x + 46}" y="${Y(id) + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">${echapper(libelle)}</text>`;
+        return `<rect x="${x}" y="${Y(id) - 12}" width="92" height="24" fill="#fff" stroke="${bougees.has(nom) ? "#b35c00" : "#2b6cb0"}" stroke-width="${epaisseurCadre}"/>
+      <text x="${x + 46}" y="${Y(id) + 4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f4e8c">${echapper(libelle)}</text>`;
       })
       .join("");
-    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" fill="${surHead ? "#000" : "#fff"}" stroke="#000" stroke-width="${epaisseur}"/>
-      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" fill="#000">${echapper(d.commits[id].message)}</text>${pastilles}`;
+    return `<circle cx="${X(id)}" cy="${Y(id)}" r="${rayon}" fill="${surHead ? "#2a7a2a" : "#fff"}" stroke="${nouveaux.has(id) ? "#b35c00" : "#1f2328"}" stroke-width="${epaisseur}"/>
+      <text x="${xTexte}" y="${Y(id) + 5}" font-size="14" fill="#1f2328">${echapper(d.commits[id].message)}</text>${pastilles}`;
   });
 
   return `<svg viewBox="0 0 ${largeur} ${hauteur}" width="100%" role="img" aria-label="Graphe des commits">${liens.join("")}${noeuds.join("")}</svg>`;
