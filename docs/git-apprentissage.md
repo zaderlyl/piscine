@@ -97,9 +97,9 @@ Le graphe cible est lu par le moteur, pas par l'élève. Une fois l'exo réussi,
 3. **Deux exos** : niveau 1 (premier commit) et niveau 2 (branche). Vérifier avec des élèves de la promo.
 4. **Niveaux 3 à 5**, puis **6 et 7** selon les retours.
 
-## Points à trancher
+## Décisions
 
-1. **Simulation ou vrai Git** : je recommande la simulation (voir [visualisation-logique.md](visualisation-logique.md)). À confirmer.
-2. **Un panneau ou une page** : intégré au panneau d'exo de la plateforme, ou page séparée ? Le panneau est plus cohérent, la page est plus simple à tester.
-3. **Comparaison de graphes** : on ignore les hashs. Faut-il aussi ignorer l'ordre des branches, ou le considérer comme une erreur ?
-4. **Niveaux 6 et 7** : un second graphe « origin » suffit-il, ou faut-il simuler un vrai dépôt distant avec plusieurs utilisateurs ?
+1. **Simulation, pas de vrai Git.** Voir [visualisation-logique.md](visualisation-logique.md).
+2. **Dans le panneau d'exo.** Le module s'affiche comme les autres exos, avec un panneau `depot` déclaré dans l'en-tête (`panneaux: [enonce, depot]`). Même navigation, même brouillon, même bouton « Exo suivant ». La logique du graphe se teste hors du navigateur, sur le moteur seul.
+3. **L'ordre des branches n'est pas comparé.** Git ne donne aucun sens à cet ordre. On compare les commits (messages et liens parents), les étiquettes de branche (quel commit elles pointent) et l'emplacement de `HEAD`. Les hashs sont ignorés.
+4. **Un seul second graphe, « origin ».** Les niveaux 6 et 7 simulent un dépôt distant unique, avec `push` et `pull` entre les deux graphes. Pas de plusieurs utilisateurs : une pull request est une étiquette posée sur une branche, avec son état (ouverte ou fusionnée).
