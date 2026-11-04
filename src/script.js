@@ -355,6 +355,7 @@ async function lancerPhp() {
     sortiePhp += e.detail;
   });
 
+  await moteurPhp.binary;
   await moteurPhp.run(editeurs["index.php"].state.doc.toString());
 
   const echecs = (await testerPhp(sortiePhp)).filter((r) => !r.ok);
@@ -362,8 +363,8 @@ async function lancerPhp() {
     sortiePhp +
     "\n\n" +
     (echecs.length
-      ? echecs.map((r) => " X " + r.message).join("\n")
-      : "OK : All tests are done");
+      ? echecs.map((r) => "❌ " + r.message).join("\n")
+      : "✅ Tous les tests passent");
 
   clearTimeout(minuteurTests);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
