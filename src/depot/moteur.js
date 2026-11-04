@@ -30,6 +30,8 @@ export function executer(depot, ligne) {
     return resultat(`« ${sous} » n'est pas encore au programme de ce module.`, true);
   }
   switch (sous) {
+    case "init":
+      return resultat("Dépôt Git déjà présent ici.");
     case "status":
       return resultat(statut(neuf));
     case "add":

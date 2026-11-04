@@ -9,6 +9,12 @@ function lancer(commandes, depot = nouveauDepot()) {
 }
 
 const tests = [
+  ["init sur un dépôt existant ne change rien", () => {
+    const d = lancer(["git add .", 'git commit -m "A"']);
+    const r = executer(d, "git init");
+    assert.equal(r.erreur, false);
+    assert.deepEqual(r.depot, d);
+  }],
   ["status sur un dépôt neuf", () => {
     const r = executer(nouveauDepot(), "git status");
     assert.match(r.sortie, /Sur la branche main/);
