@@ -278,8 +278,29 @@ function lireCode(section) {
 }
 
 const reponse = await fetch(FICHIER_EXO);
-const exo = lireExo(await reponse.text());
+const texteExo = await reponse.text();
+const exo = lireExo(texteExo);
 testsExo = lireCode(exo["Tests"]);
+
+// raccourcis Emmet à débloquer quand l'exo est réussi (emmet_debloque: ["lorem"] dans l'en-tête)
+function lireEmmetExo(texte) {
+  const ligne = texte.match(/^emmet_debloque:\s*(\[.*\])/m);
+  try {
+    return ligne ? JSON.parse(ligne[1]) : [];
+  } catch {
+    return [];
+  }
+}
+
+const emmetExo = lireEmmetExo(texteExo);
+
+// ajoute les raccourcis de l'exo réussi à ceux déjà débloqués
+function debloquerEmmet() {
+  const nouveaux = emmetExo.filter((raccourci) => !emmetDebloque.includes(raccourci));
+  if (!nouveaux.length) return;
+  emmetDebloque.push(...nouveaux);
+  localStorage.setItem(CLE_EMMET, JSON.stringify(emmetDebloque));
+}
 
 // Panneau doc : un onglet par section de l'exo
 function afficherDoc(nom) {
@@ -345,4 +366,5 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
+  if (!echecs.length && testsExo) debloquerEmmet();
 });
