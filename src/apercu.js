@@ -8,6 +8,7 @@ let urlApercu = null;
 export function assemblerPage(contenus, tests) {
   let code = contenus["index.html"];
   let analyse = analyserScript("");
+  let balisePresente = false;
 
   for (const [nom, contenu] of Object.entries(contenus)) {
     if (nom === "index.html") continue;
@@ -23,10 +24,12 @@ export function assemblerPage(contenus, tests) {
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
+      // Sans cette balise dans index.html, le script de l'élève ne tourne pas : on le dit au panneau
+      balisePresente = code.search(balise) !== -1;
       code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
     }
   }
-  return { code: injecterTests(code, tests), analyse };
+  return { code: injecterTests(code, tests), analyse, balisePresente };
 }
 
 // Affiche du HTML dans l'iframe (libère l'ancienne adresse)

@@ -78,6 +78,8 @@ font-family: sans-serif;
 
 #droite {
   min-width: 0;
+  /* Hauteur fixée à la fenêtre : le résultat des tests prend ce qui reste */
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
