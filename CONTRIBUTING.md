@@ -72,6 +72,43 @@ Ne jamais committer de clé API, de token ou de chemin personnel.
 - Commente avec bienveillance, en proposant plutôt qu'en imposant.
 - Valide (« Approve ») uniquement si tu as testé.
 
+## Fonctionnement de l'équipe
+
+Chacun travaille sur Piscine à côté de ses études : il n'y a pas de deadline, on avance quand on a le temps.
+
+- **Prendre une tâche** : s'assigner l'issue avant de commencer.
+- **Tâche qui traîne** : sans nouvelle pendant 14 jours, l'issue est libérée et redevient disponible. Aucun problème, on peut la reprendre plus tard.
+- **Bloqué ?** Le dire sur Discord ou dans l'issue (label `statut: bloquée`) plutôt que de rester seul.
+- **PR en attente** : sans relecture après 7 jours, relancer sur Discord.
+
+## Communication
+
+- **Discord** : questions rapides, entraide, annonces.
+- **GitHub** : tout ce qui doit rester écrit (décisions, choix techniques, bugs, avancement).
+- Une décision prise sur Discord est recopiée dans l'issue concernée.
+
+## Décisions techniques
+
+On discute dans l'issue. En cas de désaccord, le mainteneur (Lilian) tranche et on avance.
+
+## Premiers pas (nouveau membre)
+
+1. Lis le [README](README.md) pour comprendre le projet.
+2. Installe et lance-le avec [docs/lancer-le-projet.md](docs/lancer-le-projet.md).
+3. Cherche une issue `bonne-première-tâche` dans le tableau Projects, assigne-la-toi et suis le cycle de ce fichier.
+4. Bloqué ? Pose ta question sur Discord : personne ne t'en voudra.
+
+## Suivi de l'avancement
+
+Le tableau **Projects** de GitHub fait foi pour savoir qui fait quoi. `docs/feuille-de-route.md` décrit la vision d'ensemble, pas l'avancement au jour le jour.
+
+## Retours de relecture
+
+- Le relecteur dit **ce qui doit changer et pourquoi**, avec un exemple de correction quand c'est possible.
+- Les remarques portent sur le code, jamais sur la personne.
+- L'auteur corrige **dans la même PR**, sans en rouvrir une.
+- Si les changements sont importants, 10 minutes d'appel valent mieux qu'un long message.
+
 ## Conventions de code
 
 - Fichiers en kebab-case, commentaires en français.

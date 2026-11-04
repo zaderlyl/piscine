@@ -4,6 +4,8 @@
 
 Pour prendre une tâche : ouvre une issue ou préviens le mainteneur (voir [CONTRIBUTING.md](../CONTRIBUTING.md)).
 
+> L'avancement détaillé est dans le tableau **Projects** du dépôt. Cette page garde la vision des grandes étapes.
+
 ## Étape en cours : prototypes techniques
 
 Tout tourne dans le navigateur (compatible GitHub Pages).
