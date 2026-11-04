@@ -1,7 +1,7 @@
 // Page du module Git : un exo = un fichier Markdown dans exos/git/visuel/.
 // Mode bac à sable (?libre) : pas d'exo, pas de cible, on part d'un dossier sans dépôt.
 import { marked } from "https://esm.sh/marked@12.0.2";
-import { nouveauDepot, executer, signature, rendre } from "./depot/moteur.js";
+import { nouveauDepot, executer, signature } from "./depot/moteur.js";
 
 const params = new URLSearchParams(location.search);
 const LIBRE = params.has("libre");
@@ -52,8 +52,56 @@ let solution = [];
 let depart = [];
 let sansDepot = false; // l'exo commence dans un dossier sans dépôt (depot: aucun)
 
+// Échappe le texte saisi par l'élève avant de l'insérer dans le SVG
+function echapper(texte) {
+  return texte.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+// Dessin du graphe en SVG : un commit par ligne (le plus récent en haut), une colonne par branche.
+// Une branche garde la même colonne que ses commits ; une ligne relie chaque commit à son parent.
+function dessinerArbre(depot) {
+  if (!depot) return `<p>(pas de dépôt Git dans ce dossier)</p>`;
+  if (!depot.ordre.length) return `<p>(aucun commit)</p>`;
+
+  const noms = Object.keys(depot.branches);
+  const colonne = {};
+  for (const id of depot.ordre) {
+    const branche = noms.find((nom) => depot.branches[nom] === id);
+    const parent = depot.commits[id].parents[0];
+    colonne[id] = branche !== undefined ? noms.indexOf(branche) : colonne[parent] ?? 0;
+  }
+
+  const ordre = [...depot.ordre].reverse();
+  const X = (id) => 20 + colonne[id] * 36;
+  const Y = (id) => 20 + ordre.indexOf(id) * 40;
+  const largeur = 20 + noms.length * 36 + 300;
+  const hauteur = Y(ordre[ordre.length - 1]) + 30;
+  const xTexte = 20 + noms.length * 36;
+
+  const lignes = ordre
+    .filter((id) => depot.commits[id].parents[0])
+    .map((id) => {
+      const p = depot.commits[id].parents[0];
+      return `<line x1="${X(id)}" y1="${Y(id)}" x2="${X(p)}" y2="${Y(p)}" stroke="#555" stroke-width="2"/>`;
+    });
+
+  const noeuds = ordre.map((id) => {
+    const commit = depot.commits[id];
+    const surHead = depot.branches[depot.head] === id;
+    const etiquettes = noms
+      .filter((nom) => depot.branches[nom] === id)
+      .map((nom) => (nom === depot.head ? `HEAD -> ${nom}` : nom));
+    const badge = etiquettes.length ? ` (${etiquettes.join(", ")})` : "";
+    return `
+      <circle cx="${X(id)}" cy="${Y(id)}" r="7" fill="${surHead ? "#2a7a2a" : "#fff"}" stroke="#333" stroke-width="2"/>
+      <text x="${xTexte}" y="${Y(id) + 5}" font-family="monospace" font-size="13">${echapper(commit.message)}${echapper(badge)}</text>`;
+  });
+
+  return `<svg width="100%" viewBox="0 0 ${largeur} ${hauteur}" role="img" aria-label="Graphe des commits">${lignes.join("")}${noeuds.join("")}</svg>`;
+}
+
 function afficher() {
-  document.getElementById("graphe").textContent = depot ? rendre(depot) : "(pas de dépôt Git dans ce dossier)";
+  document.getElementById("graphe").innerHTML = dessinerArbre(depot);
   const reussi = cible && depot && signature(depot) === signature(cible);
   verdict.textContent = reussi ? "✅ Le graphe correspond à la cible" : "";
 }
@@ -68,7 +116,7 @@ function recommencer() {
 function afficherCible() {
   document.getElementById("titre-cible").hidden = !cible;
   document.getElementById("cible").hidden = !cible;
-  if (cible) document.getElementById("cible").textContent = rendre(cible);
+  if (cible) document.getElementById("cible").innerHTML = dessinerArbre(cible);
 }
 
 async function charger() {
