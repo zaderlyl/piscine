@@ -339,8 +339,21 @@ if (new URLSearchParams(location.search).has("auteur")) {
 moteurPhp.addEventListener("output", (e) => { sortiePhp += e.detail; });
 moteurPhp.addEventListener("error", (e) => { sortiePhp += e.detail; });
 
+async function testerPhp(){
+  const resultats = [];
+  const assert = (condition, message) => resultats.push({ ok: condition, message });
+  const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+  try {
+    await new AsyncFunction("assert","sortie", testsExo)(assert, sortie);
+  } catch (erreur) {
+    resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
+  }
+  return resultats;
+}
+
 async function lancerPhp() {
-  panneauResultats.textContent = "Exécution…";
+  const echecs = ( await testerPhp(sortiePhp)).filter((r) => !r.ok);
+  panneauResultats.textContent = sortiePhp + "\n\n" + (echecs.length ? echecs.maps((r) => " X " + r.message).join("\n") : " OK : Alle tests are done");
   sortiePhp = "";
   await moteurPhp.binary;
   await moteurPhp.run(editeurs["index.php"].state.doc.toString());
