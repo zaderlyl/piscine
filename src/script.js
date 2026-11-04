@@ -3,6 +3,8 @@ import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { marked } from "https://esm.sh/marked@12.0.2";
+import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
+import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
 
 import expand from "https://esm.sh/emmet@2.4.11";
@@ -15,6 +17,8 @@ const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
 const docOnglet = document.getElementById("doc-onglet");
+
+const boutonPhp = document.createElement("button");
 
 
 
@@ -34,6 +38,7 @@ const boutonsDoc = {};
 const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
 
 
+const moteurPhp = new PhpWeb();
 
 
 
@@ -43,6 +48,7 @@ const fichier = {
   "index.html": html,
   "style.css": css,
   "script.js": javascript,
+  "index.php": php,
 };
 
 const types = {
@@ -56,6 +62,7 @@ let minuteur = null;
 let urlApercu = null;
 
 let testsExo = "";
+let sortiePhp = "";
 
 // decoupage fichier exo en section -> ("##Titre")
 
@@ -167,6 +174,7 @@ const theme = EditorView.theme({
 
 const ecoute = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
+    if (update.view !== editeurs["index.php"])
     afficherApercu();
     clearTimeout(minuteur);
     minuteur = setTimeout(sauvegarderBrouillon, 1000);
@@ -326,6 +334,29 @@ if (new URLSearchParams(location.search).has("auteur")) {
   boutonSolution.addEventListener("click", chargerSolution);
   onglets.append(boutonSolution);
 }
+
+// PHP dans le navigateur : la sortie s'affiche en texte (console) et en HTML (aperçu)
+moteurPhp.addEventListener("output", (e) => { sortiePhp += e.detail; });
+moteurPhp.addEventListener("error", (e) => { sortiePhp += e.detail; });
+
+async function lancerPhp() {
+  panneauResultats.textContent = "Exécution…";
+  sortiePhp = "";
+  await moteurPhp.binary;
+  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
+  panneauResultats.textContent = sortiePhp;
+
+  clearTimeout(minuteurTests);
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(
+    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
+  );
+  apercu.src = urlApercu;
+}
+
+boutonPhp.textContent = "Exécuter PHP";
+boutonPhp.addEventListener("click", lancerPhp);
+onglets.append(boutonPhp);
 
 afficherFichier("index.html");
 

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <title>Test php-wasm</title>
 </head>
+
 <body>
   <h1>Test php-wasm</h1>
   <pre id="etat">Chargement de PHP...</pre>
@@ -22,7 +24,7 @@
     await php.binary;
     etat.textContent = "PHP prêt en " + Math.round(performance.now() - debut) + " ms";
 
-    await php.run('<?php echo "Bonjour depuis PHP " . PHP_VERSION . "\\n";');
-  </script>
+    await php.run('<?php echo "avant\\n"; echo $inconnue; echo 5 +;');  </script>
 </body>
+
 </html>
