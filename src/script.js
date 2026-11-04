@@ -3,11 +3,10 @@ import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { marked } from "https://esm.sh/marked@12.0.2";
-
+import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
+import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
 import expand from "https://esm.sh/emmet@2.4.11";
-
-
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -16,7 +15,7 @@ const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
 const docOnglet = document.getElementById("doc-onglet");
 
-
+const boutonPhp = document.createElement("button");
 
 // exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 04)
 const exoChoisi = new URLSearchParams(location.search).get("exo");
@@ -26,20 +25,19 @@ const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
-const FICHIER_EXO = `../exos/${EXO}.md`;
+const exoDemande = new URLSearchParams(location.search).get("exo");
+
+
+const FICHIER_EXO = /^[a-z]+\/[a-z]+\/\d+$/.test(exoDemande || "")
+  ? `../exos/${exoDemande}.md`
+  : "../exos/html/vanilla/04.md";
 
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
 const boutonsDoc = {};
 
-
-
 const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
-
-
-
-
 
 const DELAI_SUSPENDU = 5000;
 
@@ -47,6 +45,7 @@ const fichier = {
   "index.html": html,
   "style.css": css,
   "script.js": javascript,
+  "index.php": php,
 };
 
 const types = {
@@ -58,8 +57,10 @@ const types = {
 let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
+let moteurPhp = null;
 
 let testsExo = "";
+let sortiePhp = "";
 
 // decoupage fichier exo en section -> ("##Titre")
 
@@ -152,12 +153,13 @@ function afficherApercu() {
   }
   code = injecterTests(code, testsExo);
   if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(new Blob([code], { type: "text/html;charset=utf-8" }));
+  urlApercu = URL.createObjectURL(
+    new Blob([code], { type: "text/html;charset=utf-8" }),
+  );
   apercu.src = urlApercu;
   clearTimeout(minuteurTests);
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
-
 
 const theme = EditorView.theme({
   "&": {
@@ -165,13 +167,11 @@ const theme = EditorView.theme({
   },
 });
 
-
-
 // mise a jour a chaque modif
 
 const ecoute = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
-    afficherApercu();
+    if (update.view !== editeurs["index.php"]) afficherApercu();
     clearTimeout(minuteur);
     minuteur = setTimeout(sauvegarderBrouillon, 1000);
   }
@@ -232,7 +232,7 @@ const emmetTab = EditorView.domEventHandlers({
       .match(/\S+$/)?.[0];
     if (!abreviation) return false;
     if (!emmetDebloque.includes(abreviation)) return false;
-    
+
     let resultat;
     try {
       resultat = expand(abreviation);
@@ -305,7 +305,6 @@ for (const nom of SECTION_DOC) {
 
 afficherDoc("Énoncé");
 
-
 // remplace le code des editeurs par la solution de reference
 
 function chargerSolution() {
@@ -331,6 +330,58 @@ if (new URLSearchParams(location.search).has("auteur")) {
   boutonSolution.addEventListener("click", chargerSolution);
   onglets.append(boutonSolution);
 }
+
+
+
+async function testerPhp(sortie) {
+  const resultats = [];
+  const assert = (condition, message) =>
+    resultats.push({ ok: !!condition, message });
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  try {
+    await new AsyncFunction("assert", "sortie", testsExo)(assert, sortie);
+  } catch (erreur) {
+    resultats.push({
+      ok: false,
+      message: "Erreur dans les tests : " + erreur.message,
+    });
+  }
+  return resultats;
+}
+
+async function lancerPhp() {
+  panneauResultats.textContent = "Exécution en cours...";
+  sortiePhp = "";
+  moteurPhp = new PhpWeb();
+  moteurPhp.addEventListener("output", (e) => {
+    sortiePhp += e.detail;
+  });
+  moteurPhp.addEventListener("error", (e) => {
+    sortiePhp += e.detail;
+  });
+
+  await moteurPhp.binary;
+  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
+
+  const echecs = (await testerPhp(sortiePhp)).filter((r) => !r.ok);
+  panneauResultats.textContent =
+    sortiePhp +
+    "\n\n" +
+    (echecs.length
+      ? echecs.map((r) => "❌ " + r.message).join("\n")
+      : "✅ Tous les tests passent");
+
+  clearTimeout(minuteurTests);
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(
+    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
+  );
+  apercu.src = urlApercu;
+}
+
+boutonPhp.textContent = "Exécuter PHP";
+boutonPhp.addEventListener("click", lancerPhp);
+onglets.append(boutonPhp);
 
 afficherFichier("index.html");
 
