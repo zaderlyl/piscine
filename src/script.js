@@ -17,7 +17,11 @@ const docOnglet = document.getElementById("doc-onglet");
 
 const boutonPhp = document.createElement("button");
 
-const CLE_BROUILLON = "piscine-brouillon";
+// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 04)
+const exoChoisi = new URLSearchParams(location.search).get("exo");
+const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
+
+const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 const CLE_EMMET = "piscine-emmet";
 
@@ -207,13 +211,13 @@ const brouillon = lireBrouillon();
 // abreviation lock au start puis deblocable
 function lireEmmet() {
   try {
-    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [false];
+    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [];
   } catch {
     return [];
   }
 }
 
-const emmet = lireEmmet();
+const emmetDebloque = lireEmmet();
 
 // raccourcis clavier pour Emmet
 const emmetTab = EditorView.domEventHandlers({
@@ -278,7 +282,8 @@ function lireCode(section) {
 }
 
 const reponse = await fetch(FICHIER_EXO);
-const exo = lireExo(await reponse.text());
+// les fins de ligne Windows (CRLF) cassent la lecture des blocs de code : on les remplace par LF
+const exo = lireExo((await reponse.text()).replace(/\r\n/g, "\n"));
 testsExo = lireCode(exo["Tests"]);
 
 // Panneau doc : un onglet par section de l'exo

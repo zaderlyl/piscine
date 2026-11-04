@@ -13,13 +13,16 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [x] Emmet limité, débloqué par la réussite des exos
 - [x] Éléments HTML obsolètes (`font`, `center`, `marquee`, `frameset`) : testés
 - [x] Documentation dans un panneau (Énoncé, Cours, Méthode, Indice)
-- [ ] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
+- [x] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
 - [ ] PHP dans le navigateur (php-wasm)
 - [ ] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
+- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) et de Git : voir [visualisation-logique.md](visualisation-logique.md)
 
 ## Contenu (exos)
+
+Ordre des langages et notions attendues : [programme-par-langage.md](programme-par-langage.md).
 
 Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 
