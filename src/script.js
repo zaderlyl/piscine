@@ -351,7 +351,25 @@ async function testerPhp(sortie){
   return resultats;
 }
 
-async function lancerPhp() {
+async function lancerPhp(){
+  panneauResultats.textContent = "Exécution de PHP...";
+  sortiePhp = "";
+  await moteurPhp.binary;
+  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
+
+  const echecs = ( await testerPhp(sortiePhp)).filter((r) => !r.ok);
+  panneauResultats.textContent = sortiePhp + "\n\n" + (echecs.length ? echecs.map((r) => " X " + r.message).join("\n") : "OK : All tests are done");
+
+  clearTimeout(minuteurTests);
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(
+    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
+  );
+  apercu.src = urlApercu;
+}
+
+
+async function lancerPhp2() {
   const echecs = ( await testerPhp(sortiePhp)).filter((r) => !r.ok);
   panneauResultats.textContent = sortiePhp + "\n\n" + (echecs.length ? echecs.maps((r) => " X " + r.message).join("\n") : " OK : Alle tests are done");
   sortiePhp = "";
