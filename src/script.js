@@ -339,9 +339,9 @@ if (new URLSearchParams(location.search).has("auteur")) {
 moteurPhp.addEventListener("output", (e) => { sortiePhp += e.detail; });
 moteurPhp.addEventListener("error", (e) => { sortiePhp += e.detail; });
 
-async function testerPhp(){
+async function testerPhp(sortie){
   const resultats = [];
-  const assert = (condition, message) => resultats.push({ ok: condition, message });
+  const assert = (condition, message) => resultats.push({ ok: !!condition, message });
   const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
   try {
     await new AsyncFunction("assert","sortie", testsExo)(assert, sortie);
