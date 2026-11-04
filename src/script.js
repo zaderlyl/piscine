@@ -368,23 +368,6 @@ async function lancerPhp(){
   apercu.src = urlApercu;
 }
 
-
-async function lancerPhp2() {
-  const echecs = ( await testerPhp(sortiePhp)).filter((r) => !r.ok);
-  panneauResultats.textContent = sortiePhp + "\n\n" + (echecs.length ? echecs.maps((r) => " X " + r.message).join("\n") : " OK : Alle tests are done");
-  sortiePhp = "";
-  await moteurPhp.binary;
-  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
-  panneauResultats.textContent = sortiePhp;
-
-  clearTimeout(minuteurTests);
-  if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(
-    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
-  );
-  apercu.src = urlApercu;
-}
-
 boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
