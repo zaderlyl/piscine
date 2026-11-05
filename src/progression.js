@@ -19,3 +19,17 @@ export function marquerReussi(exo){
     console.error("Erreur lors de la sauvegarde de la prog");
   }
 }
+
+
+export async function chargerListeExos(){
+  try {
+    const reponse = await fetch("../exos/index.json");
+  } catch {
+    return[];
+  }
+}
+
+export function exoSuivant(exo, liste){
+  const position = liste.indexOf(exo);
+  return position === -1 ? null : (liste[position + 1] ?? null);
+}
