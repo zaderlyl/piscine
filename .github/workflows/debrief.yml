@@ -1,0 +1,37 @@
+name: Débrief hebdomadaire
+
+# Poste un résumé de l'avancement dans le salon Discord #debrief.
+# Le webhook est dans le secret du dépôt DISCORD_WEBHOOK (Settings > Secrets and variables > Actions).
+on:
+  schedule:
+    - cron: "0 7 * * 1" # le lundi à 7h UTC (8h ou 9h en France)
+  workflow_dispatch: # lancement manuel, pour tester
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  debrief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Générer le message
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/debrief.sh > message.txt
+
+      - name: Envoyer sur Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "Le secret DISCORD_WEBHOOK est vide ou absent." >&2
+            exit 1
+          fi
+          jq -n --rawfile contenu message.txt '{content: $contenu}' \
+            | curl --fail --silent --show-error \
+                -H "Content-Type: application/json" \
+                -d @- "$DISCORD_WEBHOOK"
