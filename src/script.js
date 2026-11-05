@@ -129,26 +129,13 @@ function afficherFichier(nom) {
   }
 }
 
-function lireBrouillon() {
-  try {
-    return JSON.parse(localStorage.getItem(CLE_BROUILLON)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function sauvegarderBrouillon() {
-  const brouillon = {};
+function enregistrerBrouillon() {
+  const contenus = {};
   for (const nom in editeurs) {
-    brouillon[nom] = editeurs[nom].state.doc.toString();
+    contenus[nom] = editeurs[nom].state.doc.toString();
   }
-  try {
-    localStorage.setItem(CLE_BROUILLON, JSON.stringify(brouillon));
-  } catch {
-    console.error("Erreur lors de la sauvegarde du brouillon");
-  }
+  sauvegarderBrouillon(CLE_BROUILLON, contenus);
 }
-
 const brouillon = lireBrouillon();
 
 // abreviation lock au start puis deblocable
