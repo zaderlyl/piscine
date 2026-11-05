@@ -256,9 +256,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
   boutons[nom] = bouton;
 }
 
-const reponse = await fetch(FICHIER_EXO);
-// les fins de ligne Windows (CRLF) cassent la lecture des blocs de code : on les remplace par LF
-const exo = lireExo((await reponse.text()).replace(/\r\n/g, "\n"));
+const exo = await chargerExo(FICHIER_EXO);
 testsExo = lireCode(exo["Tests"]);
 
 // Panneau doc : un onglet par section de l'exo
@@ -269,6 +267,14 @@ function afficherDoc(nom) {
   }
 }
 
+for (const nom of SECTION_DOC) {
+  if (!exo[nom]) continue;
+  const bouton = document.createElement("button");
+  bouton.textContent = nom;
+  bouton.addEventListener("click", () => afficherDoc(nom));
+  docOnglet.append(bouton);
+  boutonsDoc[nom] = bouton;
+}
 
 afficherDoc("Énoncé");
 

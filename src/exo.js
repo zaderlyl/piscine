@@ -15,7 +15,7 @@ export function lireExo(texte) {
 
 export function lireCode(section) {
   const bloc = section.match(/```(?:\w+)?\n([\s\S]*?)```/);
-  return bloc ? bloc[2] : "";
+  return bloc ? bloc[1] : "";
 }
 
 export async function chargerExo(fichier){
