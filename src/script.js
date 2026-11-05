@@ -12,7 +12,7 @@ import expand from "https://esm.sh/emmet@2.4.11";
 import { lireCode, chargerExo } from "./exo.js";
 import { injecterTests } from "./tests.js";
 import { executerPhp } from "./php.js";
-import { lireBrouillon, sauvegardeBrouillon } from "./brouillon.js";
+import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 
 
 const apercu = document.getElementById("apercu");
@@ -64,7 +64,7 @@ let testsExo = "";
 
 
 function arreterApercu() {
-  sauvegarderBrouillon();
+  enregistrerBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
   location.reload();
 }
@@ -116,7 +116,7 @@ const ecoute = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
     if (update.view !== editeurs["index.php"]) afficherApercu();
     clearTimeout(minuteur);
-    minuteur = setTimeout(sauvegarderBrouillon, 1000);
+    minuteur = setTimeout(enregistrerBrouillon, 1000);
   }
 });
 
@@ -136,7 +136,7 @@ function enregistrerBrouillon() {
   }
   sauvegarderBrouillon(CLE_BROUILLON, contenus);
 }
-const brouillon = lireBrouillon();
+const brouillon = lireBrouillon(CLE_BROUILLON);
 
 // abreviation lock au start puis deblocable
 function lireEmmet() {

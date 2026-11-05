@@ -7,7 +7,7 @@ export function lireBrouillon(cle){
 }
 
 
-export function sauvegardeBrouillon(cle, contenus) {
+export function sauvegarderBrouillon(cle, contenus) {
   try {
     localStorage.setItem(cle, JSON.stringify(contenus));
   } catch {
