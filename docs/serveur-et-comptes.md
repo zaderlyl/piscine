@@ -13,6 +13,7 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 - **Un seul serveur pour le front et l'API** : le HTML et le JS sont servis par le même serveur PHP que l'API. Pas de CORS, les cookies de session fonctionnent normalement. GitHub Pages ne sert plus qu'à la vitrine et aux prototypes.
 - **Inscription de test** : l'élève saisit son mail, son prénom, son nom, un mot de passe et un **code d'inscription universel** (`MMIpiscine`). La confirmation par mail et le code de promo viendront plus tard.
 - **Le code universel n'est pas dans le code versionné** : il est dans un fichier de configuration local (ignoré par Git), avec un fichier d'exemple dans le dépôt.
+- **Hébergement confirmé** : le serveur de l'IUT, avec phpMyAdmin pour administrer la base. Les versions de PHP et MySQL sont des versions standard récentes. Les fichiers sont déposés avec FileZilla (SFTP), sans `git pull` sur le serveur.
 - **Développement en local** : PHP et MySQL sur chaque poste, une base créée par un script SQL versionné. Le serveur de l'IUT sert pour la mise en ligne, pas pour développer.
 - **Filet local** : le `localStorage` reste en secours. Quand l'élève est connecté, la base fait foi ; sans serveur, l'app continue de marcher en local. Au premier login, la progression locale est envoyée au serveur.
 
@@ -20,7 +21,7 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 
 - **Format de l'API** : fichiers PHP simples qui reçoivent et renvoient du JSON, ou un framework. À discuter en équipe.
 - **Répartition du travail** : après la réflexion.
-- **Réponses de l'IUT** : versions de PHP et MySQL, dépôt des fichiers (SFTP ou `git pull`), envoi de mails depuis le serveur, règles sur les données d'élèves.
+- **Réponses de l'IUT restantes** : envoi de mails depuis le serveur, règles sur les données d'élèves, maintenance.
 
 ## Schéma de base (première proposition)
 
@@ -71,8 +72,8 @@ Une fois ce document validé, un découpage possible (à ajuster) :
 
 ## Questions pour l'IUT
 
-- Quelles versions de PHP et de MySQL sont disponibles ?
-- Comment déposer les fichiers : SFTP, `git pull`, autre ?
+Déjà répondu : versions standard récentes, dépôt par SFTP (FileZilla), phpMyAdmin disponible. Restent :
+
 - Le serveur peut-il envoyer des mails (confirmation d'inscription, mot de passe oublié) ?
 - Quelles règles s'appliquent à l'hébergement de données d'élèves ?
 - Qui assure la maintenance, et pendant combien de temps après les études ?
