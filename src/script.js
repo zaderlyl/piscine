@@ -6,9 +6,6 @@ import { marked } from "https://esm.sh/marked@12.0.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
 
 
-import expand from "https://esm.sh/emmet@2.4.11";
-
-
 import { lireCode, chargerExo } from "./exo.js";
 import { injecterTests } from "./tests.js";
 import { executerPhp } from "./php.js";
@@ -30,7 +27,6 @@ const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
-const CLE_EMMET = "piscine-emmet";
 
 const FICHIER_EXO = `../exos/${EXO}.md`;
 
