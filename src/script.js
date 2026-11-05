@@ -10,6 +10,8 @@ import expand from "https://esm.sh/emmet@2.4.11";
 
 
 import { lireCode, chargerExo } from "./exo.js";
+import { injecterTests } from "./tests.js";
+
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -60,37 +62,7 @@ let moteurPhp = null;
 let testsExo = "";
 let sortiePhp = "";
 
-// execution des resultat de page
 
-function construireTests(tests) {
-  return `<script>
-    window.addEventListener("load", async () => {
-      const resultats = [];
-      const $ = (selecteur) => document.querySelector(selecteur);
-      const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
-      const style = (selecteur, propriete) => {
-        const element = $(selecteur);
-        return element ? getComputedStyle(element)[propriete] : null;
-      };
-      const click = (selecteur) => $(selecteur)?.click();
-      const type = (selecteur, texte) => {
-        const element = $(selecteur);
-        if (!element) return;
-        element.value = texte;
-        element.dispatchEvent(new Event("input", { bubbles: true }));
-        element.dispatchEvent(new Event("change", { bubbles: true }));
-      };
-      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const assert = (condition, message) => resultats.push({ ok: !!condition, message });
-      try {
-        ${tests}
-      } catch (erreur) {
-        resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
-      }
-      parent.postMessage({ type: "tests", resultats }, "*");
-    });
-  <\/script>`;
-}
 
 function arreterApercu() {
   sauvegarderBrouillon();
