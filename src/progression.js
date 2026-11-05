@@ -24,6 +24,7 @@ export function marquerReussi(exo){
 export async function chargerListeExos(){
   try {
     const reponse = await fetch("../exos/index.json");
+    return await reponse.json();
   } catch {
     return[];
   }
@@ -32,4 +33,8 @@ export async function chargerListeExos(){
 export function exoSuivant(exo, liste){
   const position = liste.indexOf(exo);
   return position === -1 ? null : (liste[position + 1] ?? null);
+}
+
+export function estReussi(exo) {
+  return Boolean(lireProgression()[exo]?.reussi);
 }
