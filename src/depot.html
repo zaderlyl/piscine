@@ -3,43 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
   <title>Piscine : Git</title>
   <style>
-    body { font-family: sans-serif; margin: 16px; max-width: 1100px; }
-    #page { display: flex; flex-wrap: wrap; gap: 24px; }
-    #gauche { flex: 1 1 380px; }
-    #droite { flex: 1 1 320px; }
-    pre { background: #f4f4f4; padding: 8px; white-space: pre-wrap; }
-    input { width: 70%; font-family: monospace; }
-    .verdict { font-weight: bold; color: green; }
-    .erreur { color: #b00; }
+    /* Style de la plateforme (src/style.css) : police sans-serif, barre grise, énoncé jaune pâle, résultat gris */
+    body { font-family: sans-serif; background: #fff; color: #000; margin: 0; padding: 0 16px 16px; }
+    h1 { background: #eee; margin: 0 -16px 16px; padding: 10px 16px; font-size: 1.2rem; }
+    #enonce { background: #fffbe6; padding: 8px 12px; }
+    #sortie { background: #F5F5F5; font-family: monospace; padding: 8px 10px; }
+    button { border: 0; background: #eee; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #ddd; }
+    input { font-family: monospace; padding: 6px 8px; border: 1px solid #ddd; }
+    .grille, .graphes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .carte { border: 1px solid #ddd; padding: 12px 14px; margin-bottom: 16px; }
+    .carte h2 { margin-top: 0; }
+    .bon { color: #2a7a2a; }
+    .mauvais { color: #b00020; }
+    @media (max-width: 800px) { .grille, .graphes { grid-template-columns: 1fr; } }
   </style>
 </head>
-<body>
+<body bgcolor="#ffffff" text="#000000">
   <h1 id="titre"></h1>
-  <div id="page">
-    <div id="gauche">
-      <div id="cours"></div>
-      <div id="enonce"></div>
 
+  <div class="grille">
+    <section class="carte">
+      <h2>Ta mission</h2>
+      <div id="enonce"></div>
+      <ol id="etapes"></ol>
+      <details>
+        <summary>Le cours en bref</summary>
+        <div id="cours"></div>
+      </details>
+      <details>
+        <summary>Besoin d'un indice ?</summary>
+        <div id="indice"></div>
+      </details>
+    </section>
+
+    <section class="carte">
+      <h2>Terminal</h2>
       <form id="formulaire">
-        <input id="commande" placeholder="git status" autocomplete="off">
+        <input id="commande" placeholder="git status" autocomplete="off" aria-label="Commande git">
         <button>Lancer</button>
         <button type="button" id="recommencer">Recommencer</button>
         <button type="button" id="solution" hidden>Charger la solution</button>
       </form>
       <pre id="sortie"></pre>
-      <p id="verdict" class="verdict"></p>
-    </div>
-
-    <div id="droite">
-      <h2>Ton dépôt</h2>
-      <div id="graphe"></div>
-
-      <h2 id="titre-cible">Cible</h2>
-      <div id="cible"></div>
-    </div>
+      <p id="verdict"></p>
+      <ul id="ecarts"></ul>
+      <button type="button" id="suivant" hidden>Exo suivant →</button>
+    </section>
   </div>
+
+  <div class="graphes">
+    <section class="carte">
+      <h2>Ton dépôt</h2>
+      <div id="statut" aria-live="polite"></div>
+      <div id="graphe"></div>
+    </section>
+
+    <section class="carte">
+      <h2 id="titre-cible">Ce qu'on attend</h2>
+      <div id="cible"></div>
+    </section>
+  </div>
+  <p>○ commit · ● commit courant (HEAD) · étiquette encadrée : branche · trait épais : vient de changer · pointillés : ne correspond pas à la cible</p>
 
   <script type="module" src="depot.js"></script>
 </body>

@@ -16,11 +16,12 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [x] Éléments HTML obsolètes (`font`, `center`, `marquee`, `frameset`) : testés
 - [x] Documentation dans un panneau (Énoncé, Cours, Méthode, Indice)
 - [x] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
-- [ ] PHP dans le navigateur (php-wasm)
+- [x] PHP dans le navigateur (php-wasm)
 - [ ] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
-- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) et de Git : voir [visualisation-logique.md](visualisation-logique.md)
+- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) : voir [visualisation-logique.md](visualisation-logique.md)
+- [ ] Module Git visuel : niveaux 1 à 7 faits (moteur, page, exos 01 à 11). Reste : intégration en panneau (dépend de #29), retours pédagogiques affinés, test avec des élèves (issue [#36](https://github.com/zaderlyl/piscine/issues/36)) : voir [git-apprentissage.md](git-apprentissage.md)
 
 ## Contenu (exos)
 

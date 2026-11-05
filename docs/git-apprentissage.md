@@ -4,7 +4,7 @@ Git est difficile parce que son fonctionnement est invisible : l'historique, les
 
 Il développe la partie « Git » de [visualisation-logique.md](visualisation-logique.md) et la place proposée dans [programme-par-langage.md](programme-par-langage.md). Référentiel : R4, « gestion de versions » (voir [referentiel-mmi.md](referentiel-mmi.md)).
 
-Ce document est une proposition, à valider. Rien n'est développé.
+Ce document est une proposition. **Statut** : niveaux 1 à 7 développés (moteur, page `src/depot.html`, exos 01 à 11). Restent à faire : l'intégration en panneau dans l'app (dépend de zaderlyl/piscine#29), les tests avec des élèves, et les retours pédagogiques affinés. Le suivi est dans l'issue [#36](https://github.com/zaderlyl/piscine/issues/36).
 
 ## Principes
 
@@ -17,11 +17,12 @@ Ce document est une proposition, à valider. Rien n'est développé.
 
 ## L'interface
 
-Le module tient dans un seul panneau, avec trois zones :
+Le module tient dans une page, en deux colonnes :
 
-1. **Le graphe** (à gauche) : les commits, les branches, `HEAD`. Le commit courant est entouré. Un commit fusionné a deux liens entrants.
-2. **Les zones de travail** (en bas) : répertoire de travail, zone de préparation (`add`), dépôt (`commit`). Chaque commande déplace les fichiers d'une zone à l'autre, comme dans [visualisation-logique.md](visualisation-logique.md).
-3. **La commande** (à droite) : un champ de saisie avec quelques commandes reconnues, et la liste des commandes déjà tapées.
+1. **La consigne** (à gauche) : la mission, puis le cours et l'indice repliés, pour ne pas surcharger l'écran.
+2. **Le terminal** (à gauche, sous la consigne) : un champ de saisie, la sortie de la commande, et la liste des écarts avec la cible (« Il manque 1 commit », « La branche « menu » n'existe pas encore »).
+3. **Le graphe** (à droite) : les commits du plus ancien (en haut) au plus récent (en bas), une colonne par branche, les étiquettes de branche à côté du commit qu'elles pointent, et le commit courant en vert. Ce qui vient de changer est entouré en orange.
+4. **Le statut** (au-dessus du graphe) : la branche courante, le nombre de fichiers modifiés et le nombre de fichiers prêts à être enregistrés. Il remplace l'affichage des zones de travail, qui n'est pas prévu pour l'instant.
 
 La consigne de l'exo reste visible en haut, avec le graphe cible affiché à côté du graphe de l'élève pour comparer.
 
@@ -33,11 +34,11 @@ Le module n'implémente que les commandes nécessaires à chaque niveau. Une com
 |---|---|---|
 | 1 | Premier commit | `status`, `add`, `commit`, `log` |
 | 2 | Branches | `branch`, `switch`, `switch -c` (ou `checkout -b`) |
-| 3 | Fusion | `merge` (avance rapide, puis fusion à trois) |
-| 4 | Conflit | `merge` avec conflit, résolution, `add`, `commit` |
-| 5 | Revenir en arrière | `restore`, `reset` (doux, mixte), `revert` |
-| 6 | Dépôt distant | `remote`, `push`, `fetch`, `pull` (avec un second graphe « origin ») |
-| 7 | Travail à plusieurs | `push -u`, pull request simulée, relecture, fusion |
+| 3 | Fusion (développé, exo 03) | `merge` (avance rapide, puis fusion à trois) |
+| 4 | Conflit (développé, exo 05) | `merge` avec conflit, résolution, `add`, `commit`, `merge --abort` |
+| 5 | Revenir en arrière (développé, exos 06 à 08) | `restore`, `reset` (doux, mixte), `revert` |
+| 6 | Dépôt distant (développé, exos 09 et 10) | `remote`, `push`, `fetch`, `pull` (avec les copies « origin/… » dans le graphe) |
+| 7 | Travail à plusieurs (développé, exo 11) | `push -u`, pull request simulée (`gh pr create`, `gh pr review --approve`, `gh pr merge`) |
 
 Les niveaux 5 et 6 peuvent être découpés plus tard. Le `rebase` n'est pas dans ce module : il arrive après les notions de base, en complément.
 
@@ -79,8 +80,11 @@ Le graphe cible est lu par le moteur, pas par l'élève. Une fois l'exo réussi,
 ## Format des exos
 
 - **Un fichier Markdown par exo**, rangé dans `exos/git/visuel/NN.md`. Le dossier `git` n'est pas un langage : il regroupe les exos Git.
-- **Sections** : `## Cours`, `## Énoncé`, `## Départ`, `## Cible`, `## Indice`, puis `## Solution` (suite de commandes, jamais envoyée à l'élève).
+- **Sections** : `## Cours` (3 phrases et un schéma avant/après), `## Énoncé` (la mission, en prose), `## Étapes`, `## Indice`, `## Départ`, puis `## Solution` (suite de commandes, jamais envoyée à l'élève).
+- **Étapes** : une ligne par étape, au format `- condition | texte | indice`. La condition est vérifiée par le moteur (par exemple `commit "Ajoute la page"`, `branche menu`, `meme main menu`, `propre`, `pr fusionnee`). Les étapes se cochent dans l'ordre ; l'indice affiché est celui de l'étape en cours.
+- **Lignes de script** : `edit <fichier>` modifie un fichier, `autre-dev push "<message>"` ajoute un commit sur origin. Elles ne servent qu'à préparer le départ des exos : l'élève ne peut pas les taper.
 - **Pas de section `## Tests` en JavaScript.** La vérification vient de la comparaison de graphes. Un exo reste donc lisible sans savoir coder.
+- **Validation avant fusion** : `node scripts/valider-exos.js` joue le départ puis la solution, et vérifie que toutes les étapes se cochent dans l'ordre. Une étape qui ne se coche jamais, une commande qui échoue ou une condition inconnue font échouer l'exo, avec le fichier, la section et la ligne.
 - **Solution obligatoire** : la suite de commandes doit mener du départ à la cible, sinon l'exo est refusé à l'import (voir [ecrire-un-exo.md](ecrire-un-exo.md)).
 - **Départ et cible en commandes** (version implémentée) : `## Départ` et `## Solution` contiennent des suites de commandes `git …`. Le graphe cible est calculé en jouant le départ puis la solution : pas besoin de l'écrire à la main. L'exemple ci-dessus, avec le graphe écrit, est une version antérieure.
 - **Exception à la règle « pas de `## Départ` »** de [ecrire-un-exo.md](ecrire-un-exo.md) : ici, le départ est un graphe, pas un éditeur vide. Cette règle devra être précisée si ce module est retenu.
@@ -104,3 +108,5 @@ Le graphe cible est lu par le moteur, pas par l'élève. Une fois l'exo réussi,
 2. **Dans le panneau d'exo.** Le module s'affiche comme les autres exos, avec un panneau `depot` déclaré dans l'en-tête (`panneaux: [enonce, depot]`). Même navigation, même brouillon, même bouton « Exo suivant ». La logique du graphe se teste hors du navigateur, sur le moteur seul.
 3. **L'ordre des branches n'est pas comparé.** Git ne donne aucun sens à cet ordre. On compare les commits (messages et liens parents), les étiquettes de branche (quel commit elles pointent) et l'emplacement de `HEAD`. Les hashs sont ignorés.
 4. **Un seul second graphe, « origin ».** Les niveaux 6 et 7 simulent un dépôt distant unique, avec `push` et `pull` entre les deux graphes. Pas de plusieurs utilisateurs : une pull request est une étiquette posée sur une branche, avec son état (ouverte ou fusionnée).
+5. **Un fichier modifié est une version, pas un état partagé.** Chaque commit garde la version de chaque fichier. Un conflit naît quand un même fichier a changé différemment des deux côtés. Le travail en cours (fichiers modifiés, zone de préparation) est global, pas propre à chaque branche : c'est une simplification.
+6. **Affichage** : arbre du plus ancien au plus récent, noir et blanc, rouge pour une erreur ou un conflit, vert pour un progrès ou une réussite. Les graphes « Ton dépôt » et « Ce qu'on attend » sont côte à côte, avec les écarts en pointillés.

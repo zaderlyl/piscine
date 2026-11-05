@@ -363,7 +363,8 @@ if (age >= 18) console.log("majeur");
 - **Méthode** : contraintes d'outil (exos seulement). **Résultat** : ce qui doit être obtenu (exos et paliers).
 - **Pas de section `## Départ`** : l'élève part toujours d'un éditeur vide (un fichier imposé par l'exo existe, mais vide). L'exo 00 contient seulement le cours.
 - `## Solution` n'est **jamais envoyée** aux élèves.
-- **À l'import** : validation de la structure, versionnage par hash, vérification que les tests passent sur la solution (sinon refus).
+- **Avant fusion** : `node scripts/valider-exos.js` vérifie le front matter, les sections et la solution. Pour les exos HTML, la section `## Tests` est exécutée sur la solution dans un DOM (jsdom). Les solutions PHP ne sont pas encore exécutées (il faut un interpréteur PHP). Pour les exos Git (`exos/git/visuel`), il n'y a pas de `## Tests` : le script joue le départ puis la solution dans le moteur Git, et vérifie que chaque étape de `## Étapes` se coche.
+- **À l'import** (à venir) : versionnage par hash, et même vérification que le script avant fusion.
 - Écrire au fil de l'eau, à partir d'un modèle vide ; **calibrer l'API de test avant la rédaction en masse**.
 
 ---
