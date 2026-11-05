@@ -4,14 +4,13 @@ import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { marked } from "https://esm.sh/marked@12.0.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
-import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
 import expand from "https://esm.sh/emmet@2.4.11";
 
 
 import { lireCode, chargerExo } from "./exo.js";
 import { injecterTests } from "./tests.js";
-
+import { executerPhp } from "./php.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -57,10 +56,7 @@ const types = {
 let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
-let moteurPhp = null;
-
 let testsExo = "";
-let sortiePhp = "";
 
 
 
@@ -274,54 +270,6 @@ if (new URLSearchParams(location.search).has("auteur")) {
   boutonSolution.textContent = "Charger la solution";
   boutonSolution.addEventListener("click", chargerSolution);
   onglets.append(boutonSolution);
-}
-
-
-
-async function testerPhp(sortie) {
-  const resultats = [];
-  const assert = (condition, message) =>
-    resultats.push({ ok: !!condition, message });
-  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  try {
-    await new AsyncFunction("assert", "sortie", testsExo)(assert, sortie);
-  } catch (erreur) {
-    resultats.push({
-      ok: false,
-      message: "Erreur dans les tests : " + erreur.message,
-    });
-  }
-  return resultats;
-}
-
-async function lancerPhp() {
-  panneauResultats.textContent = "Exécution en cours...";
-  sortiePhp = "";
-  moteurPhp = new PhpWeb();
-  moteurPhp.addEventListener("output", (e) => {
-    sortiePhp += e.detail;
-  });
-  moteurPhp.addEventListener("error", (e) => {
-    sortiePhp += e.detail;
-  });
-
-  await moteurPhp.binary;
-  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
-
-  const echecs = (await testerPhp(sortiePhp)).filter((r) => !r.ok);
-  panneauResultats.textContent =
-    sortiePhp +
-    "\n\n" +
-    (echecs.length
-      ? echecs.map((r) => "❌ " + r.message).join("\n")
-      : "✅ Tous les tests passent");
-
-  clearTimeout(minuteurTests);
-  if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(
-    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
-  );
-  apercu.src = urlApercu;
 }
 
 boutonPhp.textContent = "Exécuter PHP";
