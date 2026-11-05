@@ -10,6 +10,7 @@ import { injecterTests } from "./tests.js";
 import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { emmetTab } from "./emmet.js";
+import { afficherPanneauDoc } from "./doc.js";
 
 
 const apercu = document.getElementById("apercu");
@@ -159,24 +160,7 @@ for (const [nom, langage] of Object.entries(fichier)) {
 const exo = await chargerExo(FICHIER_EXO);
 testsExo = lireCode(exo["Tests"]);
 
-// Panneau doc : un onglet par section de l'exo
-function afficherDoc(nom) {
-  panneauEnonce.innerHTML = marked.parse((exo[nom] || "").trim());
-  for (const [n, bouton] of Object.entries(boutonsDoc)) {
-    bouton.classList.toggle("actif", n === nom);
-  }
-}
-
-for (const nom of SECTION_DOC) {
-  if (!exo[nom]) continue;
-  const bouton = document.createElement("button");
-  bouton.textContent = nom;
-  bouton.addEventListener("click", () => afficherDoc(nom));
-  docOnglet.append(bouton);
-  boutonsDoc[nom] = bouton;
-}
-
-afficherDoc("Énoncé");
+afficherPanneauDoc(exo, panneauEnonce, docOnglet);
 
 // remplace le code des editeurs par la solution de reference
 
