@@ -295,3 +295,18 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
 });
+
+
+async function lancherPhp() {
+  panneauResultats.textContent = "Execution en cours...";
+  const{sortie,resultat} = await executerPhp(
+    editeurs["index.php"].state.doc.toString(),
+  );
+  const echecs = resultat.filter((r) => !r.ok);
+  panneauResultats.textContent = sortie + "\n\n" + (echecs.length ? echecs.map((r) => " X " + r.message).join("\n") : "All test passed");
+
+  clearTimeout(minuteurTests);
+  if(urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL( new Blob ([sortie], {type: "text/html;charset=utf-8"}),);
+  apercu.src = urlApercu;
+}
