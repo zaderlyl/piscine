@@ -4,11 +4,13 @@
 // Deux façons de valider un exo, selon son module :
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
-// - les autres modules (HTML, PHP) : section « Tests » obligatoire. L'exécution des
-//   tests sur la solution n'est pas encore branchée (il faut un DOM, par exemple jsdom).
+// - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
+//   sur la solution HTML dans un DOM (jsdom). Une solution PHP n'est pas exécutée
+//   (il faut un interpréteur PHP) : le script l'signale par un avertissement.
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
@@ -108,23 +110,96 @@ function verifierFront(front) {
   return erreurs;
 }
 
-// Règle « tests » : Énoncé, Tests (avec du code) et au moins une Solution
-function verifierTests(sections) {
+// Contenu du premier bloc de code d'une section, avec la ligne de son premier contenu
+function blocDeCode(section) {
+  if (!section) return null;
+  const debut = section.corps.findIndex((l) => /^\s*```/.test(l.texte));
+  if (debut === -1) return null;
+  const fin = section.corps.findIndex((l, i) => i > debut && /^\s*```\s*$/.test(l.texte));
+  if (fin === -1) return null;
+  const lignes = section.corps.slice(debut + 1, fin);
+  return { code: lignes.map((l) => l.texte).join("\n"), ligne: section.corps[debut].ligne };
+}
+
+// Joue les tests d'un exo HTML sur sa solution, dans un DOM (jsdom).
+// Même rôle que construireTests() dans src/script.js : $, $$, assert, wait, click, type.
+const DELAI_TESTS = 5000; // ms, pour qu'un test qui attend ne bloque pas le script
+async function jouerTestsHtml(solution, tests) {
+  const dom = new JSDOM(solution, { runScripts: "outside-only", pretendToBeVisual: true });
+  const fenetre = dom.window;
+  const chargement = new Promise((resolve) => fenetre.addEventListener("load", resolve));
+  await chargement;
+  const script = `(async () => {
+    const resultats = [];
+    const $ = (selecteur) => document.querySelector(selecteur);
+    const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
+    const style = (selecteur, propriete) => {
+      const element = $(selecteur);
+      return element ? getComputedStyle(element)[propriete] : null;
+    };
+    const click = (selecteur) => $(selecteur)?.click();
+    const type = (selecteur, texte) => {
+      const element = $(selecteur);
+      if (!element) return;
+      element.value = texte;
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+    try {
+      ${tests}
+    } catch (erreur) {
+      resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
+    }
+    return resultats;
+  })()`;
+  try {
+    const delai = new Promise((_, rejet) => setTimeout(() => rejet(new Error("délai dépassé")), DELAI_TESTS));
+    return await Promise.race([fenetre.eval(script), delai]);
+  } finally {
+    fenetre.close();
+  }
+}
+
+// Règle « tests » : Énoncé, Tests (avec du code), une Solution, et les tests passent sur la solution
+async function verifierTests(sections) {
   const erreurs = [];
   const avertissements = [];
   for (const nom of ["Énoncé", "Tests"]) {
     if (!trouver(sections, nom)) erreurs.push({ section: "—", ligne: 1, message: `section « ${nom} » manquante` });
   }
   const tests = trouver(sections, "Tests");
-  if (tests && !tests.corps.some((l) => /^\s*```js/.test(l.texte))) {
-    erreurs.push({ section: "Tests", ligne: tests.ligne, message: "aucun bloc de code js dans la section" });
+  const codeTests = blocDeCode(tests);
+  if (tests && !codeTests) {
+    erreurs.push({ section: "Tests", ligne: tests.ligne, message: "aucun bloc de code dans la section" });
   }
   const solutions = sections.filter((s) => s.titre.startsWith("Solution:"));
   if (solutions.length === 0) {
     erreurs.push({ section: "—", ligne: 1, message: "aucune section « Solution: <fichier> »" });
   }
-  if (tests && solutions.length > 0) {
-    avertissements.push("tests non exécutés sur la solution (DOM pas encore branché)");
+  if (!codeTests || solutions.length === 0) return { erreurs, avertissements };
+
+  const solution = solutions.find((s) => s.titre === "Solution: index.html");
+  if (!solution) {
+    // Seule une solution HTML se joue dans jsdom ; PHP demande un interpréteur PHP
+    avertissements.push(`tests non exécutés : ${solutions.map((s) => s.titre).join(", ")} (il faut PHP sur la machine)`);
+    return { erreurs, avertissements };
+  }
+  const bloc = blocDeCode(solution);
+  if (!bloc) {
+    erreurs.push({ section: solution ? solution.titre : "Solution", ligne: solution ? solution.ligne : 1, message: "aucun bloc de code dans la solution" });
+    return { erreurs, avertissements };
+  }
+  let resultats;
+  try {
+    resultats = await jouerTestsHtml(bloc.code, codeTests.code);
+  } catch (erreur) {
+    erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `les tests n'ont pas pu tourner : ${erreur.message}` });
+    return { erreurs, avertissements };
+  }
+  for (const r of resultats) {
+    if (!r.ok) erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `test échoué sur la solution : ${r.message}` });
   }
   return { erreurs, avertissements };
 }
@@ -201,7 +276,7 @@ function verifierEtapes(sections, sansDepot) {
 }
 
 // Valide un fichier ; renvoie ses erreurs et ses avertissements
-function validerFichier(chemin) {
+async function validerFichier(chemin) {
   const texte = readFileSync(chemin, "utf8");
   const { front, sections } = lireFichier(texte);
   const erreurs = verifierFront(front);
@@ -213,7 +288,7 @@ function validerFichier(chemin) {
   if (module === "git/visuel") {
     erreurs.push(...verifierEtapes(sections, front.valeurs.depot === "aucun"));
   } else {
-    const resultat = verifierTests(sections);
+    const resultat = await verifierTests(sections);
     erreurs.push(...resultat.erreurs);
     avertissements.push(...resultat.avertissements);
   }
@@ -228,7 +303,7 @@ let avertissements = 0;
 
 for (const chemin of fichiers) {
   const rel = relative(process.cwd(), chemin).split(sep).join("/");
-  const r = validerFichier(chemin);
+  const r = await validerFichier(chemin);
   if (r.cours) {
     cours++;
     continue;
