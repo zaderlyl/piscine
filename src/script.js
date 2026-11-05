@@ -124,8 +124,7 @@ onglets.append(boutonPhp);
 // bouton "exo suvant" 
 
 const boutonSuivant = document.createElement("button");
-bouton.createElement("button");
-boutonSuivant.textContent = "Exo suivant ->";
+boutonSuivant.textContent = "Exo suivant →";
 boutonSuivant.classList.add("cache");
 onglets.append(boutonSuivant);
 
@@ -136,7 +135,7 @@ function afficherSuivant() {
 }
 
 boutonSuivant.addEventListener("click",()=> {
-  const param = new URLSearchParams(location.search);
+  const params = new URLSearchParams(location.search);
   params.set("exo", suivant);
   location.search = params.toString();
 });
@@ -182,8 +181,10 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
-  if (!echecs.length && e.data.resultats.length) marquerReussi(EXO);
-  afficherSuivant();
+  if (!echecs.length && e.data.resultats.length) {
+    marquerReussi(EXO);
+    afficherSuivant();
+  }
 });
 
 
@@ -201,12 +202,10 @@ async function lancerPhp() {
     (echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")
       : "✅ Tous les tests passent");
-    if (!echecs.length && resultats.length)
-      afficherSuivant();;
-    if(!echecs.length && resultats.length){
-      marquerReussi(EXO);
-      afficherSuivant();
-    }
+  if (!echecs.length && resultats.length) {
+    marquerReussi(EXO);
+    afficherSuivant();
+  }
 
   clearTimeout(minuteurTests);
   afficherDansApercu(apercu, sortie);
