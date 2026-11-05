@@ -1,15 +1,8 @@
-import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
-import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
-import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
-import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
-import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
-
-
 import { lireCode, chargerExo } from "./exo.js";
 import { assemblerPage, afficherDansApercu } from "./apercu.js";
 import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
-import { emmetTab } from "./emmet.js";
+import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 
 
@@ -36,18 +29,7 @@ const CLE_SUSPENDU = "piscine-apercyu-suspendu";
 
 const FICHIER_EXO = `../exos/${EXO}.md`;
 
-const editeurs = {};
-const zonesParNom = {};
-const boutons = {};
-
 const DELAI_SUSPENDU = 5000;
-
-const fichier = {
-  "index.html": html,
-  "style.css": css,
-  "script.js": javascript,
-  "index.php": php,
-};
 
 const types = {
   html: "text/html",
@@ -80,31 +62,6 @@ function afficherApercu() {
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
 
-const theme = EditorView.theme({
-  "&": {
-    height: "100%",
-  },
-});
-
-// mise a jour a chaque modif
-
-const ecoute = EditorView.updateListener.of((update) => {
-  if (update.docChanged) {
-    if (update.view !== editeurs["index.php"]) afficherApercu();
-    clearTimeout(minuteur);
-    minuteur = setTimeout(enregistrerBrouillon, 1000);
-  }
-});
-
-// visibilité et cache fichier
-
-function afficherFichier(nom) {
-  for (const n in fichier) {
-    zonesParNom[n].classList.toggle("cache", n !== nom);
-    boutons[n].classList.toggle("actif", n === nom);
-  }
-}
-
 function lireContenus() {
   const contenus = {};
   for (const nom in editeurs) {
@@ -117,32 +74,16 @@ function enregistrerBrouillon() {
   sauvegarderBrouillon(CLE_BROUILLON, lireContenus());
 }
 
-const brouillon = lireBrouillon(CLE_BROUILLON);
-
-for (const [nom, langage] of Object.entries(fichier)) {
-  const zone = document.createElement("div");
-  zone.className = "zone cache";
-  zones.append(zone);
-  zonesParNom[nom] = zone;
-
-  editeurs[nom] = new EditorView({
-    doc: brouillon[nom] || "",
-    extensions: [
-      basicSetup,
-      langage(),
-      theme,
-      ecoute,
-      ...(nom === "index.html" ? [emmetTab] : []),
-    ],
-    parent: zone,
-  });
-
-  const bouton = document.createElement("button");
-  bouton.textContent = nom;
-  bouton.addEventListener("click", () => afficherFichier(nom));
-  onglets.append(bouton);
-  boutons[nom] = bouton;
-}
+const { editeurs, afficherFichier } = creerEditeurs({
+  zones,
+  onglets,
+  brouillon: lireBrouillon(CLE_BROUILLON),
+  surChangement(vue) {
+    if (vue !== editeurs["index.php"]) afficherApercu();
+    clearTimeout(minuteur);
+    minuteur = setTimeout(enregistrerBrouillon, 1000);
+  },
+});
 
 const exo = await chargerExo(FICHIER_EXO);
 testsExo = lireCode(exo["Tests"]);
