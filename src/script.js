@@ -2,7 +2,6 @@ import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
-import { marked } from "https://esm.sh/marked@12.0.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
 
 
@@ -34,9 +33,6 @@ const FICHIER_EXO = `../exos/${EXO}.md`;
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
-const boutonsDoc = {};
-
-const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
 
 const DELAI_SUSPENDU = 5000;
 
