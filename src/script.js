@@ -10,6 +10,7 @@ import { lireCode, chargerExo } from "./exo.js";
 import { injecterTests } from "./tests.js";
 import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
+import { emmetTab } from "./emmet.js";
 
 
 const apercu = document.getElementById("apercu");

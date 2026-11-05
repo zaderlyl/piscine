@@ -15,7 +15,7 @@ const emmetDebloque = lireEmmet();
 
 export const emmetTab = EditorView.domEventHandlers({
   keydown(event, view){
-    if (event.key !== "tab" || event.shiftKey) return false;
+    if (event.key !== "Tab" || event.shiftKey) return false;
     const { from, to } = view.state.selection.main;
     if ( from !== to) return false;
 
