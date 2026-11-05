@@ -1,18 +1,13 @@
 #!/usr/bin/env bash
-# Génère le message du débrief hebdomadaire (affiché sur la sortie standard).
+# Génère le débrief hebdomadaire : un message Discord (embed) en JSON, sur la sortie standard.
 # Utilise la CLI gh (identifiée en local, ou via GH_TOKEN dans GitHub Actions).
-# Test en local, sans rien envoyer : bash scripts/debrief.sh
+# Aperçu en local, sans rien envoyer : bash scripts/debrief.sh | jq
 set -euo pipefail
 
 REPO="${GITHUB_REPOSITORY:-zaderlyl/piscine}"
 JOURS_PR=7       # PR sans relecture depuis plus de 7 jours (voir CONTRIBUTING.md)
 JOURS_ISSUE=14   # issue assignée sans nouvelle depuis plus de 14 jours
-
-# Fonctions jq : âge en jours et ligne de liste avec lien sans aperçu
-JQ_DEF='
-  def jours: ((now - (. | fromdateiso8601)) / 86400 | floor);
-  def ligne(date): "- [#\(.number) \(.title)](<\(.url)>) · \(date | jours) j";
-'
+MAX_FUSION=8     # nombre de PR fusionnées détaillées
 
 prs=$(gh pr list --repo "$REPO" --state open --limit 100 \
   --json number,title,url,author,createdAt,isDraft,reviewDecision)
@@ -21,46 +16,52 @@ issues=$(gh issue list --repo "$REPO" --state open --limit 100 \
 fusionnees=$(gh pr list --repo "$REPO" --state merged --limit 50 \
   --json number,title,url,mergedAt)
 
-attente=$(jq -r --argjson j "$JOURS_PR" "$JQ_DEF"'
-  .[] | select(.isDraft | not)
-      | select(.reviewDecision != "APPROVED")
-      | select((.createdAt | jours) > $j)
-      | ligne(.createdAt) + " (par \(.author.login))"' <<<"$prs")
+jq -n \
+  --argjson prs "$prs" --argjson issues "$issues" --argjson fusionnees "$fusionnees" \
+  --arg repo "$REPO" \
+  --argjson jpr "$JOURS_PR" --argjson jis "$JOURS_ISSUE" --argjson max "$MAX_FUSION" '
+  def jours: ((now - (. | fromdateiso8601)) / 86400 | floor);
+  def lien: "[#\(.number) \(.title)](<\(.url)>)";
+  # un champ Discord ne dépasse pas 1024 caractères : on coupe à la fin d une ligne
+  def borne: if length > 1000 then .[:1000] | sub("\n[^\n]*$"; "") + "\n…" else . end;
+  def champ($nom; $lignes):
+    if ($lignes | length) == 0 then empty
+    else {name: $nom, value: ($lignes | join("\n") | borne), inline: false} end;
+  def etat:
+    if .isDraft then "brouillon"
+    elif .reviewDecision == "APPROVED" then "approuvée"
+    elif .reviewDecision == "CHANGES_REQUESTED" then "modifications demandées"
+    elif (.createdAt | jours) > $jpr then "relecture à relancer"
+    else "en attente de relecture" end;
 
-silence=$(jq -r --argjson j "$JOURS_ISSUE" "$JQ_DEF"'
-  .[] | select(.assignees | length > 0)
-      | select((.updatedAt | jours) > $j)
-      | ligne(.updatedAt) + " (" + ([.assignees[].login] | join(", ")) + ")"' <<<"$issues")
-
-bloquees=$(jq -r "$JQ_DEF"'
-  .[] | select([.labels[].name] | index("statut: bloquée"))
-      | ligne(.updatedAt)' <<<"$issues")
-
-MAX_FUSION=8
-fusion=$(jq -r --argjson max "$MAX_FUSION" "$JQ_DEF"'
-  [.[] | select((.mergedAt | jours) <= 7)] as $liste
-  | ($liste[:$max][] | "- [#\(.number) \(.title)](<\(.url)>)"),
-    (if ($liste | length) > $max then "- … et \(($liste | length) - $max) autres" else empty end)' <<<"$fusionnees")
-
-section() { # section "titre" "contenu"
-  if [ -n "$2" ]; then printf '\n**%s**\n%s\n' "$1" "$2"; fi
-}
-
-message=$(
-  printf '📋 **Débrief Piscine**\n'
-  section "⏳ PR en attente de relecture (+${JOURS_PR} j)" "$attente"
-  section "💤 Issues sans nouvelle (+${JOURS_ISSUE} j) : à libérer ou à relancer" "$silence"
-  section "🚧 Issues bloquées" "$bloquees"
-  section "✅ Fusionné cette semaine" "$fusion"
-  if [ -z "$attente$silence$bloquees$fusion" ]; then
-    printf '\nRien à signaler cette semaine.\n'
-  fi
-  printf '\n🔗 Tableau : https://github.com/users/zaderlyl/projects/4\n'
-)
-
-# Discord refuse les messages de plus de 2000 caractères : on coupe à la fin d'une ligne
-if [ "${#message}" -gt 1900 ]; then
-  message="${message:0:1880}"
-  message="${message%$'\n'*}"$'\n…(message tronqué)'
-fi
-printf '%s\n' "$message"
+  ($fusionnees | map(select((.mergedAt | jours) <= 7))) as $recentes
+  | ($issues | map(select(.assignees | length == 0)) | length) as $sansAssigne
+  | ($issues | map(.assignees[].login) | group_by(.) | map("\(.[0]) : \(length)")) as $parPersonne
+  | {
+      username: "Piscine",
+      allowed_mentions: {parse: []},
+      embeds: [{
+        title: "Débrief hebdomadaire",
+        url: "https://github.com/\($repo)",
+        color: 616922,
+        description: "Situation au \(now | strftime("%d/%m/%Y")) : \($prs | length) pull requests ouvertes, \($issues | length) issues ouvertes, \($recentes | length) pull requests fusionnées sur 7 jours.",
+        fields: [
+          champ("Pull requests ouvertes";
+            $prs | map("\(lien) · \(.author.login) · \(.createdAt | jours) j · \(etat)")),
+          champ("Issues sans activité depuis plus de \($jis) jours";
+            $issues
+            | map(select((.assignees | length > 0) and ((.updatedAt | jours) > $jis))
+                  | "\(lien) · \(.assignees | map(.login) | join(", ")) · \(.updatedAt | jours) j")),
+          champ("Issues bloquées";
+            $issues | map(select([.labels[].name] | index("statut: bloquée")) | lien)),
+          champ("Fusionnées ces 7 derniers jours";
+            ($recentes[:$max] | map(lien))
+            + (if ($recentes | length) > $max then ["et \(($recentes | length) - $max) autres"] else [] end)),
+          {name: "Répartition des issues ouvertes",
+           value: (($parPersonne + (if $sansAssigne > 0 then ["non assignées : \($sansAssigne)"] else [] end)) | join("  ·  ")),
+           inline: false}
+        ],
+        footer: {text: "\($repo) · débrief automatique"},
+        timestamp: (now | todate)
+      }]
+    }'
