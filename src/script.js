@@ -134,48 +134,6 @@ function enregistrerBrouillon() {
 }
 const brouillon = lireBrouillon(CLE_BROUILLON);
 
-// abreviation lock au start puis deblocable
-function lireEmmet() {
-  try {
-    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [];
-  } catch {
-    return [];
-  }
-}
-
-const emmetDebloque = lireEmmet();
-
-// raccourcis clavier pour Emmet
-const emmetTab = EditorView.domEventHandlers({
-  keydown(event, view) {
-    if (event.key !== "Tab" || event.shiftKey) return false;
-    const { from, to } = view.state.selection.main;
-    if (from !== to) return false;
-
-    const ligne = view.state.doc.lineAt(from);
-    const abreviation = ligne.text
-      .slice(0, from - ligne.from)
-      .match(/\S+$/)?.[0];
-    if (!abreviation) return false;
-    if (!emmetDebloque.includes(abreviation)) return false;
-
-    let resultat;
-    try {
-      resultat = expand(abreviation);
-    } catch {
-      return false;
-    }
-
-    event.preventDefault();
-    const debut = from - abreviation.length;
-    view.dispatch({
-      changes: { from: debut, to: from, insert: resultat },
-      selection: { anchor: debut + resultat.length },
-    });
-    return true;
-  },
-});
-
 for (const [nom, langage] of Object.entries(fichier)) {
   const zone = document.createElement("div");
   zone.className = "zone cache";
