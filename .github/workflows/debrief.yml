@@ -31,7 +31,16 @@ jobs:
             echo "Le secret DISCORD_WEBHOOK est vide ou absent." >&2
             exit 1
           fi
+          # enlève espaces, retours à la ligne et guillemets laissés par le copier-coller
+          URL=$(printf '%s' "$DISCORD_WEBHOOK" | tr -d '[:space:]"')
+          case "$URL" in
+            https://discord.com/api/webhooks/*) ;;
+            *)
+              echo "Le secret DISCORD_WEBHOOK doit commencer par https://discord.com/api/webhooks/" >&2
+              exit 1
+              ;;
+          esac
           jq -n --rawfile contenu message.txt '{content: $contenu}' \
             | curl --fail --silent --show-error \
                 -H "Content-Type: application/json" \
-                -d @- "$DISCORD_WEBHOOK"
+                -d @- "$URL"
