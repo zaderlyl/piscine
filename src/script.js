@@ -6,14 +6,14 @@ import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
 
 
 import { lireCode, chargerExo } from "./exo.js";
-import { injecterTests } from "./tests.js";
+import { assemblerPage, afficherDansApercu } from "./apercu.js";
 import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { emmetTab } from "./emmet.js";
 import { afficherPanneauDoc } from "./doc.js";
 
 
-import { analyserScript, afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
+import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
 
 
@@ -57,7 +57,6 @@ const types = {
 
 let minuteurTests = null;
 let minuteur = null;
-let urlApercu = null;
 let testsExo = "";
 
 
@@ -72,36 +71,11 @@ function arreterApercu() {
 
 
 
-// Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
+// Affiche index.html dans l'iframe
 function afficherApercu() {
-  let code = editeurs["index.html"].state.doc.toString();
-  let analyse = analyserScript("");
-
-  for (const nom of Object.keys(fichier)) {
-    if (nom === "index.html") continue;
-    const contenu = editeurs[nom].state.doc.toString();
-    const extension = nom.split(".").pop();
-    const echapper = nom.replace(".", "\\.");
-
-    if (extension === "css") {
-      const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
-      code = code.replace(lien, () => `<style>${contenu}</style>`);
-    } else if (extension === "js") {
-      analyse = analyserScript(contenu);
-      const balise = new RegExp(
-        `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
-        "g",
-      );
-      code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
-    }
-  }
+  const { code, analyse } = assemblerPage(lireContenus(), testsExo);
   afficherVariables(analyse);
-  code = injecterTests(code, testsExo);
-  if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(
-    new Blob([code], { type: "text/html;charset=utf-8" }),
-  );
-  apercu.src = urlApercu;
+  afficherDansApercu(apercu, code);
   clearTimeout(minuteurTests);
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
 }
@@ -131,13 +105,18 @@ function afficherFichier(nom) {
   }
 }
 
-function enregistrerBrouillon() {
+function lireContenus() {
   const contenus = {};
   for (const nom in editeurs) {
     contenus[nom] = editeurs[nom].state.doc.toString();
   }
-  sauvegarderBrouillon(CLE_BROUILLON, contenus);
+  return contenus;
 }
+
+function enregistrerBrouillon() {
+  sauvegarderBrouillon(CLE_BROUILLON, lireContenus());
+}
+
 const brouillon = lireBrouillon(CLE_BROUILLON);
 
 for (const [nom, langage] of Object.entries(fichier)) {
@@ -256,9 +235,5 @@ async function lancerPhp() {
       : "✅ Tous les tests passent");
 
   clearTimeout(minuteurTests);
-  if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(
-    new Blob([sortie], { type: "text/html;charset=utf-8" }),
-  );
-  apercu.src = urlApercu;
+  afficherDansApercu(apercu, sortie);
 }
