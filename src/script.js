@@ -2,11 +2,16 @@ import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
-import { marked } from "https://esm.sh/marked@12.0.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
-import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
-import expand from "https://esm.sh/emmet@2.4.11";
+
+import { lireCode, chargerExo } from "./exo.js";
+import { injecterTests } from "./tests.js";
+import { executerPhp } from "./php.js";
+import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
+import { emmetTab } from "./emmet.js";
+import { afficherPanneauDoc } from "./doc.js";
+
 
 import { analyserScript, afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -28,21 +33,12 @@ const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercyu-suspendu";
-const CLE_EMMET = "piscine-emmet";
 
-const exoDemande = new URLSearchParams(location.search).get("exo");
-
-
-const FICHIER_EXO = /^[a-z]+\/[a-z]+\/\d+$/.test(exoDemande || "")
-  ? `../exos/${exoDemande}.md`
-  : "../exos/html/vanilla/04.md";
+const FICHIER_EXO = `../exos/${EXO}.md`;
 
 const editeurs = {};
 const zonesParNom = {};
 const boutons = {};
-const boutonsDoc = {};
-
-const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
 
 const DELAI_SUSPENDU = 5000;
 
@@ -62,78 +58,19 @@ const types = {
 let minuteurTests = null;
 let minuteur = null;
 let urlApercu = null;
-let moteurPhp = null;
-
 let testsExo = "";
-let sortiePhp = "";
 
-// decoupage fichier exo en section -> ("##Titre")
 
-function lireExo(texte) {
-  const section = {};
-  let courant = null;
-  for (const ligne of texte.split("\n")) {
-    const titre = ligne.match(/^##\s*(.*)/);
-    if (titre) {
-      courant = titre[1].trim();
-      section[courant] = "";
-    } else if (courant) {
-      section[courant] += ligne + "\n";
-    }
-  }
-  return section;
-}
-
-// execution des resultat de page
-
-function construireTests(tests) {
-  return `<script>
-    window.addEventListener("load", async () => {
-      const resultats = [];
-      const $ = (selecteur) => document.querySelector(selecteur);
-      const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
-      const style = (selecteur, propriete) => {
-        const element = $(selecteur);
-        return element ? getComputedStyle(element)[propriete] : null;
-      };
-      const click = (selecteur) => $(selecteur)?.click();
-      const type = (selecteur, texte) => {
-        const element = $(selecteur);
-        if (!element) return;
-        element.value = texte;
-        element.dispatchEvent(new Event("input", { bubbles: true }));
-        element.dispatchEvent(new Event("change", { bubbles: true }));
-      };
-      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const assert = (condition, message) => resultats.push({ ok: !!condition, message });
-      try {
-        ${tests}
-      } catch (erreur) {
-        resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
-      }
-      parent.postMessage({ type: "tests", resultats }, "*");
-    });
-  <\/script>`;
-}
 
 function arreterApercu() {
-  sauvegarderBrouillon();
+  enregistrerBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
   location.reload();
 }
 
-// Insère le code de test au début du document (après <head>, <body> ou le doctype),
-// car il serait ignoré après un </frameset>
-function injecterTests(code, tests) {
-  const bloc = construireTests(tests);
-  const ouverture =
-    code.match(/<head(\s[^>]*)?>/i) ||
-    code.match(/<body(\s[^>]*)?>/i) ||
-    code.match(/^\s*<!doctype[^>]*>/i);
-  if (!ouverture) return bloc + code;
-  const fin = ouverture.index + ouverture[0].length;
-  return code.slice(0, fin) + bloc + code.slice(fin);
-}
+
+
+
 
 // Affiche index.html dans l'iframe, en injectant le CSS et le JS dans la page
 function afficherApercu() {
@@ -181,7 +118,7 @@ const ecoute = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
     if (update.view !== editeurs["index.php"]) afficherApercu();
     clearTimeout(minuteur);
-    minuteur = setTimeout(sauvegarderBrouillon, 1000);
+    minuteur = setTimeout(enregistrerBrouillon, 1000);
   }
 });
 
@@ -194,69 +131,14 @@ function afficherFichier(nom) {
   }
 }
 
-function lireBrouillon() {
-  try {
-    return JSON.parse(localStorage.getItem(CLE_BROUILLON)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function sauvegarderBrouillon() {
-  const brouillon = {};
+function enregistrerBrouillon() {
+  const contenus = {};
   for (const nom in editeurs) {
-    brouillon[nom] = editeurs[nom].state.doc.toString();
+    contenus[nom] = editeurs[nom].state.doc.toString();
   }
-  try {
-    localStorage.setItem(CLE_BROUILLON, JSON.stringify(brouillon));
-  } catch {
-    console.error("Erreur lors de la sauvegarde du brouillon");
-  }
+  sauvegarderBrouillon(CLE_BROUILLON, contenus);
 }
-
-const brouillon = lireBrouillon();
-
-// abreviation lock au start puis deblocable
-function lireEmmet() {
-  try {
-    return JSON.parse(localStorage.getItem(CLE_EMMET)) || [];
-  } catch {
-    return [];
-  }
-}
-
-const emmetDebloque = lireEmmet();
-
-// raccourcis clavier pour Emmet
-const emmetTab = EditorView.domEventHandlers({
-  keydown(event, view) {
-    if (event.key !== "Tab" || event.shiftKey) return false;
-    const { from, to } = view.state.selection.main;
-    if (from !== to) return false;
-
-    const ligne = view.state.doc.lineAt(from);
-    const abreviation = ligne.text
-      .slice(0, from - ligne.from)
-      .match(/\S+$/)?.[0];
-    if (!abreviation) return false;
-    if (!emmetDebloque.includes(abreviation)) return false;
-
-    let resultat;
-    try {
-      resultat = expand(abreviation);
-    } catch {
-      return false;
-    }
-
-    event.preventDefault();
-    const debut = from - abreviation.length;
-    view.dispatch({
-      changes: { from: debut, to: from, insert: resultat },
-      selection: { anchor: debut + resultat.length },
-    });
-    return true;
-  },
-});
+const brouillon = lireBrouillon(CLE_BROUILLON);
 
 for (const [nom, langage] of Object.entries(fichier)) {
   const zone = document.createElement("div");
@@ -283,35 +165,10 @@ for (const [nom, langage] of Object.entries(fichier)) {
   boutons[nom] = bouton;
 }
 
-// recuperer cotenu d'un section
-function lireCode(section) {
-  const bloc = section.match(/```(\w+)?\n([\s\S]*?)```/);
-  return bloc ? bloc[2] : "";
-}
-
-const reponse = await fetch(FICHIER_EXO);
-// les fins de ligne Windows (CRLF) cassent la lecture des blocs de code : on les remplace par LF
-const exo = lireExo((await reponse.text()).replace(/\r\n/g, "\n"));
+const exo = await chargerExo(FICHIER_EXO);
 testsExo = lireCode(exo["Tests"]);
 
-// Panneau doc : un onglet par section de l'exo
-function afficherDoc(nom) {
-  panneauEnonce.innerHTML = marked.parse((exo[nom] || "").trim());
-  for (const [n, bouton] of Object.entries(boutonsDoc)) {
-    bouton.classList.toggle("actif", n === nom);
-  }
-}
-
-for (const nom of SECTION_DOC) {
-  if (!exo[nom]) continue;
-  const bouton = document.createElement("button");
-  bouton.textContent = nom;
-  bouton.addEventListener("click", () => afficherDoc(nom));
-  docOnglet.append(bouton);
-  boutonsDoc[nom] = bouton;
-}
-
-afficherDoc("Énoncé");
+afficherPanneauDoc(exo, panneauEnonce, docOnglet);
 
 // remplace le code des editeurs par la solution de reference
 
@@ -337,54 +194,6 @@ if (new URLSearchParams(location.search).has("auteur")) {
   boutonSolution.textContent = "Charger la solution";
   boutonSolution.addEventListener("click", chargerSolution);
   onglets.append(boutonSolution);
-}
-
-
-
-async function testerPhp(sortie) {
-  const resultats = [];
-  const assert = (condition, message) =>
-    resultats.push({ ok: !!condition, message });
-  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  try {
-    await new AsyncFunction("assert", "sortie", testsExo)(assert, sortie);
-  } catch (erreur) {
-    resultats.push({
-      ok: false,
-      message: "Erreur dans les tests : " + erreur.message,
-    });
-  }
-  return resultats;
-}
-
-async function lancerPhp() {
-  panneauResultats.textContent = "Exécution en cours...";
-  sortiePhp = "";
-  moteurPhp = new PhpWeb();
-  moteurPhp.addEventListener("output", (e) => {
-    sortiePhp += e.detail;
-  });
-  moteurPhp.addEventListener("error", (e) => {
-    sortiePhp += e.detail;
-  });
-
-  await moteurPhp.binary;
-  await moteurPhp.run(editeurs["index.php"].state.doc.toString());
-
-  const echecs = (await testerPhp(sortiePhp)).filter((r) => !r.ok);
-  panneauResultats.textContent =
-    sortiePhp +
-    "\n\n" +
-    (echecs.length
-      ? echecs.map((r) => "❌ " + r.message).join("\n")
-      : "✅ Tous les tests passent");
-
-  clearTimeout(minuteurTests);
-  if (urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL(
-    new Blob([sortiePhp], { type: "text/html;charset=utf-8" }),
-  );
-  apercu.src = urlApercu;
 }
 
 boutonPhp.textContent = "Exécuter PHP";
@@ -429,3 +238,27 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
 });
+
+
+async function lancerPhp() {
+  panneauResultats.textContent = "Exécution en cours...";
+  const { sortie, resultats } = await executerPhp(
+    editeurs["index.php"].state.doc.toString(),
+    testsExo,
+  );
+
+  const echecs = resultats.filter((r) => !r.ok);
+  panneauResultats.textContent =
+    sortie +
+    "\n\n" +
+    (echecs.length
+      ? echecs.map((r) => "❌ " + r.message).join("\n")
+      : "✅ Tous les tests passent");
+
+  clearTimeout(minuteurTests);
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(
+    new Blob([sortie], { type: "text/html;charset=utf-8" }),
+  );
+  apercu.src = urlApercu;
+}
