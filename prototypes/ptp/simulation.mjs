@@ -1,185 +1,118 @@
-// Simulateur du tirage PTP (README §6 et §19). Sans interface, sans dépendance.
-// Lancer : node prototypes/ptp/simulation.mjs [graine]
-// Même graine = même résultat, pour comparer deux réglages.
+// Simulateur du tirage PTP : lancement en ligne de commande.
+// node prototypes/ptp/simulation.mjs [scénario] [graine] [--eleves fichier.json] [--detail]
+// node prototypes/ptp/simulation.mjs --liste
+// Même scénario + même graine = même résultat.
 
-// ---------- Paramètres : à régler ici ----------
-const PARAMETRES = {
-  nbEleves: 30,
-  nbAnnees: 3,            // les élèves sont répartis sur les années 1 à 3
-  nbTicks: 3000,          // une unité de temps = un tick
-  probaConnexion: 0.6,    // chance qu'un élève soit connecté à un tick donné
-  probaValidation: 0.05,  // chance qu'un élève connecté valide un exo à un tick
-  partExosNonPtp: 0.15,   // part des exos marqués « ptp: non » (jamais tirés)
-  // Chance de déclenchement, indexée par le nombre d'exos validés depuis le dernier PTP
-  probaDeclenchement: [0, 0, 0, 0.10, 0.20, 0.35, 0.60, 1.00],
-  plafond: 7,             // à partir de ce compteur, déclenchement garanti
-  dureeEchange: 3,        // ticks pendant lesquels élève et correcteur sont occupés
-  bonusAutreAnnee: 50,    // bonus (en ticks d'ancienneté) pour un correcteur d'une autre année
-  penalitePaire: 200,     // pénalité si cette paire s'est déjà vue récemment
-  fenetrePaire: 300,      // « récemment » : nombre de ticks
-};
+import { readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { simuler, mesurer } from "./moteur.mjs";
 
-// ---------- Générateur aléatoire seedé (mulberry32) ----------
-function creerGenerateur(graine) {
-  let etat = graine >>> 0;
-  return () => {
-    etat = (etat + 0x6d2b79f5) >>> 0;
-    let t = etat;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+const ici = dirname(fileURLToPath(import.meta.url));
+const dossierScenarios = join(ici, "scenarios");
 
-// ---------- Modèle ----------
-function creerEleves(p, rng) {
-  return Array.from({ length: p.nbEleves }, (_, i) => ({
-    id: i,
-    nom: `Élève ${String(i + 1).padStart(2, "0")}`,
-    annee: (i % p.nbAnnees) + 1,
-    connecte: false,
-    occupeJusquA: -1,        // tick jusqu'auquel l'élève est en échange
-    dernierCorrection: -p.nbTicks, // jamais corrigé : très ancien
-    compteur: 0,             // exos validés depuis le dernier PTP reçu
-    validés: 0,
-    echangesRecus: 0,
-    corrections: 0,
-    validesAuDernierEchange: null,
-    ecartMin: Infinity,      // plus petit nombre d'exos validés entre deux échanges reçus
-  }));
-}
-
-function creerStats() {
-  return { tirages: 0, reportes: 0, paires: new Map() };
-}
-
-// Choisit le correcteur : libre, connecté, pas soi-même, le moins récemment sollicité d'abord.
-function choisirCorrecteur(eleve, eleves, p, tick, stats, rng) {
-  let meilleur = null;
-  let meilleurScore = -Infinity;
-  for (const c of eleves) {
-    if (c === eleve || !c.connecte || c.occupeJusquA > tick) continue;
-    const cle = [eleve.id, c.id].sort((a, b) => a - b).join("-");
-    const derniere = stats.paires.get(cle);
-    const pairRecente = derniere !== undefined && tick - derniere < p.fenetrePaire;
-    const score =
-      (tick - c.dernierCorrection) +
-      (c.annee !== eleve.annee ? p.bonusAutreAnnee : 0) -
-      (pairRecente ? p.penalitePaire : 0) +
-      rng() * 10; // petit bruit pour départager les ex æquo
-    if (score > meilleurScore) {
-      meilleurScore = score;
-      meilleur = c;
-    }
+export function chargerScenario(nom) {
+  try {
+    return JSON.parse(readFileSync(join(dossierScenarios, `${nom}.json`), "utf8"));
+  } catch {
+    throw new Error(`Scénario inconnu : « ${nom} ». Voir --liste.`);
   }
-  return meilleur;
 }
 
-// Un élève vient de valider un exo : compteur, déclenchement, éventuel échange.
-function valider(eleve, eleves, p, tick, stats, rng) {
-  eleve.validés++;
-  eleve.compteur++;
-  if (rng() < p.partExosNonPtp) return; // exo « ptp: non » : pas d'échange possible
+export function listerScenarios() {
+  return readdirSync(dossierScenarios)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""));
+}
 
-  const index = Math.min(eleve.compteur, p.plafond);
-  const proba = index >= p.plafond ? 1 : p.probaDeclenchement[index];
-  if (rng() >= proba) return;
+const pct = (x) => (Number.isFinite(x) ? `${Math.round(x * 100)} %` : "—");
+const num = (x, d = 1) => (Number.isFinite(x) ? x.toFixed(d) : "—");
 
-  stats.tirages++;
-  const correcteur = choisirCorrecteur(eleve, eleves, p, tick, stats, rng);
-  if (!correcteur) {
-    stats.reportes++; // personne de libre : le compteur reste, l'élève n'attend pas
+function afficherDetail(r) {
+  const larg = [22, 6, 8, 8, 12, 10];
+  const ligne = (c) => c.map((x, i) => String(x).padEnd(larg[i])).join(" ").trimEnd();
+  console.log(ligne(["Élève", "Année", "Validés", "Reçus", "Corrections", "Présent"]));
+  console.log("-".repeat(70));
+  for (const e of r.eleves) {
+    const present = e.premiereArrivee === null ? "absent" : `${e.minutesPresent} min`;
+    console.log(ligne([e.nom, e.annee, e.valides, e.echangesRecus, e.corrections, present]));
+  }
+  console.log();
+}
+
+function afficherBilan(nom, description, r, m) {
+  const p = r.parametres;
+  console.log(`Scénario « ${nom} », graine ${r.graine}`);
+  if (description) console.log(description);
+  console.log(
+    `${r.eleves.length} élèves, ${p.sessions.length} session(s), 1 tick = 1 minute. ` +
+      `Plafond ${p.plafond}, échange ${p.dureeEchange.join(" à ")} min, alerte à ${p.delaiAlerte} min.\n`,
+  );
+  const repos = p.probaDeclenchement.findIndex((x) => x > 0);
+  const lignes = [
+    ["Présence", `${m.elevesVenus} venus, ${m.elevesAbsents} absents`],
+    ["Exos validés", m.exosValides],
+    ["Demandes d'échange", `${m.demandes} (dont ${m.demandesPendantPic} en fin de séance)`],
+    ["Échanges entre élèves", m.echangesEntrePairs],
+    ["Échanges pris par le prof", m.echangesParProf],
+    [
+      "Appels du prof",
+      `${m.appelsProf.personneDeLibre} personne de libre, ${m.appelsProf.tiragesEpuises} tirages épuisés, ` +
+        `${m.appelsProf.correcteurAbsent} correcteur absent`,
+    ],
+    ["Demandes non terminées", m.demandesNonTerminees],
+    ["Tirages reportés (minutes)", m.tiragesReportes],
+    ["Confirmations échouées", m.confirmationsEchouees],
+    [
+      "Attente d'un correcteur",
+      `moy. ${num(m.attenteCorrecteur.moyenne)} min, 90 % sous ${m.attenteCorrecteur.p90} min, max ${m.attenteCorrecteur.max} min`,
+    ],
+    [
+      "Déclenchement → échange",
+      `moy. ${num(m.delaiDeclenchementEchange.moyenne)} min, max ${m.delaiDeclenchementEchange.max} min`,
+    ],
+    [
+      "Exos entre deux échanges",
+      `min ${m.exosEntreDeuxEchanges.min} (repos attendu ≥ ${repos}), moy. ${num(m.exosEntreDeuxEchanges.moyenne)}, max ${m.exosEntreDeuxEchanges.max}`,
+    ],
+    ["Compteur max à la demande", `${m.compteurMaxADemande} (plafond ${p.plafond})`],
+    ["Premier échange", `${num(m.delaiPremierEchange, 0)} min après l'arrivée, en moyenne`],
+    [
+      "Corrections par élève venu",
+      `de ${m.corrections.min} à ${m.corrections.max}, écart type ${num(m.corrections.ecartType, 2)}`,
+    ],
+    ["Paires", `${m.pairesDistinctes} distinctes, la plus répétée ${m.paireMax} fois`],
+    ["Échanges inter-années", pct(m.partInterAnnees)],
+    ["Élèves oubliés", m.elevesOublies],
+  ];
+  const largeur = Math.max(...lignes.map(([k]) => k.length));
+  for (const [k, v] of lignes) console.log(`${k.padEnd(largeur)} : ${v}`);
+
+  if (m.exosEntreDeuxEchanges.min < repos) console.log(`\n⚠️  Repos de ${repos} exos non respecté.`);
+  if (m.elevesOublies > 0) console.log("\n⚠️  Des élèves actifs n'ont reçu aucun échange.");
+}
+
+function main(argv) {
+  const args = argv.filter((a, i) => !a.startsWith("--") && argv[i - 1] !== "--eleves");
+  if (argv.includes("--liste")) {
+    for (const nom of listerScenarios()) console.log(`${nom.padEnd(22)} ${chargerScenario(nom).description ?? ""}`);
     return;
   }
-  if (correcteur === eleve) throw new Error("Un élève ne peut pas se corriger lui-même");
-
-  // Échange : le compteur de l'élève repart de zéro
-  if (eleve.validesAuDernierEchange !== null) {
-    eleve.ecartMin = Math.min(eleve.ecartMin, eleve.validés - eleve.validesAuDernierEchange);
-  }
-  eleve.validesAuDernierEchange = eleve.validés;
-  eleve.compteur = 0;
-  eleve.echangesRecus++;
-  eleve.occupeJusquA = tick + p.dureeEchange;
-  correcteur.occupeJusquA = tick + p.dureeEchange;
-  correcteur.corrections++;
-  correcteur.dernierCorrection = tick;
-
-  const cle = [eleve.id, correcteur.id].sort((a, b) => a - b).join("-");
-  stats.paires.set(cle, tick);
+  const nom = args[0] ?? "normal";
+  const graine = Number(args[1] ?? 42);
+  const iFichier = argv.indexOf("--eleves");
+  const donnees = iFichier >= 0 ? JSON.parse(readFileSync(argv[iFichier + 1], "utf8")) : null;
+  const { description, ...parametres } = chargerScenario(nom);
+  const r = simuler(parametres, graine, donnees);
+  if (argv.includes("--detail")) afficherDetail(r);
+  afficherBilan(nom, description, r, mesurer(r));
 }
 
-// ---------- Simulation ----------
-function simuler(p, graine) {
-  const rng = creerGenerateur(graine);
-  const eleves = creerEleves(p, rng);
-  const stats = creerStats();
-
-  for (let tick = 0; tick < p.nbTicks; tick++) {
-    for (const e of eleves) e.connecte = rng() < p.probaConnexion;
-    for (const e of eleves) {
-      if (!e.connecte || e.occupeJusquA > tick) continue;
-      if (rng() < p.probaValidation) valider(e, eleves, p, tick, stats, rng);
-    }
-  }
-  return { eleves, stats };
-}
-
-// ---------- Affichage ----------
-const largeurs = [12, 6, 8, 8, 12, 14];
-const entetes = ["Élève", "Année", "Validés", "Reçus", "Corrections", "Écart corr."];
-
-function ligne(cellules) {
-  return cellules.map((c, i) => String(c).padEnd(largeurs[i])).join(" ").trimEnd();
-}
-
-function afficher(p, graine, { eleves, stats }) {
-  const moyenneCorrections = eleves.reduce((s, e) => s + e.corrections, 0) / eleves.length;
-  const totalEchanges = eleves.reduce((s, e) => s + e.echangesRecus, 0);
-  const totalCorrections = eleves.reduce((s, e) => s + e.corrections, 0);
-  if (totalEchanges !== totalCorrections) throw new Error("Incohérence : échanges reçus ≠ corrections");
-
-  console.log(`Simulation PTP : ${p.nbEleves} élèves, ${p.nbTicks} ticks, graine ${graine}`);
-  console.log(`Plafond ${p.plafond} · repos : 0 % en dessous de 3 · correction ${p.dureeEchange} ticks\n`);
-  console.log(ligne(entetes));
-  console.log("-".repeat(largeurs.reduce((s, l) => s + l + 1, 0) - 1));
-  for (const e of eleves) {
-    const ecart = e.corrections - moyenneCorrections;
-    console.log(
-      ligne([
-        e.nom,
-        e.annee,
-        e.validés,
-        e.echangesRecus,
-        e.corrections,
-        (ecart >= 0 ? "+" : "") + ecart.toFixed(1),
-      ]),
-    );
-  }
-
-  const sansEchange = eleves.filter((e) => e.echangesRecus === 0).length;
-  const ecartMin = Math.min(...eleves.map((e) => e.ecartMin));
-
-  console.log("\nBilan");
-  console.log(`- Tirages déclenchés : ${stats.tirages}`);
-  console.log(`- Échanges réalisés : ${totalEchanges}`);
-  console.log(`- Tirages reportés (personne de libre) : ${stats.reportes}`);
-  console.log(`- Élèves sans aucun échange reçu : ${sansEchange}`);
-  console.log(
-    `- Plus petit nombre d'exos validés entre deux échanges reçus : ${Number.isFinite(ecartMin) ? ecartMin : "—"} (repos attendu : ≥ 3)`,
-  );
-  console.log(`- Paires distinctes ayant eu au moins un échange : ${stats.paires.size}`);
-  console.log(`- Écart type des corrections : ${ecartType(eleves.map((e) => e.corrections)).toFixed(2)}`);
-
-  if (Number.isFinite(ecartMin) && ecartMin < 3) {
-    console.log("\n⚠️  Le repos de 3 exos n'est pas respecté : vérifie les paramètres.");
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  try {
+    main(process.argv.slice(2));
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
   }
 }
-
-function ecartType(valeurs) {
-  const moyenne = valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
-  return Math.sqrt(valeurs.reduce((s, v) => s + (v - moyenne) ** 2, 0) / valeurs.length);
-}
-
-const graine = Number(process.argv[2] ?? 42);
-afficher(PARAMETRES, graine, simuler(PARAMETRES, graine));

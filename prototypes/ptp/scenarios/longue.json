@@ -1,0 +1,15 @@
+{
+  "description": "10 séances de 4 h à la suite, pour l'équité sur la durée",
+  "sessions": [
+    { "salle": "A102", "groupe": 0, "debut": 0, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 1440, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 2880, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 4320, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 5760, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 7200, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 8640, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 10080, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 11520, "duree": 240 },
+    { "salle": "A102", "groupe": 0, "debut": 12960, "duree": 240 }
+  ]
+}

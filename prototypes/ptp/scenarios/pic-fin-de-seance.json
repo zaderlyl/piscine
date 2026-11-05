@@ -1,0 +1,1 @@
+{ "description": "Beaucoup de validations dans les 45 dernières minutes", "pic": { "dernieresMinutes": 45, "facteur": 4 } }

@@ -1,0 +1,8 @@
+{
+  "description": "60 élèves dans deux salles ouvertes en même temps, tirage commun",
+  "nbEleves": 60,
+  "sessions": [
+    { "salle": "A102", "groupe": 0, "debut": 0, "duree": 240 },
+    { "salle": "B204", "groupe": 1, "debut": 0, "duree": 240 }
+  ]
+}

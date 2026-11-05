@@ -1,6 +1,8 @@
 # Simulateur PTP : logique, problèmes et plan
 
-Document de travail pour l'issue #23 (simulateur de tirage PTP). Il décrit ce que fait le prototype actuel (`prototypes/ptp/simulation.mjs`, commit `2f6b018`), ce qui manque, et comment le compléter. Sources : README §6 (échanges PTP), §8 (sessions et présence), §19 (pilote et simulation).
+Document de travail pour l'issue #23 (simulateur de tirage PTP). Il décrit ce que fait le prototype actuel (`prototypes/ptp/simulation.mjs`, commit `2f6b018`), ce qui manque, et comment le compléter.
+
+> **État** : le plan de la section 5 est fait (étapes 2 à 9). Le moteur est dans `moteur.mjs`, les scénarios dans `scenarios/`, les tests dans `simulation.test.mjs`. Les sections 1 et 3 décrivent l'ancien prototype. Reste l'étape 1 : trancher les hypothèses de la section 6. Sources : README §6 (échanges PTP), §8 (sessions et présence), §19 (pilote et simulation).
 
 ---
 

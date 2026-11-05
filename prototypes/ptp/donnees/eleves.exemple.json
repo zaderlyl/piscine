@@ -1,0 +1,11 @@
+[
+  { "id": 1, "prenom": "Marie", "nom": "Dupont", "annee": 3, "compteur": 2 },
+  { "id": 2, "prenom": "Lucas", "nom": "Martin", "annee": 1, "compteur": 0 },
+  { "id": 2, "prenom": "Lucas", "nom": "Martin", "annee": 1, "compteur": 0 },
+  { "id": 3, "prenom": "Inès", "nom": "Bernard", "annee": 2, "compteur": 5 },
+  { "id": 4, "prenom": "Hugo", "nom": "Petit", "annee": 1, "compteur": 1 },
+  { "id": 5, "prenom": "Léa", "nom": "Robert", "annee": 2, "compteur": 0 },
+  { "id": 6, "prenom": "Nathan", "nom": "Richard", "annee": 3, "compteur": 4 },
+  { "id": 7, "prenom": "Chloé", "nom": "Durand", "annee": 1, "compteur": 0 },
+  { "id": 8, "prenom": "Tom", "nom": "Moreau", "annee": 2, "compteur": 3 }
+]

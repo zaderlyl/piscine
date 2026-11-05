@@ -1,0 +1,7 @@
+{
+  "description": "Pilote (README §19) : 12 volontaires sur 2 années, une séance de 3 h",
+  "nbEleves": 12,
+  "repartitionAnnees": [0.5, 0.5],
+  "probaVenir": 0.95,
+  "sessions": [{ "salle": "A102", "groupe": 0, "debut": 0, "duree": 180 }]
+}
