@@ -8,7 +8,7 @@ import { afficherPanneauDoc } from "./doc.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
-import { marquerReussi } from "./progression.js";
+import { marquerReussi, estReussi, chargerListeExos, exoSuivant} from "./progression.js";
 
 
 const apercu = document.getElementById("apercu");
@@ -120,6 +120,31 @@ boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
 
+
+// bouton "exo suvant" 
+
+const boutonSuivant = document.createElement("button");
+bouton.createElement("button");
+boutonSuivant.textContent = "Exo suivant ->";
+boutonSuivant.classList.add("cache");
+onglets.append(boutonSuivant);
+
+const suivant = exoSuivant(EXO, await chargerListeExos());
+
+function afficherSuivant() {
+  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));
+}
+
+boutonSuivant.addEventListener("click",()=> {
+  const param = new URLSearchParams(location.search);
+  params.set("exo", suivant);
+  location.search = params.toString();
+});
+
+afficherSuivant();
+
+
+
 afficherFichier("index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
@@ -158,6 +183,7 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
   if (!echecs.length && e.data.resultats.length) marquerReussi(EXO);
+  afficherSuivant();
 });
 
 
@@ -175,7 +201,12 @@ async function lancerPhp() {
     (echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")
       : "✅ Tous les tests passent");
-    if (!echecs.length && resultats.length)marquerReussi(EXO);
+    if (!echecs.length && resultats.length)
+      afficherSuivant();;
+    if(!echecs.length && resultats.length){
+      marquerReussi(EXO);
+      afficherSuivant();
+    }
 
   clearTimeout(minuteurTests);
   afficherDansApercu(apercu, sortie);
