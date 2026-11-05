@@ -1,0 +1,11 @@
+{
+  "name": "piscine",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "valider-exos": "node scripts/valider-exos.js"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
