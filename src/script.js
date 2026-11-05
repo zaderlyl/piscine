@@ -66,22 +66,6 @@ function arreterApercu() {
   location.reload();
 }
 
-// Insère le code de test au début du document (après <head>, <body> ou le doctype),
-// car il serait ignoré après un </frameset>
-
-
-
-// function injecterTests(code, tests) {
-//   const bloc = construireTests(tests);
-//   const ouverture =
-//     code.match(/<head(\s[^>]*)?>/i) ||
-//     code.match(/<body(\s[^>]*)?>/i) ||
-//     code.match(/^\s*<!doctype[^>]*>/i);
-//   if (!ouverture) return bloc + code;
-//   const fin = ouverture.index + ouverture[0].length;
-//   return code.slice(0, fin) + bloc + code.slice(fin);
-// }
-
 
 
 
@@ -304,16 +288,25 @@ window.addEventListener("message", (e) => {
 });
 
 
-async function lancherPhp() {
-  panneauResultats.textContent = "Execution en cours...";
-  const{sortie,resultat} = await executerPhp(
+async function lancerPhp() {
+  panneauResultats.textContent = "Exécution en cours...";
+  const { sortie, resultats } = await executerPhp(
     editeurs["index.php"].state.doc.toString(),
+    testsExo,
   );
-  const echecs = resultat.filter((r) => !r.ok);
-  panneauResultats.textContent = sortie + "\n\n" + (echecs.length ? echecs.map((r) => " X " + r.message).join("\n") : "All test passed");
+
+  const echecs = resultats.filter((r) => !r.ok);
+  panneauResultats.textContent =
+    sortie +
+    "\n\n" +
+    (echecs.length
+      ? echecs.map((r) => "❌ " + r.message).join("\n")
+      : "✅ Tous les tests passent");
 
   clearTimeout(minuteurTests);
-  if(urlApercu) URL.revokeObjectURL(urlApercu);
-  urlApercu = URL.createObjectURL( new Blob ([sortie], {type: "text/html;charset=utf-8"}),);
+  if (urlApercu) URL.revokeObjectURL(urlApercu);
+  urlApercu = URL.createObjectURL(
+    new Blob([sortie], { type: "text/html;charset=utf-8" }),
+  );
   apercu.src = urlApercu;
 }
