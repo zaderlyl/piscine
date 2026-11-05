@@ -8,7 +8,7 @@ import { afficherPanneauDoc } from "./doc.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
-
+import { marquerReussi } from "./progression.js";
 
 
 const apercu = document.getElementById("apercu");
@@ -157,6 +157,7 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
+  if (!echecs.length && e.data.resultats.length) marquerReussi(EXO);
 });
 
 
@@ -174,6 +175,7 @@ async function lancerPhp() {
     (echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")
       : "✅ Tous les tests passent");
+    if (!echecs.length && resultats.length)marquerReussi(EXO);
 
   clearTimeout(minuteurTests);
   afficherDansApercu(apercu, sortie);
