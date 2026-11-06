@@ -1,4 +1,4 @@
-const CLE_PROGRESSION = "piscine-progression" ;
+const CLE_PROGRESSION = "piscine-progression";
 
 export function lireProgression(){
   try{

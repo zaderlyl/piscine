@@ -28,7 +28,7 @@ const exoChoisi = new URLSearchParams(location.search).get("exo");
 const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
-const CLE_SUSPENDU = "piscine-apercyu-suspendu";
+const CLE_SUSPENDU = "piscine-apercu-suspendu";
 
 const FICHIER_EXO = `../exos/${EXO}.md`;
 
@@ -124,7 +124,7 @@ boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
 
-// bouton "exo suvant"
+// bouton "suivant"
 
 const boutonSuivant = document.createElement("button");
 boutonSuivant.textContent = "Exo suivant →";
@@ -210,8 +210,7 @@ async function lancerPhp() {
       ? echecs.map((r) => "❌ " + r.message).join("\n")
       : "✅ Tous les tests passent");
   if (!echecs.length && resultats.length) {
-    marquerReussi(EXO);
-    afficherSuivant();
+    validerExo();
   }
 
   clearTimeout(minuteurTests);
