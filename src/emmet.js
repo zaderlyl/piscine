@@ -28,9 +28,14 @@ export const emmetTab = EditorView.domEventHandlers({
     if ( from !== to) return false;
 
     const ligne = view.state.doc.lineAt(from);
-    const abreviation = ligne.text.slice(0, from - ligne.from).match(/\S+$/)?.[0];
+    const avant = ligne.text.slice(0, from - ligne.from);
+    const mot = avant.match(/\S+$/)?.[0];
+    if (!mot) return false;
+    // « <h1>lorem » : l'abréviation commence après la dernière balise
+    const abreviation = [mot, mot.slice(mot.lastIndexOf(">") + 1)].find((a) =>
+      emmetDebloque.includes(a),
+    );
     if (!abreviation) return false;
-    if (!emmetDebloque.includes(abreviation)) return false;
 
     let resultat;
     try{
