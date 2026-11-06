@@ -81,7 +81,7 @@ Le bouton « J'ai terminé l'exo » simule la réussite des tests : la démo n'e
 node --test "prototypes/ptp/*.test.mjs"
 ```
 
-37 tests : les 12 cas du §9 de CONCEPTION.md, le plafond d'échanges en cours, la recherche de 2 min et l'échange perdu, le malus de paire qui s'atténue, la table de probabilité (et sa modification), l'éligibilité des exos, les classes (nombre impair, petite classe, toutes les classes), et la simulation (même graine, mêmes résultats ; personne ne se corrige ; les comptes concordent ; les absents ne corrigent pas).
+47 tests : les 12 cas du §9 de CONCEPTION.md, le plafond d'échanges en cours, la recherche de 2 min et l'échange perdu, le malus de paire qui s'atténue, la table de probabilité (et sa modification), l'éligibilité des exos, les classes (nombre impair, petite classe, toutes les classes), et la simulation (même graine, mêmes résultats ; personne ne se corrige ; les comptes concordent ; les absents ne corrigent pas), plus les cas communs de `cas-de-test.json` (rejoués par `cas-de-test.test.mjs`, réutilisables pour la version PHP).
 
 ## Ce qui n'est pas fait
 Voir [AMELIORATIONS-INTERFACE.md](AMELIORATIONS-INTERFACE.md) pour les idées d'interface, et CONCEPTION.md §10 pour les points à trancher. Pas de serveur (PHP et MySQL), pas de gel réel de l'écran, pas de lien avec les vrais exos.

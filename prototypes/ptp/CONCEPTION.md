@@ -230,7 +230,7 @@ Les étapes 0 et 1 se font sans attendre le serveur.
 
 ## 9. Test à 4 sessions
 
-4 élèves (**A, B, C, D**) connectés en même temps : c'est un **petit pool**, donc le test vérifie surtout que les règles se relâchent correctement. Tu peux ouvrir 4 sessions (4 navigateurs, ou 4 profils) et suivre ce scénario. Les étapes 0 et 1 existent (dossier `prototypes/ptp/`) : ce scénario est couvert par `ptp-logique.test.mjs` (cas 1 à 12 ; le plafond du cas 13 par les tests P1 à P5) et se rejoue à la main avec la démo à onglets.
+4 élèves (**A, B, C, D**) connectés en même temps : c'est un **petit pool**, donc le test vérifie surtout que les règles se relâchent correctement. Tu peux ouvrir 4 sessions (4 navigateurs, ou 4 profils) et suivre ce scénario. Les étapes 0 et 1 existent (dossier `prototypes/ptp/`) : ce scénario est couvert par `ptp-logique.test.mjs` (cas 1 à 12 ; `cas-de-test.json` reprend les cas communs avec la future version PHP ; le plafond du cas 13 par les tests P1 à P5) et se rejoue à la main avec la démo à onglets.
 
 | # | Situation de départ | Action | Résultat attendu |
 |---|---|---|---|
