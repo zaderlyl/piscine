@@ -13,6 +13,14 @@ function lireEmmet() {
 
 const emmetDebloque = lireEmmet();
 
+// Ajoute des raccourcis à ceux déjà débloqués et les garde pour les prochaines visites
+export function debloquerEmmet(raccourcis) {
+  const nouveaux = raccourcis.filter((raccourci) => !emmetDebloque.includes(raccourci));
+  if (!nouveaux.length) return;
+  emmetDebloque.push(...nouveaux);
+  localStorage.setItem(CLE_EMMET, JSON.stringify(emmetDebloque));
+}
+
 export const emmetTab = EditorView.domEventHandlers({
   keydown(event, view){
     if (event.key !== "Tab" || event.shiftKey) return false;
