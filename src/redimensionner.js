@@ -5,6 +5,16 @@
 // min : taille minimale en px. max : taille maximale en px, ou une fonction qui la calcule
 // (utile quand la fenêtre change de taille). Sans max, le panneau peut sortir de l'écran.
 export function glissable(barre, panneau, { axe, variable, sens = 1, min = 60, max = Infinity }) {
+  const limiter = (valeur) => Math.max(min, Math.min(typeof max === "function" ? max() : max, valeur));
+
+  // Quand la fenêtre rétrécit, ramène le panneau à sa limite (sinon il sort de l'écran)
+  window.addEventListener("resize", () => {
+    const actuelle = parseFloat(document.documentElement.style.getPropertyValue(variable));
+    if (Number.isNaN(actuelle)) return;
+    const limitee = limiter(actuelle);
+    if (limitee !== actuelle) document.documentElement.style.setProperty(variable, limitee + "px");
+  });
+
   barre.addEventListener("pointerdown", (depart) => {
     depart.preventDefault();
     barre.setPointerCapture(depart.pointerId);
@@ -15,8 +25,7 @@ export function glissable(barre, panneau, { axe, variable, sens = 1, min = 60, m
 
     const bouger = (e) => {
       const position = axe === "x" ? e.clientX : e.clientY;
-      const limite = typeof max === "function" ? max() : max;
-      const nouvelle = Math.max(min, Math.min(limite, taille + (position - origine) * sens));
+      const nouvelle = limiter(taille + (position - origine) * sens);
       document.documentElement.style.setProperty(variable, nouvelle + "px");
     };
 
