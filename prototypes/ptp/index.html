@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PTP : démo multi-onglets</title>
+<style>
+  body { font-family: sans-serif; max-width: 880px; margin: 0 auto; padding: 12px; color: #222; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #eee; padding: 8px 12px; border-radius: 6px; }
+  header h1 { font-size: 1rem; margin: 0 auto 0 0; }
+  button { padding: 6px 12px; border: 1px solid #bbb; background: #fafafa; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #eee; }
+  button.principal { background: #1d76db; color: #fff; border-color: #1d76db; }
+  button:disabled { opacity: .5; cursor: default; }
+  .carte { border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin: 12px 0; }
+  .enonce { background: #fffbe6; }
+  .info { background: #f5f5f5; }
+  .alerte { background: #fde8e8; border-color: #e5a0a0; }
+  .ok { background: #e8f6ea; border-color: #9fd0a6; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { border-bottom: 1px solid #ddd; padding: 4px 6px; text-align: left; }
+  .point { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  .journal { font-size: .8rem; font-family: monospace; max-height: 260px; overflow: auto; background: #fafafa; padding: 6px; }
+  .petit { font-size: .85rem; color: #555; }
+  input[type=text] { padding: 6px; font-size: 1.2rem; width: 9ch; letter-spacing: .2em; }
+  .code { font-size: 2rem; letter-spacing: .3em; font-weight: bold; }
+  .barre { background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; width: 140px; display: inline-block; vertical-align: middle; }
+  .barre span { display: block; height: 100%; background: #2da44e; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PTP : démo (un onglet = un élève)</h1>
+  <label class="petit"><input type="checkbox" id="toujours"> chaque exo déclenche un échange</label>
+  <label class="petit">Qui peut corriger :
+    <select id="portee">
+      <option value="classe_puis_autres">la classe, puis les autres si elle est petite</option>
+      <option value="classe_seule">la classe seulement</option>
+      <option value="toutes">toutes les classes</option>
+    </select>
+  </label>
+  <button id="vue">Vue prof</button>
+  <button id="reinit">Tout réinitialiser</button>
+</header>
+<main id="contenu"></main>
+
+<script type="module">
+import * as P from "./ptp-logique.js";
+
+const CLE = "ptp-demo-v1";
+const EXOS = ["HTML 00 · Premières balises", "HTML 01", "HTML 02", "HTML 03", "HTML 04 · Six titres h1 à h6"];
+const contenu = document.getElementById("contenu");
+let moi = sessionStorage.getItem("ptp-moi");
+let vueProf = false;
+
+const charger = () => JSON.parse(localStorage.getItem(CLE) || "null") || P.nouvelEtat();
+const sauver = (s) => localStorage.setItem(CLE, JSON.stringify(s));
+
+// Toute modification passe par un verrou partagé entre les onglets, pour que deux clics simultanés
+// ne se marchent pas dessus (équivalent du verrou de tirage prévu côté serveur).
+async function agir(fn) {
+  const parUtilisateur = typeof fn === "function"; // un clic force le redessin ; les minuteurs non
+  const corps = () => {
+    const s = charger();
+    if (moi) P.battement(s, moi, Date.now());
+    fn?.(s, Date.now(), Math.random);
+    P.tick(s, Date.now(), Math.random);
+    sauver(s);
+  };
+  if (navigator.locks) await navigator.locks.request("ptp-demo", corps); else corps();
+  rendre(parUtilisateur);
+}
+
+function h(tag, attrs, ...enfants) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null) continue;
+    if (k === "onclick") el.addEventListener("click", v);
+    else if (k === "class") el.className = v;
+    else el.setAttribute(k, v);
+  }
+  for (const c of enfants.flat()) if (c != null) el.append(c.nodeType ? c : document.createTextNode(c));
+  return el;
+}
+
+const secondes = (t) => Math.max(0, Math.round((t - Date.now()) / 1000));
+const COULEUR = { libre: "#2da44e", en_recherche: "#d29922", reserve: "#d29922", en_echange: "#1d76db" };
+
+// Ne jamais redessiner pendant que l'utilisateur tape ou choisit dans une liste : le champ serait vidé.
+function enSaisie() {
+  return ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName);
+}
+
+function rendre(force = false) {
+  if (!force && enSaisie()) return;
+  const s = charger();
+  document.getElementById("toujours").checked = !!s.config.toujours;
+  document.getElementById("portee").value = s.config.portee || "classe_puis_autres";
+  document.getElementById("vue").textContent = vueProf ? "Vue élève" : "Vue prof";
+  contenu.replaceChildren(vueProf ? vueProfesseur(s) : (moi && s.eleves[moi] ? vueEleve(s) : vueRejoindre(s)));
+}
+
+// Une classe = une seule année (MMI1-A et MMI1-B sont en 1ʳᵉ année, etc.)
+const CLASSES = { "MMI1-A": 1, "MMI1-B": 1, "MMI2-A": 2, "MMI3-A": 3 };
+const PRENOMS = ["Alice", "Bob", "Chloé", "David", "Emma", "Farid", "Gaëlle", "Hugo"];
+
+function vueRejoindre(s) {
+  const pris = new Set(Object.keys(s.eleves));
+  const choixPrenom = h("select", {}, PRENOMS.map((p) => h("option", { value: p }, pris.has(p) ? `${p} (déjà pris)` : p)));
+  choixPrenom.value = PRENOMS.find((p) => !pris.has(p)) || PRENOMS[0];
+  const choixClasse = h("select", {}, Object.entries(CLASSES).map(([c, a]) => h("option", { value: c }, `${c} (année ${a})`)));
+  const effectifs = Object.keys(CLASSES).map((c) => `${c} : ${Object.values(s.eleves).filter((e) => e.classe === c).length}`).join(" · ");
+  return h("div", { class: "carte info" },
+    h("h2", {}, "Qui es-tu dans cet onglet ?"),
+    h("p", {}, "Ouvre un onglet par élève. Choisis un prénom et une classe : une classe ne contient qu'une seule année."),
+    h("p", {}, "Prénom ", choixPrenom, "  Classe ", choixClasse, "  ",
+      h("button", { class: "principal", onclick: () => {
+        if (pris.has(choixPrenom.value)) return;
+        entrer(choixPrenom.value, choixClasse.value);
+      } }, "Entrer")),
+    h("p", { class: "petit" }, `Déjà connectés par classe : ${effectifs}`));
+}
+
+async function entrer(prenom, classe) {
+  moi = prenom;
+  sessionStorage.setItem("ptp-moi", moi);
+  const annee = CLASSES[classe];
+  await agir((s, now) => P.rejoindre(s, { id: prenom, prenom, annee, classe, salle: "salle " + classe }, now));
+}
+
+function vueEleve(s) {
+  const e = s.eleves[moi];
+  const ech = e.echangeId ? s.echanges[e.echangeId] : null;
+  const racine = h("div");
+  const fini = e.exoIdx >= EXOS.length;
+  const pct = Math.round((Math.min(e.exoIdx, EXOS.length) / EXOS.length) * 100);
+
+  racine.append(h("div", { class: "carte info" },
+    h("strong", {}, `${e.prenom} · ${e.classe} (année ${e.annee})`), " ",
+    h("span", { class: "point", style: `background:${COULEUR[e.etat]}` }), e.etat.replace("_", " "), " ",
+    h("div", {}, "Avancement ", h("span", { class: "barre" }, h("span", { style: `width:${pct}%` })), ` ${Math.min(e.exoIdx, EXOS.length)}/${EXOS.length}`),
+    h("div", { class: "petit" }, `Exos validés depuis le dernier échange : ${e.depuisPtp} · échange en attente : ${e.declenche ? "oui" : "non"} · corrections faites : ${e.corrections}`)));
+
+  if (e.message) racine.append(h("div", { class: "carte alerte" }, e.message));
+
+  // Je suis correcteur potentiel ou en cours
+  if (e.etat === "reserve" && ech && ech.correcteur === moi) {
+    const demandeur = s.eleves[ech.eleve];
+    racine.append(h("div", { class: "carte alerte" },
+      h("h3", {}, "Un camarade a besoin d'un avis"),
+      h("p", {}, `${demandeur.prenom} (${demandeur.classe}, année ${demandeur.annee}) veut te présenter son exo. Tu es là ?`),
+      h("p", { class: "petit" }, `Réponds dans ${secondes(ech.deadline)} s, sinon quelqu'un d'autre sera tiré.`),
+      h("button", { class: "principal", onclick: () => agir((st, n, r) => P.confirmer(st, moi, n, r)) }, "Je suis là")));
+  } else if (ech && ech.correcteur === moi && ["confirme", "en_cours", "appel_prof"].includes(ech.etat)) {
+    racine.append(blocCorrecteur(s, ech));
+  }
+
+  // Mon propre exo
+  if (!(ech && ech.correcteur === moi)) {
+    if (fini) {
+      racine.append(h("div", { class: "carte ok" }, "Module terminé. Bravo !"));
+    } else {
+      racine.append(h("div", { class: "carte enonce" },
+        h("h3", {}, EXOS[e.exoIdx]),
+        h("p", { class: "petit" }, "Démo : le bouton ci-dessous simule « tous les tests passent »."),
+        h("button", { class: "principal", disabled: e.etat !== "libre" || e.exoEnAttente ? "" : null,
+          onclick: () => agir((st, n, r) => P.validerExo(st, moi, n, r)) }, "J'ai terminé l'exo (tests OK)")));
+    }
+    racine.append(blocEleve(s, e, ech));
+  } else {
+    racine.append(h("div", { class: "carte info" }, "Ton propre exo est bloqué tant que tu n'as pas corrigé (ton brouillon est conservé)."));
+  }
+  return racine;
+}
+
+function blocEleve(s, e, ech) {
+  if (e.etat === "libre" && e.exoEnAttente) {
+    return h("div", { class: "carte alerte" }, "Un échange est nécessaire avant l'exo suivant. ",
+      h("button", { class: "principal", onclick: () => agir((st, n, r) => P.relancer(st, moi, n, r)) }, "Relancer la recherche"));
+  }
+  if (!ech) return h("span");
+  if (ech.eleve !== moi) return h("span");
+  const annuler = h("button", { onclick: () => agir((st, n) => P.annuler(st, moi, n)) }, "Annuler");
+  if (["recherche", "verification"].includes(ech.etat)) {
+    return h("div", { class: "carte alerte" }, h("h3", {}, "Recherche d'un correcteur…"),
+      h("p", {}, "Ton écran est gelé, prépare ton explication."), annuler);
+  }
+  if (ech.etat === "file") {
+    return h("div", { class: "carte alerte" }, h("h3", {}, "Tous les correcteurs sont occupés"),
+      h("p", {}, `Nouvel essai dans la file d'attente : encore ${secondes(ech.fileDeadline)} s, puis l'échange sera reporté.`), annuler);
+  }
+  if (ech.etat === "confirme") {
+    const c = s.eleves[ech.correcteur];
+    const champ = h("input", { type: "text", maxlength: "6", inputmode: "numeric", placeholder: "000000" });
+    const retour = h("span", { class: "petit" });
+    return h("div", { class: "carte alerte" },
+      h("h3", {}, `${c.prenom}, ${c.classe}, vient t'écouter`),
+      h("p", {}, "Il ou elle va te donner un code à 6 chiffres. Saisis-le ici."), champ, " ",
+      h("button", { class: "principal", onclick: () => agir((st, n) => {
+        const r = P.saisirCode(st, moi, champ.value, n);
+        if (!r.ok) st.eleves[moi].message = r.raison; else st.eleves[moi].message = "";
+      }) }, "Valider le code"), " ", annuler, " ", retour);
+  }
+  if (ech.etat === "en_cours") {
+    return h("div", { class: "carte alerte" }, h("h3", {}, "Explique ton exo à l'oral"),
+      h("p", {}, `${s.eleves[ech.correcteur].prenom} lit ton code et te donnera son avis.`));
+  }
+  if (ech.etat === "appel_prof") {
+    return h("div", { class: "carte alerte" }, "Le correcteur n'est pas venu : un prof est appelé.");
+  }
+  return h("span");
+}
+
+function blocCorrecteur(s, ech) {
+  const demandeur = s.eleves[ech.eleve];
+  const bloc = h("div", { class: "carte alerte" }, h("h3", {}, `Tu corriges ${demandeur.prenom} (${demandeur.classe}, année ${demandeur.annee})`));
+  if (ech.etat === "confirme") {
+    bloc.append(h("p", {}, "Va le ou la voir et donne-lui ce code :"), h("div", { class: "code" }, ech.code),
+      h("p", { class: "petit" }, `Le code est valable ${secondes(ech.codeExpire)} s. Il est régénéré s'il expire.`));
+  } else if (ech.etat === "en_cours") {
+    const note = h("input", { type: "text", style: "width:30ch;letter-spacing:0;font-size:1rem", placeholder: "Commentaire (facultatif)" });
+    const bouton = (verdict, texte) => h("button", { class: verdict === "bon" ? "principal" : "", style: "margin-right:6px",
+      onclick: () => agir((st, n) => P.donnerAvis(st, moi, verdict, note.value, n)) }, texte);
+    bloc.append(h("p", {}, "Ton rôle est de comprendre, pas de juger. Ton avis :"),
+      bouton("bon", "Ça me paraît bon"), bouton("erreur", "Je pense qu'il y a une erreur"), bouton("doute", "Je ne suis pas sûr"),
+      h("p", {}, note));
+  } else {
+    bloc.append(h("p", {}, "Échange en alerte : un prof est appelé."));
+  }
+  return bloc;
+}
+
+function vueProfesseur(s) {
+  const now = Date.now();
+  const racine = h("div");
+  const eleves = Object.values(s.eleves).sort((a, b) => b.exoIdx - a.exoIdx);
+  const lignes = eleves.map((e) => {
+    const connecte = now - e.dernierSignal <= s.config.signalMs;
+    const heures = Math.max((now - e.presenceDepuis) / 3600000, 0.25);
+    return h("tr", {},
+      h("td", {}, h("span", { class: "point", style: `background:${connecte ? "#2da44e" : "#aaa"}` }), e.prenom),
+      h("td", {}, e.classe || `année ${e.annee}`),
+      h("td", {}, h("span", { class: "barre" }, h("span", { style: `width:${Math.round(e.exoIdx / EXOS.length * 100)}%` })), ` ${e.exoIdx}/${EXOS.length}`),
+      h("td", {}, e.etat.replace("_", " ")),
+      h("td", {}, `${e.depuisPtp}${e.declenche ? " (échange en attente)" : ""}`),
+      h("td", {}, `${e.corrections} (${(e.corrections / heures).toFixed(1)}/h)`),
+      h("td", {}, connecte ? "oui" : `non (${Math.round((now - e.dernierSignal) / 1000)} s)`));
+  });
+  racine.append(h("div", { class: "carte info" }, h("h3", {}, "Élèves, classés par avancement"),
+    eleves.length ? h("table", {}, h("thead", {}, h("tr", {}, ["Élève", "Classe", "Avancement", "État", "Exos depuis dernier PTP", "Corrections", "Connecté"].map((t) => h("th", {}, t)))), h("tbody", {}, lignes))
+      : h("p", {}, "Personne n'a encore rejoint la session.")));
+
+  const parClasse = {};
+  eleves.forEach((e) => { const k = e.classe || `année ${e.annee}`; parClasse[k] = (parClasse[k] || 0) + 1; });
+  racine.append(h("div", { class: "carte info" }, h("h3", {}, "Pool par classe"),
+    h("p", { class: "petit" }, Object.entries(parClasse).map(([k, v]) => `${k} : ${v} élève${v > 1 ? "s" : ""}`).join(" · ") || "aucune classe"),
+    h("p", { class: "petit" }, "Une classe de moins de 6 correcteurs libres est élargie aux autres classes (selon le réglage « Qui peut corriger »).")));
+
+  const actifs = Object.values(s.echanges).filter((x) => ["recherche", "file", "verification", "confirme", "en_cours", "appel_prof"].includes(x.etat));
+  racine.append(h("div", { class: "carte info" }, h("h3", {}, "Échanges en cours et alertes"),
+    actifs.length ? actifs.map((x) => h("div", {},
+      `${s.eleves[x.eleve].prenom} ← ${x.correcteur ? s.eleves[x.correcteur].prenom : "?"} : ${x.etat}`, " ",
+      x.etat === "appel_prof" ? h("button", { onclick: () => agir((st, n) => P.cloreParProf(st, x.id, n)) }, "Clore (prof)") : null))
+      : h("p", { class: "petit" }, "Aucun échange en cours.")));
+
+  const paires = {};
+  s.paires.forEach((p) => (paires[p] = (paires[p] || 0) + 1));
+  racine.append(h("div", { class: "carte info" }, h("h3", {}, "Équité"),
+    h("p", { class: "petit" }, `Échanges terminés : ${s.paires.length}. Paires : ${Object.entries(paires).map(([k, v]) => k.replace("|", "+") + " ×" + v).join(", ") || "aucune"}.`)));
+
+  racine.append(h("div", { class: "carte" }, h("h3", {}, "Journal (tirages, scores, alertes)"),
+    h("div", { class: "journal" }, [...s.journal].reverse().map((j) => h("div", {}, new Date(j.t).toLocaleTimeString("fr-FR") + " " + j.texte)))));
+  return racine;
+}
+
+document.getElementById("vue").addEventListener("click", () => { vueProf = !vueProf; rendre(true); });
+document.getElementById("toujours").addEventListener("change", (ev) => agir((s) => { s.config.toujours = ev.target.checked; }));
+document.getElementById("portee").addEventListener("change", (ev) => agir((s) => { s.config.portee = ev.target.value; }));
+document.getElementById("reinit").addEventListener("click", async () => {
+  if (!confirm("Effacer toute la session pour tous les onglets ?")) return;
+  localStorage.removeItem(CLE);
+  moi = null;
+  sessionStorage.removeItem("ptp-moi");
+  rendre(true);
+});
+
+window.addEventListener("storage", (ev) => {
+  if (ev.key === CLE || ev.key === null) rendre();
+});
+setInterval(() => agir(), 5000);   // signal de présence + expirations (évaluation paresseuse)
+// comptes à rebours ; on ne redessine pas pendant que l'élève tape (sinon le champ se vide)
+setInterval(() => rendre(), 1000);
+agir();
+</script>
+</body>
+</html>
