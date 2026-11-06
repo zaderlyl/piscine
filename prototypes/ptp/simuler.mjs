@@ -51,7 +51,7 @@ export const PARAMS = {
   delaiProfS: 300,            // le prof clôt un échange en alerte au bout de 5 min
 
   // Surcharges de CONFIG_DEFAUT (ptp-logique.js) : plafond, repos, bonus, portée…
-  reglages: {},               // exemple : { plafondSession: 2, portee: "classe_seule", topN: 4 }
+  reglages: {},               // exemple : { plafondSession: 2, topN: 4, diviseurPlafond: 4, rechercheMs: 60000 }
 };
 
 // Scénarios nommés : chacun surcharge quelques réglages.
@@ -60,8 +60,8 @@ export const SCENARIOS = {
   absences: { probVenir: 0.7, departAnticipeProb: 0.3 },
   "petit-pool": { nbEleves: 6, classes: [{ nom: "MMI1-A", annee: 1, part: 1 }] },
   "classe-impaire": { nbEleves: 5, classes: [{ nom: "MMI1-A", annee: 1, part: 1 }] },
-  "classe-seule": { reglages: { portee: "classe_seule" } },
-  "toutes-les-classes": { reglages: { portee: "toutes" } },
+  "plafond-large": { reglages: { diviseurPlafond: 2 } },  // plus d'échanges en même temps (connectés ÷ 2)
+  "plafond-serre": { reglages: { diviseurPlafond: 10 } }, // moins d'échanges en même temps (connectés ÷ 10)
   "correcteurs-absents": { probRepond: 0.5, probAbsentApresConfirmation: 0.2 },
   "tout-declenche": { probaDeclenchement: [1] },
   "sans-plafond": { reglages: { plafondSession: 999 } },
@@ -199,9 +199,10 @@ function statistiques(s, eleves, P, t0, fin) {
     elevesVenus: presents.length,
     echangesTermines: compte("termine"),
     echangesReportes: compte("reporte"),
+    echangesPerdus: compte("perdu"),
     echangesExpires: compte("expire"),
     appelsProf: compte("appel_prof") + compte("clos_par_prof"),
-    echangesEnCoursALaFin: echanges.filter((x) => ["recherche", "file", "verification", "confirme", "en_cours"].includes(x.etat)).length,
+    echangesEnCoursALaFin: echanges.filter((x) => ["recherche", "verification", "confirme", "en_cours"].includes(x.etat)).length,
     correctionsMin: Math.min(...corr), correctionsMax: Math.max(...corr),
     correctionsMoyenne: +moy.toFixed(2), correctionsEcartType: +ecartType(corr).toFixed(2),
     rapportMaxSurMoyenne: moy ? +(Math.max(...corr) / moy).toFixed(2) : 0,
@@ -229,7 +230,7 @@ function afficher({ lignes, resume, params }, nomScenario) {
   }
   const r = resume;
   console.log("\nBilan");
-  console.log(`  Échanges terminés : ${r.echangesTermines} · reportés : ${r.echangesReportes} · expirés : ${r.echangesExpires} · appels du prof : ${r.appelsProf} · en cours à la fin : ${r.echangesEnCoursALaFin}`);
+  console.log(`  Échanges terminés : ${r.echangesTermines} · reportés : ${r.echangesReportes} · perdus : ${r.echangesPerdus} · expirés : ${r.echangesExpires} · appels du prof : ${r.appelsProf} · en cours à la fin : ${r.echangesEnCoursALaFin}`);
   console.log(`  Corrections par élève (venus) : min ${r.correctionsMin}, max ${r.correctionsMax}, moyenne ${r.correctionsMoyenne}, écart-type ${r.correctionsEcartType}, max/moyenne ${r.rapportMaxSurMoyenne}`);
   console.log(`  Élèves présents plus d'1 h qui n'ont jamais corrigé : ${r.jamaisCorrecteurAlorsPresent1h} sur ${r.elevesPresent1h}`);
   console.log(`  Paires distinctes : ${r.pairesDistinctes} · paire la plus répétée : ${r.pairePlusRepetee} fois`);

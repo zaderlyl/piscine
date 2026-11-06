@@ -32,13 +32,6 @@
 <header>
   <h1>PTP : démo (un onglet = un élève)</h1>
   <label class="petit"><input type="checkbox" id="toujours"> chaque exo déclenche un échange</label>
-  <label class="petit">Qui peut corriger :
-    <select id="portee">
-      <option value="classe_puis_autres">la classe, puis les autres si elle est petite</option>
-      <option value="classe_seule">la classe seulement</option>
-      <option value="toutes">toutes les classes</option>
-    </select>
-  </label>
   <button id="vue">Vue prof</button>
   <button id="reinit">Tout réinitialiser</button>
 </header>
@@ -95,7 +88,6 @@ function rendre(force = false) {
   if (!force && enSaisie()) return;
   const s = charger();
   document.getElementById("toujours").checked = !!s.config.toujours;
-  document.getElementById("portee").value = s.config.portee || "classe_puis_autres";
   document.getElementById("vue").textContent = vueProf ? "Vue élève" : "Vue prof";
   contenu.replaceChildren(vueProf ? vueProfesseur(s) : (moi && s.eleves[moi] ? vueEleve(s) : vueRejoindre(s)));
 }
@@ -181,13 +173,13 @@ function blocEleve(s, e, ech) {
   if (!ech) return h("span");
   if (ech.eleve !== moi) return h("span");
   const annuler = h("button", { onclick: () => agir((st, n) => P.annuler(st, moi, n)) }, "Annuler");
-  if (["recherche", "verification"].includes(ech.etat)) {
+  if (ech.etat === "verification") {
     return h("div", { class: "carte alerte" }, h("h3", {}, "Recherche d'un correcteur…"),
       h("p", {}, "Ton écran est gelé, prépare ton explication."), annuler);
   }
-  if (ech.etat === "file") {
-    return h("div", { class: "carte alerte" }, h("h3", {}, "Tous les correcteurs sont occupés"),
-      h("p", {}, `Nouvel essai dans la file d'attente : encore ${secondes(ech.fileDeadline)} s, puis l'échange sera reporté.`), annuler);
+  if (ech.etat === "recherche") {
+    return h("div", { class: "carte alerte" }, h("h3", {}, "Recherche d'un correcteur…"),
+      h("p", {}, `Ton écran est gelé, prépare ton explication. Encore ${secondes(ech.rechercheDeadline)} s de recherche ; sans correcteur trouvé, tu passes à l'exo suivant.`), annuler);
   }
   if (ech.etat === "confirme") {
     const c = s.eleves[ech.correcteur];
@@ -254,9 +246,9 @@ function vueProfesseur(s) {
   eleves.forEach((e) => { const k = e.classe || `année ${e.annee}`; parClasse[k] = (parClasse[k] || 0) + 1; });
   racine.append(h("div", { class: "carte info" }, h("h3", {}, "Pool par classe"),
     h("p", { class: "petit" }, Object.entries(parClasse).map(([k, v]) => `${k} : ${v} élève${v > 1 ? "s" : ""}`).join(" · ") || "aucune classe"),
-    h("p", { class: "petit" }, "Une classe de moins de 6 correcteurs libres est élargie aux autres classes (selon le réglage « Qui peut corriger »).")));
+    h("p", { class: "petit" }, `Le tirage porte sur toutes les classes. Échanges en cours : ${Object.values(s.echanges).filter((x) => ["recherche", "verification", "confirme", "en_cours", "appel_prof"].includes(x.etat)).length} sur ${P.plafondEchanges(s, Date.now())} au maximum (connectés ÷ 5, arrondi au supérieur).`)));
 
-  const actifs = Object.values(s.echanges).filter((x) => ["recherche", "file", "verification", "confirme", "en_cours", "appel_prof"].includes(x.etat));
+  const actifs = Object.values(s.echanges).filter((x) => ["recherche", "verification", "confirme", "en_cours", "appel_prof"].includes(x.etat));
   racine.append(h("div", { class: "carte info" }, h("h3", {}, "Échanges en cours et alertes"),
     actifs.length ? actifs.map((x) => h("div", {},
       `${s.eleves[x.eleve].prenom} ← ${x.correcteur ? s.eleves[x.correcteur].prenom : "?"} : ${x.etat}`, " ",
@@ -275,7 +267,6 @@ function vueProfesseur(s) {
 
 document.getElementById("vue").addEventListener("click", () => { vueProf = !vueProf; rendre(true); });
 document.getElementById("toujours").addEventListener("change", (ev) => agir((s) => { s.config.toujours = ev.target.checked; }));
-document.getElementById("portee").addEventListener("change", (ev) => agir((s) => { s.config.portee = ev.target.value; }));
 document.getElementById("reinit").addEventListener("click", async () => {
   if (!confirm("Effacer toute la session pour tous les onglets ?")) return;
   localStorage.removeItem(CLE);

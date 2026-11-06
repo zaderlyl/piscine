@@ -9,28 +9,24 @@ export const CONFIG_DEFAUT = {
   signalMs: 120000,      // un élève est « présent » si son dernier signal a moins de 2 min (proposition : 90 s)
   verifMs: 30000,        // vérification d'activité du correcteur
   confirmeMs: 600000,    // correcteur confirmé qui ne vient pas : appel du prof
-  fileMs: 120000,        // file d'attente courte quand tous les candidats sont occupés
+  rechercheMs: 120000,   // recherche d'un correcteur (~2 min) ; sans résultat, l'échange est perdu et l'élève passe à l'exo suivant
+  diviseurPlafond: 5,    // échanges en cours au maximum : connectés ÷ 5, arrondi au supérieur (17 connectés : 4 échanges)
   codeMs: 300000,        // validité du code à 6 chiffres
   essaisCodeMax: 5,
-  essaisVerifMax: 3,     // tirages successifs avant la file d'attente
   topN: 6,
   petitPool: 6,          // en dessous : on relâche la contrainte « paire déjà vue » et la préférence d'année
   plafondSession: 3,     // corrections max par correcteur et par session
   repetitionMs: 900000,  // « pas deux d'affilée » : a déjà corrigé il y a moins de 15 min
   bonusAnnee: 0.2,
   bonusEquite: 0.3,
-  malusPaire: 0.1,
+  malusPaire: 0.1,       // malus d'une paire qui vient de corriger ensemble ; il s'atténue ensuite
+  demiViePaireMs: 3600000, // la moitié du malus de paire a disparu après 1 h (à régler au pilote)
   malusRepet: 0.3,
   baseMaxMin: 60,        // l'ancienneté plafonne après 60 min
   plancher: 0.05,
   toujours: false,       // démo : déclencher un échange à chaque exo validé
   probas: PROBAS_DEFAUT, // table de déclenchement (modifiable, voir simuler.mjs)
-  // Qui peut corriger qui :
-  //  "classe_puis_autres" : la classe d'abord ; si elle a moins de `petitPool` correcteurs libres, on élargit aux autres classes
-  //  "classe_seule"       : uniquement la classe (si personne : file courte puis report)
-  //  "toutes"             : toutes les classes ouvertes dès le départ (README §6)
-  portee: "classe_puis_autres",
-  bonusClasse: 0.5,      // préférence pour la même classe quand le pool est élargi (le correcteur se déplace moins)
+  // Portée du tirage : toutes les classes, comme le README §6 (pas de seuil de correcteurs libres).
 };
 
 // Probabilité de déclenchement pour `depuisPtp` exos validés.
@@ -39,7 +35,8 @@ export function probabilite(depuisPtp, table = PROBAS_DEFAUT) {
 }
 
 export function nouvelEtat() {
-  return { config: { ...CONFIG_DEFAUT }, eleves: {}, echanges: {}, paires: [], journal: [], suite: 1 };
+  // `paires` : une entrée par échange terminé ; `pairesDernier` : date du dernier échange de chaque paire
+  return { config: { ...CONFIG_DEFAUT }, eleves: {}, echanges: {}, paires: [], pairesDernier: {}, journal: [], suite: 1 };
 }
 
 const log = (s, now, texte) => {
@@ -49,6 +46,22 @@ const log = (s, now, texte) => {
 const nom = (s, id) => (s.eleves[id] ? s.eleves[id].prenom : id);
 const present = (s, e, now) => now - e.dernierSignal <= s.config.signalMs;
 const cle = (a, b) => [a, b].sort().join("|");
+
+// Plafond d'échanges en cours : connectés (tous comptes, toutes séances ; les absents ne comptent pas) ÷ 5, arrondi au supérieur.
+export function plafondEchanges(s, now) {
+  const connectes = Object.values(s.eleves).filter((e) => present(s, e, now)).length;
+  return Math.ceil(connectes / s.config.diviseurPlafond);
+}
+
+// Malus de paire : plein juste après un échange, de plus en plus faible ensuite (jamais interdit).
+export function malusPaire(s, a, b, now) {
+  const k = cle(a, b);
+  const dernier = s.pairesDernier[k];
+  if (dernier == null && !s.paires.includes(k)) return 1;
+  const c = s.config;
+  const age = dernier == null ? 0 : Math.max(0, now - dernier); // paire sans date : traitée comme récente
+  return 1 - (1 - c.malusPaire) * Math.pow(0.5, age / c.demiViePaireMs);
+}
 
 export function rejoindre(s, { id, prenom, annee, classe, salle }, now) {
   if (!s.eleves[id]) {
@@ -80,9 +93,8 @@ export function scorer(s, candidats, demandeur, now) {
     let bonus = 0;
     if (taux(e) < moyenne) bonus += c.bonusEquite;
     if (!petit && e.annee !== demandeur.annee) bonus += c.bonusAnnee;
-    if (c.portee !== "toutes" && e.classe === demandeur.classe) bonus += c.bonusClasse;
     let malus = 1;
-    if (!petit && s.paires.includes(cle(e.id, demandeur.id))) malus *= c.malusPaire;
+    if (!petit) malus *= malusPaire(s, e.id, demandeur.id, now);
     if (candidats.length >= 4 && e.derniereCorrection != null && now - e.derniereCorrection < c.repetitionMs) malus *= c.malusRepet;
     return { id: e.id, score: Math.max(c.plancher, base * (1 + bonus) * malus) };
   });
@@ -105,27 +117,29 @@ function demanderEchange(s, e, now, rng) {
   const id = "E" + s.suite++;
   s.echanges[id] = {
     id, eleve: e.id, correcteur: null, etat: "recherche", tentatives: [], essais: 0,
-    code: null, codeExpire: null, deadline: null, fileDeadline: null, creeLe: now, avis: null,
+    code: null, codeExpire: null, deadline: null, rechercheDeadline: now + s.config.rechercheMs, creeLe: now, avis: null,
   };
   e.etat = "en_recherche";
   e.echangeId = id;
   e.message = "";
-  chercher(s, s.echanges[id], now, rng);
+  const ech = s.echanges[id];
+  // Au plafond d'échanges en cours : on reporte sans geler (le déclenchement reste en attente)
+  const enCours = Object.values(s.echanges).filter((x) => x !== ech && actif(x)).length;
+  if (enCours >= plafondEchanges(s, now)) return reporter(s, ech, now, "trop d'échanges en cours");
+  chercher(s, ech, now, rng);
 }
 
 function chercher(s, ech, now, rng) {
   const e = s.eleves[ech.eleve];
   const autres = Object.values(s.eleves).filter((x) => x.id !== e.id && present(s, x, now));
   if (autres.length === 0) return reporter(s, ech, now, "aucun correcteur connecté");
+  if (now >= ech.rechercheDeadline) return perdre(s, ech, now);
   let cands = autres.filter((x) => x.etat === "libre" && !ech.tentatives.includes(x.id));
   const sansPlafond = cands.filter((x) => x.corrections < s.config.plafondSession);
   if (sansPlafond.length > 0) cands = sansPlafond; // le plafond tombe si personne d'autre n'est disponible
-  cands = restreindreALaPortee(s, cands, e);
-  if (cands.length === 0 || ech.tentatives.length >= s.config.essaisVerifMax) {
-    if (ech.fileDeadline == null) ech.fileDeadline = now + s.config.fileMs;
-    if (now >= ech.fileDeadline) return reporter(s, ech, now, "tous les correcteurs sont occupés");
-    ech.etat = "file";
-    ech.deadline = ech.fileDeadline;
+  if (cands.length === 0) { // la recherche continue jusqu'à la fin des ~2 min
+    ech.etat = "recherche";
+    ech.deadline = ech.rechercheDeadline;
     return;
   }
   const scores = scorer(s, cands, e, now);
@@ -140,14 +154,6 @@ function chercher(s, ech, now, rng) {
     t: now,
     texte: `Tirage pour ${e.prenom} : ${scores.map((x) => nom(s, x.id) + " " + x.score.toFixed(2)).join(", ")} → ${c.prenom}`,
   });
-}
-
-// Applique la règle « la classe d'abord » (voir CONFIG_DEFAUT.portee).
-export function restreindreALaPortee(s, cands, demandeur) {
-  const memeClasse = cands.filter((x) => x.classe === demandeur.classe);
-  if (s.config.portee === "toutes") return cands;
-  if (s.config.portee === "classe_seule") return memeClasse;
-  return memeClasse.length >= s.config.petitPool ? memeClasse : cands;
 }
 
 function reporter(s, ech, now, raison) {
@@ -167,6 +173,22 @@ function reporter(s, ech, now, raison) {
   log(s, now, `Échange reporté pour ${e.prenom} : ${raison}`);
 }
 
+// Recherche terminée sans correcteur : l'échange est perdu (pas de report), l'élève passe à l'exo suivant.
+function perdre(s, ech, now) {
+  const e = s.eleves[ech.eleve];
+  if (ech.correcteur) liberer(s, ech.correcteur);
+  ech.etat = "perdu";
+  ech.correcteur = null;
+  e.etat = "libre";
+  e.echangeId = null;
+  e.exoEnAttente = false;
+  e.declenche = false;
+  e.depuisPtp = 0;
+  e.exoIdx++;
+  e.message = "Aucun correcteur trouvé : tu passes à l'exo suivant.";
+  log(s, now, `Échange perdu pour ${e.prenom} : aucun correcteur trouvé en ${Math.round(s.config.rechercheMs / 60000)} min`);
+}
+
 function liberer(s, id) {
   const x = s.eleves[id];
   if (x) {
@@ -176,7 +198,7 @@ function liberer(s, id) {
 }
 
 function actif(ech) {
-  return ["recherche", "file", "verification", "confirme", "en_cours", "appel_prof"].includes(ech.etat);
+  return ["recherche", "verification", "confirme", "en_cours", "appel_prof"].includes(ech.etat);
 }
 
 // Fait avancer tout ce qui dépend du temps (évaluation paresseuse : appelée par chaque battement).
@@ -185,7 +207,7 @@ export function tick(s, now, rng) {
     if (!actif(ech)) continue;
     const e = s.eleves[ech.eleve];
     const c = ech.correcteur ? s.eleves[ech.correcteur] : null;
-    if (ech.etat === "file") {
+    if (ech.etat === "recherche") {
       if (!present(s, e, now)) { annuler(s, ech.eleve, now); continue; }
       chercher(s, ech, now, rng);
     } else if (ech.etat === "verification") {
@@ -254,7 +276,7 @@ export function relancer(s, id, now, rng) {
 export function annuler(s, id, now) {
   const e = s.eleves[id];
   const ech = e && e.echangeId ? s.echanges[e.echangeId] : null;
-  if (!ech || !["recherche", "file", "verification", "confirme"].includes(ech.etat)) return { ok: false };
+  if (!ech || !["recherche", "verification", "confirme"].includes(ech.etat)) return { ok: false };
   if (ech.correcteur) liberer(s, ech.correcteur);
   ech.etat = "annule";
   liberer(s, id);
@@ -299,6 +321,7 @@ export function donnerAvis(s, id, verdict, commentaire, now) {
   c.corrections++;
   c.derniereCorrection = now;
   s.paires.push(cle(c.id, e.id));
+  s.pairesDernier[cle(c.id, e.id)] = now;
   liberer(s, c.id);
   liberer(s, e.id);
   e.depuisPtp = 0;

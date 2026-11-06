@@ -1,10 +1,10 @@
 # Programme PTP : le vrai système de tirage des correcteurs
 
-Document de travail, version 2 (corrigée après deux relectures : une technique, une de conformité à la demande).
+Document de travail, version 3 : les points du §10 sont tranchés (décisions de l'équipe après relecture de la version 2).
 
 **La demande** : pas un simulateur, mais **le programme lui-même**, avec une page HTML, qui choisit **automatiquement** qui corrige qui, qui permet de **voir qui est avancé**, et qui évite que ce soient **toujours les mêmes personnes**. Inspiration : l'évaluation par les pairs de l'école 42.
 
-**Convention** : tout ce qui est marqué *(proposition)* est un choix à valider, pas une décision. Tout ce qui est marqué *(écart README)* s'éloigne du README §6 et doit être tranché.
+**Convention** : tout ce qui est marqué *(proposition)* est un choix encore à valider ; *(à régler au pilote)* désigne une valeur provisoire. Les décisions sont résumées au §10.
 
 Sources : README §6, §8, §9, §14, §16, §19 ; `docs/serveur-et-comptes.md` (PR #51).
 
@@ -26,7 +26,7 @@ Une page montre en direct **qui est connecté, qui en est où, qui est en échan
 | Monnaie : points gagnés en évaluant, dépensés en se faisant évaluer | **Compteur d'équité** par élève, sans monnaie visible | Tout le monde explique à peu près autant, sans « acheter » son tour |
 | L'évaluateur a déjà fait le projet | Pas obligé d'avoir fait l'exo | C'est l'explication orale qui compte (README §6) |
 | Verdict validé / non validé | **Avis**, jamais un verdict | Feedback non punitif (README §6) |
-| Les évaluateurs disponibles reviennent souvent | **Tirage varié** : paires non répétées, plafond, tirage pondéré | Objectif de la demande : pas toujours les mêmes |
+| Les évaluateurs disponibles reviennent souvent | **Tirage varié** : malus de paire qui s'atténue, plafond, tirage pondéré | Objectif de la demande : pas toujours les mêmes |
 
 ## 3. Ce que le programme sait de chaque élève
 
@@ -37,7 +37,7 @@ Une page montre en direct **qui est connecté, qui en est où, qui est en échan
 | Déclenchement en attente (oui/non) | `ptp_counters` | Savoir si le prochain exo éligible donne lieu à un échange |
 | Exos validés depuis le dernier PTP | `ptp_counters` | Probabilité de déclenchement (table README §6) |
 | Avancement (exos validés au total, dernier exo) | `progress` | **Afficher** qui est avancé (§4.3) |
-| Classe (une seule année par classe), salle | `cohorts`, `sessions_pool` | Portée du tirage (§5.5), affichage |
+| Classe (une seule année par classe), salle | `cohorts`, `sessions_pool` | Affichage et bonus d'année (le tirage porte sur toutes les classes, §5.5) |
 | Corrections faites, dernière correction, partenaires | `ptp_exchanges` | Équité et anti-répétition |
 
 ## 4. Les écrans
@@ -53,15 +53,15 @@ Une page montre en direct **qui est connecté, qui en est où, qui est en échan
 
 ### 4.3 Tableau de bord : voir qui est avancé
 - Liste des élèves **connectés dans la session**, avec : avancement (nombre d'exos validés, dernier exo), état (libre, en échange, gelé, inactif), nombre de corrections faites, dernière correction.
-- **File d'attente** et **alertes** : correcteur qui ne vient pas, échange qui traîne, personne de disponible.
+- **Recherches en cours** et **alertes** : correcteur qui ne vient pas, échange qui traîne, échanges reportés ou perdus, échanges en cours par rapport au plafond (§6.3).
 - **Équité en direct** : corrections par heure de présence. Si quelqu'un est trop sollicité, ou jamais, ça se voit.
-- *(proposition)* **Visible des profs seulement.** Hypothèse de ma part : ta demande ne précise pas qui voit. Une version simplifiée pour les élèves (« 12 connectés ») reste possible. Pas de classement public, pour ne pas comparer les élèves (cohérent avec README §7 : ne pas surcharger les élèves de tête).
+- **Visible des profs seulement** (décidé). Pas de classement public, pour ne pas comparer les élèves (cohérent avec README §7 : ne pas surcharger les élèves de tête).
 
 ## 5. Le choix du correcteur
 
 ### 5.1 Qui est candidat
 Tous ces critères à la fois :
-- connecté dans une session ouverte, avec un signal de moins de **90 s** *(proposition ; 60 s est trop serré avec une interrogation de 5 à 10 s et des onglets en arrière-plan)* ;
+- connecté dans une session ouverte, avec un signal de moins de **90 s** *(à régler au pilote ; 60 s est trop serré avec une interrogation de 5 à 10 s et des onglets en arrière-plan)* ;
 - état d'élève **libre** (ni en recherche, ni réservé, ni en échange) ;
 - pas l'élève qui demande ;
 - pas un correcteur déjà libéré pour cet échange (échec de la vérification d'activité).
@@ -78,44 +78,32 @@ Chaque candidat reçoit un score **toujours positif**. Tous les poids vivent dan
 | `base` : minutes depuis sa dernière correction | de 1 à 10 (10 = plafond, atteint après 60 min ; un correcteur jamais utilisé vaut 10) | Plafonné, sinon un arrivant récent écrase tout le monde |
 | Équité : corrections **par heure de présence** sous la moyenne | bonus +0,3 | En valeur relative : un élève arrivé tard n'est pas submergé |
 | Autre année que l'élève | bonus +0,2 | Préférence **légère** (README §6), ignorée si le pool est petit. **Ne joue que si plusieurs classes sont mélangées** : dans une classe, tout le monde a la même année |
-| Même classe que l'élève | bonus +0,5 | Quand le pool est élargi (§5.5) : le correcteur se déplace moins |
-| Paire récente : déjà ensemble dans cette session | malus ×0,1 | Fenêtre : la session entière |
+| Paire déjà ensemble | malus ×0,1 juste après l'échange, **qui s'atténue avec le temps** (la moitié du malus disparaît après 1 h) | Une paire n'est jamais interdite : faible probabilité d'abord, plus forte longtemps après. Valeurs à régler au pilote |
 | A déjà corrigé il y a moins de 15 min | malus ×0,3 | « Pas deux d'affilée » |
-| Avancement | **désactivé par défaut** (§5.4) | |
+| Avancement | **ne compte pas** (§5.4) | |
 
 Le plancher de 0,05 évite un score nul ou négatif, ce qui rendrait le tirage pondéré impossible.
 
 ### 5.3 Pas toujours les mêmes : le tirage pondéré
 Prendre le meilleur score donnerait toujours les mêmes personnes, dans le même ordre. Le programme :
 1. calcule le score de chaque candidat ;
-2. garde les **N meilleurs**, avec N = min(6, nombre de candidats) *(proposition ; « la moitié du pool » donnerait 50 candidats à 100 connectés, donc aucune concentration)* ;
+2. garde les **N meilleurs**, avec N = min(6, nombre de candidats) *(à régler au pilote ; « la moitié du pool » donnerait 50 candidats à 100 connectés, donc aucune concentration)* ;
 3. tire **un seul** au hasard, avec une probabilité proportionnelle à son score.
 
-Règles complémentaires *(propositions)* :
-- **Plafond de corrections par heure de présence** pour un même correcteur : 3 par session pour commencer.
-- **Une paire ne se répète pas dans la session**, sauf si le pool est trop petit.
-- **Relâchement quand le pool est petit** (moins de 6 candidats, cf. README §19). Les contraintes tombent dans cet ordre : d'abord « paire déjà vue », puis « pas deux d'affilée », puis le plafond, et la préférence d'année en dernier.
+Règles complémentaires :
+- **Plafond de corrections** pour un même correcteur : 3 par session pour commencer *(à régler au pilote)*.
+- **Une paire peut se répéter**, avec un malus qui s'atténue dans le temps (§5.2).
+- **Relâchement quand le pool est petit** (moins de 6 candidats, cf. README §19). Le malus de paire et la préférence d'année sont ignorés, et le plafond tombe si personne n'est sous le plafond.
 
 Le tirage est **serveur uniquement** : le jet aléatoire n'est jamais fait dans le navigateur.
 
-### 5.4 L'avancement compte-t-il ? *(écart README, à trancher)*
-Le README dit que le correcteur n'a pas besoin d'avoir fait l'exo. « Voir qui est avancé » n'oblige donc pas à s'en servir pour choisir.
+### 5.4 L'avancement ne compte pas *(décidé)*
+Le README dit que le correcteur n'a pas besoin d'avoir fait l'exo. L'avancement est **affiché** (§4.3) mais n'entre ni dans le score ni dans le départage. Cela évite de surcharger les élèves de tête (README §7).
 
-1. **Ne pas en tenir compte** : conforme au README, simple. **Valeur par défaut recommandée.**
-2. **Départage à égalité seulement** : si deux scores sont presque identiques, préférer le plus avancé.
-3. **Bonus au plus avancé** : risque de surcharger les élèves de tête, que le README §7 veut éviter. Et « plus avancé » est flou entre années, car les modules diffèrent.
-4. **Obligation d'avoir validé l'exo** : proche de 42, mais impossible pour le premier de la session. À garder hors périmètre.
+### 5.5 Portée du tirage : toutes les classes *(décidé)*
+Comme le README §6 : le correcteur est tiré parmi **toutes les classes** de toutes les sessions ouvertes, sans préférence de classe et sans seuil de correcteurs libres. Le bonus « autre année » ne joue que si plusieurs années sont connectées.
 
-### 5.5 Portée du tirage : la classe d'abord *(écart README, à trancher)*
-Une classe ne contient qu'une seule année : le bonus « autre année » ne sert donc que si plusieurs classes sont ouvertes en même temps. Le README tire parmi toutes les classes ; on propose de **commencer par la classe** (le correcteur se déplace peu), puis d'élargir quand elle est trop petite.
-
-| Réglage | Comportement |
-|---|---|
-| **la classe, puis les autres si elle est petite** *(proposition, valeur par défaut)* | Si la classe a **6 correcteurs libres ou plus**, on ne sort pas de la classe. Sinon, on ajoute les autres classes, avec une préférence pour la classe de l'élève. |
-| la classe seulement | Jamais d'autre classe. Si personne n'est libre dans la classe : file courte (2 min), puis report. |
-| toutes les classes | Comme le README : toutes les classes ouvertes dès le départ. |
-
-**Nombre impair ou petite classe.** Un échange occupe deux personnes libres : avec un nombre impair, il en reste simplement une libre, sans blocage. Dans une classe de 3, si deux sont en échange, la troisième passe en file courte puis son échange est reporté sans la geler (§6.3). Dans une petite classe, les règles anti-répétition se relâchent, donc les mêmes paires reviennent : seul l'élargissement à d'autres classes y remédie.
+**Nombre impair ou petite classe.** Un échange occupe deux personnes libres : avec un nombre impair, il en reste simplement une libre, sans blocage. Comme le tirage porte sur tous les connectés, une petite classe n'est plus un cas particulier.
 
 ## 6. Déroulé et états
 
@@ -131,16 +119,15 @@ Il faut les séparer, sinon la logique se mélange.
 2. Si `declenche`, l'échange a lieu **au prochain exo éligible**.
 3. Le compteur repart à 0 quand l'échange est **terminé**. Un exo en attente d'avis compte comme validé ; en cas d'avis négatif, le refaire ne rajoute rien au compteur.
 
-### 6.3 Cas « personne de disponible » *(écart README, à trancher)*
-Le README se contredit : « le tirage est reporté, l'élève n'attend pas » d'un côté, « file d'attente, puis appel du prof » de l'autre. Proposition :
-
+### 6.3 Cas « personne de disponible » *(décidé)*
 | Situation | Que fait le programme |
 |---|---|
-| **Aucun candidat connecté** | On **reporte sans geler** l'élève. `declenche` reste vrai, on réessaie au prochain exo éligible. |
-| **Candidats connectés mais tous occupés** | File d'attente courte (**2 min**) avec écran gelé, puis report sans geler. |
+| **Aucun autre élève connecté** | On **reporte sans geler** l'élève. `declenche` reste vrai, on réessaie au prochain exo éligible. |
+| **Plafond d'échanges en cours atteint** | Même chose : report sans geler. |
+| **Recherche sans résultat** (aucun correcteur libre ou qui répond) | Recherche d'environ **2 min** avec écran gelé, puis l'échange est **perdu** : pas de report, le compteur repart à 0 et l'élève passe à l'exo suivant. |
 | Échange **déjà confirmé** qui traîne (correcteur absent, 10 min) | Appel du prof. |
 
-Ainsi, avec 2 élèves connectés, personne ne reste gelé jusqu'à l'arrivée d'un prof.
+**Plafond d'échanges en cours** = connectés (tous comptes, toutes séances) ÷ 5, arrondi au supérieur. Exemple : 17 connectés, 4 échanges au maximum. Les absents (signal périmé) ne sont pas comptés. Un échange en recherche compte déjà. Le plafond évite le cas « présents mais tous occupés » : au plus 40 % des connectés sont mobilisés. La recherche de 2 min reste le filet de sécurité si, malgré cela, aucun correcteur ne répond.
 
 ### 6.4 Annulation *(proposition)*
 « Annuler » ne doit pas servir à esquiver l'explication :
@@ -157,11 +144,13 @@ exo validé ──> jet de probabilité ──non──> rien
 exo éligible terminé
         |
         v
-   RECHERCHE ──aucun candidat──> report sans geler
-        |                  \──tous occupés──> file courte (2 min) ──> report
+   personne de connecté ou plafond atteint ──> report sans geler
+        |
+        v
+   RECHERCHE (~2 min) ──rien de trouvé──> PERDU (pas de report, exo suivant)
         | candidat réservé (verrou)
         v
-   VÉRIFICATION (30 s) ──pas de réponse──> libéré, nouveau tirage (3 essais max, puis file courte)
+   VÉRIFICATION (30 s) ──pas de réponse──> libéré, nouveau tirage (dans les 2 min de recherche)
         |
         v
    CONFIRMÉ (code valable 5 min, régénéré s'il expire)
@@ -232,7 +221,7 @@ Index utiles : `(etat, deadline)`, `(user_id, date)`, `attendance.derniere_activ
 | **1. Page de démo** | Une page HTML (nom à choisir) qui lit des élèves dans un fichier JSON, affiche le tableau de bord et un bouton « cet élève termine un exo ». | Non |
 | **2. Serveur** | Compte, présence, progression en base (PR #51). | Oui |
 | **3. Échange réel** | Gel, code à 6 chiffres, avis, écrans élève et correcteur. | Oui |
-| **4. Cas limites** | Correcteur absent, file courte, appel du prof, fin de session. | Oui |
+| **4. Cas limites** | Correcteur absent, recherche de 2 min, appel du prof, fin de session. | Oui |
 | **5. Pilote** | 10 à 15 volontaires (README §19) ; réglage des valeurs. | Oui |
 
 Les étapes 0 et 1 se font sans attendre le serveur.
@@ -241,35 +230,38 @@ Les étapes 0 et 1 se font sans attendre le serveur.
 
 ## 9. Test à 4 sessions
 
-4 élèves (**A, B, C, D**) connectés en même temps : c'est un **petit pool**, donc le test vérifie surtout que les règles se relâchent correctement. Tu peux ouvrir 4 sessions (4 navigateurs, ou 4 profils) et suivre ce scénario. Les étapes 0 et 1 existent (dossier `prototypes/ptp/`) : ce scénario est couvert par `ptp-logique.test.mjs` (cas 1 à 12) et se rejoue à la main avec la démo à onglets.
+4 élèves (**A, B, C, D**) connectés en même temps : c'est un **petit pool**, donc le test vérifie surtout que les règles se relâchent correctement. Tu peux ouvrir 4 sessions (4 navigateurs, ou 4 profils) et suivre ce scénario. Les étapes 0 et 1 existent (dossier `prototypes/ptp/`) : ce scénario est couvert par `ptp-logique.test.mjs` (cas 1 à 12 ; le plafond du cas 13 par les tests P1 à P5) et se rejoue à la main avec la démo à onglets.
 
 | # | Situation de départ | Action | Résultat attendu |
 |---|---|---|---|
 | 1 | A, B, C, D libres, connectés | A termine un exo avec `declenche` | Un des trois autres est tiré, jamais A |
 | 2 | Idem, 20 tirages d'affilée (compteurs remis à zéro entre chaque) | Mesure | Chacun des trois autres est tiré environ le même nombre de fois, pas toujours le même |
 | 3 | A est en échange avec B | C termine un exo avec `declenche` | Seul D est candidat |
-| 4 | A est en échange avec B, C est en échange avec D | Un élève libre ? Aucun : A termine encore un exo | Candidats tous occupés : file de 2 min, puis report sans geler |
+| 4 | A est en échange avec B, C est en échange avec D (cas rare, normalement évité par le plafond) | Aucun élève libre : A termine encore un exo | Recherche de 2 min, puis échange perdu : A passe à l'exo suivant |
 | 5 | Seul A est connecté | A termine un exo avec `declenche` | Aucun candidat connecté : report sans geler, `declenche` reste vrai |
-| 6 | A et B se retrouvent déjà dans la session | A demande encore, B et D disponibles | D est préféré (paire non répétée) |
+| 6 | A et B se sont déjà retrouvés (récemment) | A demande encore, B et D disponibles | D est nettement préféré (malus de paire) |
 | 7 | A et B sont les deux seuls libres | A demande, B a déjà corrigé A | B est tiré quand même (relâchement du pool) |
 | 8 | A et B demandent **au même instant** | Les deux demandes arrivent ensemble | Deux échanges distincts, ou l'un des deux reporté ; jamais « A corrige B et B corrige A » |
 | 9 | C est tiré mais ne répond pas à la vérification de 30 s | Attendre | C est libéré, D est tiré à la place |
 | 10 | Correcteur confirmé qui ne vient pas | Attendre 10 min | Appel du prof |
 | 11 | A annule pendant la recherche | A annule | `declenche` reste vrai, annulation journalisée, exo suivant bloqué |
 | 12 | A ferme l'onglet en plein échange | Fermer | L'échange expire, B est libéré |
+| 13 | 17 connectés, 4 échanges déjà en cours | Un cinquième élève termine un exo avec `declenche` | Plafond atteint : report sans geler, `declenche` reste vrai |
 
-Pour le test à 4 vraies sessions, les cas 1, 3, 8, 9 et 12 sont les plus parlants. Les autres (2, 5, 6, 7) se vérifient mieux avec les cas de test JSON de l'étape 0.
+Avec 4 connectés, le plafond est de 1 échange (4 ÷ 5, arrondi au supérieur) : les cas 3 et 8, qui demandent deux échanges en même temps, se testent avec au moins 6 connectés ou en levant le plafond (`diviseurPlafond: 1`). Les cas 1, 9 et 12 restent les plus parlants à 4 vraies sessions. Les autres (2, 5, 6, 7, 13) se vérifient mieux avec les cas de test JSON de l'étape 0.
 
 ---
 
-## 10. À trancher
+## 10. Décisions
 
-1. **L'avancement compte-t-il** pour choisir le correcteur (§5.4) ? Recommandation : non par défaut.
-2. **Cas « personne de disponible »** (§6.3) : report sans geler pour « aucun candidat », file de 2 min pour « tous occupés » ? Il faudra aussi corriger le README, qui se contredit.
-3. **Valeurs proposées** : signal de 90 s, N = 6, plafond de 3 par session, pénalités de paire et de répétition, file de 2 min. À régler au pilote.
-4. **Une paire ne se répète jamais** dans la session, ou seulement pas deux fois de suite ?
-5. **Qui voit le tableau de bord** : profs seulement (hypothèse), ou aussi une version élève ?
-6. **Annulation** (§6.4) : le déclenchement reste en attente, d'accord ?
-7. **Écrire la logique en JavaScript puis en PHP, ou directement en PHP** ? Si on commence en JavaScript (pour la page de démo sans serveur), les cas de test JSON communs sont indispensables.
-8. **Portée du tirage** (§5.5) : la classe d'abord puis les autres classes si elle est petite (proposition), la classe seulement, ou toutes les classes comme le README ? Le seuil de « classe trop petite » est de 6 correcteurs libres.
-9. **Issue #23** : elle demande un simulateur. Le script `simuler.mjs` y répond ; la logique et la démo vont au-delà. Reformuler l'issue ou la laisser telle quelle est un choix à toi.
+1. **Avancement** : ne compte pas dans le choix du correcteur (§5.4).
+2. **Personne de disponible** (§6.3) : si personne n'est connecté, report sans geler l'écran. Le cas « présents mais tous occupés » ne doit pas arriver, car le nombre d'échanges en cours est plafonné à connectés ÷ 5, arrondi au supérieur (17 connectés : 4 échanges). Les absents ne comptent pas. La file de 2 min est remplacée par une recherche d'environ 2 min : si aucun correcteur n'est trouvé, l'élève passe à l'exo suivant.
+3. **Valeurs** (signal de 90 s, N = 6, plafond de 3 corrections, pénalités) : à régler au pilote.
+4. **Paire répétée** : autorisée, avec une pénalité qui s'atténue dans le temps (§5.2).
+5. **Tableau de bord** : profs seulement (§4.3).
+6. **Échange non trouvé après la recherche** : perdu, pas de report (§6.3).
+7. **Langage** : logique en JavaScript d'abord (démo sans serveur), puis réécriture en PHP avec des cas de test JSON communs (§8, étape 0).
+8. **Portée du tirage** : toutes les classes, comme le README ; le seuil de 6 correcteurs libres disparaît (§5.5).
+9. **Issue #23** : reformulée en « Prototype du tirage PTP (simulation, logique, démo) » et fermée avec cette PR.
+
+**Encore ouvert** : l'annulation (§6.4) n'a pas été revue ; la proposition (le déclenchement reste en attente) tient jusqu'à nouvel ordre.

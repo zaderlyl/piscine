@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   nouvelEtat, rejoindre, validerExo, tick, confirmer, saisirCode, donnerAvis, annuler,
-  relancer, cloreParProf, probabilite, tirerPondere, battement, scorer,
+  relancer, cloreParProf, probabilite, tirerPondere, battement, scorer, plafondEchanges, malusPaire,
 } from "./ptp-logique.js";
 
 // Générateur pseudo-aléatoire déterministe (injecté, pour des tests reproductibles)
@@ -60,6 +60,7 @@ test("2. 60 tirages : chacun des trois autres est tiré, pas toujours le même",
 
 test("3. A et B en échange : C demande, seul D est candidat", () => {
   const { s, t0 } = session();
+  s.config.diviseurPlafond = 1; // pas de plafond d'échanges : ce test porte sur autre chose (voir P1 à P5)
   const rng = graine(2);
   validerExo(s, "A", t0, rng);
   const e1 = s.echanges[s.eleves.A.echangeId];
@@ -71,22 +72,24 @@ test("3. A et B en échange : C demande, seul D est candidat", () => {
   assert.equal(e2.correcteur, reste[1]);
 });
 
-test("4. tous occupés : file courte puis report sans geler", () => {
+test("4. candidats tous occupés (cas rare, le plafond l'évite) : recherche de 2 min, puis échange perdu", () => {
   const { s, t0 } = session();
   const rng = graine(3);
   for (const id of "BCD") s.eleves[id].etat = "en_echange"; // connectés mais tous occupés
   validerExo(s, "A", t0, rng);
   const ech = s.echanges[s.eleves.A.echangeId];
-  assert.equal(ech.etat, "file");
-  assert.equal(s.eleves.A.etat, "en_recherche"); // gelé pendant la file courte
+  assert.equal(ech.etat, "recherche");
+  assert.equal(s.eleves.A.etat, "en_recherche"); // gelé pendant la recherche
   for (const id of "ABCD") battement(s, id, t0 + 100000);
   tick(s, t0 + 100000, rng);
-  assert.equal(s.echanges[ech.id].etat, "file");
+  assert.equal(s.echanges[ech.id].etat, "recherche");
   for (const id of "ABCD") battement(s, id, t0 + 130000);
   tick(s, t0 + 130000, rng);
-  assert.equal(s.echanges[ech.id].etat, "reporte");
+  assert.equal(s.echanges[ech.id].etat, "perdu");
   assert.equal(s.eleves.A.etat, "libre");
   assert.equal(s.eleves.A.exoEnAttente, false);
+  assert.equal(s.eleves.A.declenche, false, "perdu : pas de report");
+  assert.equal(s.eleves.A.exoIdx, 1, "il passe à l'exo suivant");
 });
 
 test("5. seul connecté : report sans geler, le déclenchement reste", () => {
@@ -122,6 +125,7 @@ test("7. pool de 2 : B est tiré même si la paire s'est déjà vue", () => {
 test("8. deux demandes simultanées : jamais A corrige B et B corrige A", () => {
   for (let i = 0; i < 100; i++) {
     const { s, t0 } = session();
+    s.config.diviseurPlafond = 1; // pas de plafond d'échanges : ce test porte sur autre chose (voir P1 à P5)
     const rng = graine(200 + i);
     validerExo(s, "A", t0, rng);
     validerExo(s, "B", t0, rng);
@@ -239,6 +243,7 @@ test("C1. classe de 5 (nombre impair) : jamais soi-même, tous les autres sont t
 
 test("C2. classe de 5 : deux échanges en même temps laissent un élève libre, sans blocage", () => {
   const { s, t0 } = classes({ "MMI1-A": [1, ["A", "B", "C", "D", "E"]] });
+  s.config.diviseurPlafond = 1; // pas de plafond d'échanges : ce test porte sur autre chose (voir P1 à P5)
   const rng = graine(301);
   validerExo(s, "A", t0, rng);
   validerExo(s, "B", t0, rng);
@@ -250,61 +255,37 @@ test("C2. classe de 5 : deux échanges en même temps laissent un élève libre,
   assert.equal(libres.length, 1);
 });
 
-test("C3. classe de 3 : A et B sont pris, C demande : file courte puis report sans geler", () => {
+test("C3. classe de 3 : A et B sont pris, C demande : recherche de 2 min, puis perdu (rare : le plafond l'évite)", () => {
   const { s, t0 } = classes({ "MMI1-A": [1, ["A", "B", "C"]] });
   const rng = graine(302);
   s.eleves.A.etat = "en_echange";
   s.eleves.B.etat = "en_echange";
   validerExo(s, "C", t0, rng);
   const ech = s.echanges[s.eleves.C.echangeId];
-  assert.equal(ech.etat, "file");
+  assert.equal(ech.etat, "recherche");
   for (const id of "ABC") battement(s, id, t0 + 130000);
   tick(s, t0 + 130000, rng);
-  assert.equal(ech.etat, "reporte");
+  assert.equal(ech.etat, "perdu");
   assert.equal(s.eleves.C.etat, "libre");
 });
 
-test("C4. grande classe (8 libres) : on ne sort jamais de la classe", () => {
-  const { s, t0 } = classes({
-    "MMI1-A": [1, ["A", "B", "C", "D", "E", "F", "G", "H"]],
-    "MMI2-A": [2, ["X", "Y", "Z"]],
-  });
-  const rng = graine(303);
-  for (let i = 0; i < 100; i++) assert.equal(corrigeur(s, "A", t0, rng).classe, "MMI1-A");
-});
-
-test("C5. petite classe (3) : on élargit aux autres classes, la classe reste préférée", () => {
-  const { s, t0 } = classes({
-    "MMI1-A": [1, ["A", "B", "C"]],
-    "MMI2-A": [2, ["P", "Q", "R", "S", "T", "U"]],
-  });
-  const rng = graine(304);
-  let memeClasse = 0, autres = 0;
-  for (let i = 0; i < 400; i++) corrigeur(s, "A", t0, rng).classe === "MMI1-A" ? memeClasse++ : autres++;
-  assert.ok(autres > 0, "les autres classes sont tirées parfois");
-  assert.ok(memeClasse > autres * 0.3, `la classe est préférée (${memeClasse} contre ${autres})`);
-});
-
-test("C6. portée « classe_seule » : jamais une autre classe ; si la classe est vide, file courte", () => {
-  const { s, t0 } = classes({ "MMI1-A": [1, ["A", "B"]], "MMI2-A": [2, ["P", "Q", "R", "S", "T", "U"]] });
-  s.config.portee = "classe_seule";
-  const rng = graine(305);
-  for (let i = 0; i < 50; i++) assert.equal(corrigeur(s, "A", t0, rng).id, "B");
-  s.eleves.B.etat = "en_echange";
-  validerExo(s, "A", t0, rng);
-  assert.equal(s.echanges[s.eleves.A.echangeId].etat, "file");
-});
-
-test("C7. portée « toutes » : les autres classes sont tirées même quand la classe est grande", () => {
+test("C4. toutes les classes : les autres classes sont tirées même quand la classe est grande", () => {
   const { s, t0 } = classes({
     "MMI1-A": [1, ["A", "B", "C", "D", "E", "F", "G", "H"]],
     "MMI2-A": [2, ["P", "Q", "R", "S", "T", "U", "V", "W"]],
   });
-  s.config.portee = "toutes";
   const rng = graine(306);
   let autres = 0;
   for (let i = 0; i < 200; i++) if (corrigeur(s, "A", t0, rng).classe !== "MMI1-A") autres++;
   assert.ok(autres > 20, `autres classes tirées ${autres} fois sur 200`);
+});
+
+test("C5. classe de 2 : le correcteur vient d'une autre classe, sans seuil de correcteurs libres", () => {
+  const { s, t0 } = classes({ "MMI1-A": [1, ["A", "B"]], "MMI2-A": [2, ["P", "Q", "R", "S", "T", "U"]] });
+  const rng = graine(305);
+  let autres = 0;
+  for (let i = 0; i < 100; i++) if (corrigeur(s, "A", t0, rng).classe === "MMI2-A") autres++;
+  assert.ok(autres > 50, `autre classe tirée ${autres} fois sur 100`);
 });
 
 test("C8. dans une classe d'une seule année, le bonus d'année ne joue pas", () => {
@@ -342,4 +323,86 @@ test("R3. déclenchement en attente : l'échange a lieu au prochain exo éligibl
   assert.equal(Object.keys(s.echanges).length, 0);
   validerExo(s, "A", t0 + 1000, graine(22), true);
   assert.equal(Object.keys(s.echanges).length, 1);
+});
+
+// ---------- Plafond d'échanges en cours, recherche de 2 min, paires ----------
+
+function connectes(n, annee = 1) {
+  const s = nouvelEtat();
+  s.config.toujours = true;
+  const t0 = 1_000_000;
+  for (let i = 0; i < n; i++) rejoindre(s, { id: "P" + i, prenom: "P" + i, annee, classe: "MMI1-A" }, t0);
+  return { s, t0 };
+}
+
+test("P1. plafond = connectés ÷ 5, arrondi au supérieur (17 connectés : 4 échanges)", () => {
+  const { s, t0 } = connectes(17);
+  assert.equal(plafondEchanges(s, t0), 4);
+  assert.equal(plafondEchanges(connectes(15).s, 1_000_000), 3);
+  assert.equal(plafondEchanges(connectes(16).s, 1_000_000), 4);
+  assert.equal(plafondEchanges(connectes(1).s, 1_000_000), 1);
+});
+
+test("P2. les absents ne comptent pas dans le plafond", () => {
+  const { s, t0 } = connectes(17);
+  for (let i = 0; i < 7; i++) s.eleves["P" + i].dernierSignal = t0 - 10 * 60000; // 7 absents : 10 connectés
+  assert.equal(plafondEchanges(s, t0), 2);
+});
+
+test("P3. au plafond : l'échange est reporté sans geler, le déclenchement reste", () => {
+  const { s, t0 } = connectes(10); // plafond 2
+  const rng = graine(40);
+  validerExo(s, "P0", t0, rng);
+  validerExo(s, "P1", t0, rng);
+  assert.equal(s.eleves.P0.etat, "en_recherche");
+  const libre = Object.values(s.eleves).find((x) => x.etat === "libre").id;
+  validerExo(s, libre, t0, rng);
+  assert.equal(s.eleves[libre].etat, "libre", "pas gelé");
+  assert.equal(s.eleves[libre].exoIdx, 1);
+  assert.equal(Object.values(s.echanges).filter((x) => x.etat === "reporte").length, 1);
+  s.config.toujours = false;
+  const autre = Object.values(s.eleves).find((x) => x.etat === "libre" && x.id !== libre);
+  autre.declenche = true;
+  validerExo(s, autre.id, t0, rng);
+  assert.equal(autre.declenche, true, "report : le déclenchement reste");
+});
+
+test("P4. le nombre d'échanges en cours ne dépasse jamais le plafond", () => {
+  const { s, t0 } = connectes(17);
+  const rng = graine(41);
+  for (let i = 0; i < 17; i++) validerExo(s, "P" + i, t0, rng);
+  const actifs = Object.values(s.echanges).filter((e) => ["recherche", "verification", "confirme", "en_cours"].includes(e.etat));
+  assert.equal(actifs.length, 4);
+});
+
+test("P5. correcteur qui ne répond pas : la recherche continue jusqu'à 2 min, puis perdu", () => {
+  const { s, t0 } = session(["A", "B"], [1, 1]);
+  const rng = graine(42);
+  validerExo(s, "A", t0, rng); // B est tiré, ne répond jamais
+  const ech = s.echanges[s.eleves.A.echangeId];
+  assert.equal(ech.etat, "verification");
+  for (const id of "AB") battement(s, id, t0 + 31000);
+  tick(s, t0 + 31000, rng);
+  assert.equal(ech.etat, "recherche", "plus personne à tirer : on attend");
+  for (const id of "AB") battement(s, id, t0 + 121000);
+  tick(s, t0 + 121000, rng);
+  assert.equal(ech.etat, "perdu");
+  assert.equal(s.eleves.B.etat, "libre");
+});
+
+test("P6. paire répétée : permise, malus fort juste après, de plus en plus faible ensuite", () => {
+  const { s, t0 } = session(["A", "B"], [1, 1]);
+  s.paires.push("A|B");
+  s.pairesDernier["A|B"] = t0;
+  const m = (dt) => malusPaire(s, "A", "B", t0 + dt);
+  assert.ok(Math.abs(m(0) - s.config.malusPaire) < 1e-9);
+  assert.ok(m(0) < m(30 * 60000) && m(30 * 60000) < m(3 * 3600000));
+  assert.ok(m(6 * 3600000) > 0.95, "longtemps après, la pénalité a presque disparu");
+  assert.equal(malusPaire(s, "A", "C", t0), 1, "une autre paire n'a aucun malus");
+});
+
+test("P7. un échange terminé enregistre la date de la paire", () => {
+  const { s, t0 } = session(["A", "B"], [1, 1]);
+  terminer(s, "A", t0 + 5000, graine(43));
+  assert.equal(s.pairesDernier["A|B"], t0 + 5000);
 });
