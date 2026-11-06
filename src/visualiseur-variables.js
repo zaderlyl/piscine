@@ -107,7 +107,8 @@ export function analyserScript(code) {
 }
 
 // Dessine une carte par variable, en attendant les valeurs
-export function afficherVariables(analyse) {
+// balisePresente : false si index.html ne contient pas <script src="script.js">
+export function afficherVariables(analyse, balisePresente = true) {
   panneau.replaceChildren();
 
   if (analyse.erreur) {
@@ -116,6 +117,14 @@ export function afficherVariables(analyse) {
     message.textContent = "Code incomplet : le panneau attend un script valide.";
     panneau.append(message);
     return;
+  }
+
+  if (!balisePresente && analyse.variables.length) {
+    const message = document.createElement("p");
+    message.className = "message";
+    message.textContent =
+      "Les valeurs n'apparaissent pas : ajoute <script src=\"script.js\"></script> dans index.html.";
+    panneau.append(message);
   }
 
   for (const variable of analyse.variables) {
