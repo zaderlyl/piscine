@@ -5,11 +5,14 @@ import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 
-
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
-import { marquerReussi, estReussi, chargerListeExos, exoSuivant} from "./progression.js";
-
+import {
+  marquerReussi,
+  estReussi,
+  chargerListeExos,
+  exoSuivant,
+} from "./progression.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -41,17 +44,18 @@ let minuteurTests = null;
 let minuteur = null;
 let testsExo = "";
 
-
-
 function arreterApercu() {
   enregistrerBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
   location.reload();
 }
 
+// validation + exo suivant
 
-
-
+function validerExo() {
+  marquerReussi(EXO);
+  afficherSuivant();
+}
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
@@ -120,8 +124,7 @@ boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
 
-
-// bouton "exo suvant" 
+// bouton "exo suvant"
 
 const boutonSuivant = document.createElement("button");
 boutonSuivant.textContent = "Exo suivant →";
@@ -134,15 +137,13 @@ function afficherSuivant() {
   boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));
 }
 
-boutonSuivant.addEventListener("click",()=> {
+boutonSuivant.addEventListener("click", () => {
   const params = new URLSearchParams(location.search);
   params.set("exo", suivant);
   location.search = params.toString();
 });
 
 afficherSuivant();
-
-
 
 afficherFichier("index.html");
 
@@ -157,21 +158,29 @@ if (localStorage.getItem(CLE_SUSPENDU)) {
 ecouterValeurs(apercu);
 
 // Barres pour agrandir ou réduire les colonnes et les panneaux de droite
-glissable(document.getElementById("separateur-v"), document.getElementById("editeur"), {
-  axe: "x",
-  variable: "--largeur-gauche",
-  min: 200,
-});
+glissable(
+  document.getElementById("separateur-v"),
+  document.getElementById("editeur"),
+  {
+    axe: "x",
+    variable: "--largeur-gauche",
+    min: 200,
+  },
+);
 glissable(document.getElementById("separateur-a"), apercu, {
   axe: "y",
   variable: "--h-apercu",
   min: 80,
 });
-glissable(document.getElementById("separateur-b"), document.getElementById("variables"), {
-  axe: "y",
-  variable: "--h-variables",
-  min: 60,
-});
+glissable(
+  document.getElementById("separateur-b"),
+  document.getElementById("variables"),
+  {
+    axe: "y",
+    variable: "--h-variables",
+    min: 60,
+  },
+);
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
@@ -182,11 +191,9 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
   if (!echecs.length && e.data.resultats.length) {
-    marquerReussi(EXO);
-    afficherSuivant();
+    validerExo();
   }
 });
-
 
 async function lancerPhp() {
   panneauResultats.textContent = "Exécution en cours...";

@@ -21,12 +21,13 @@ export function marquerReussi(exo){
 }
 
 
-export async function chargerListeExos(){
+export async function chargerListeExos() {
   try {
     const reponse = await fetch("../exos/index.json");
     return await reponse.json();
   } catch {
-    return[];
+    console.warn("Liste des exos introuvable (exos/index.json) : le bouton « Exo suivant » est désactivé.");
+    return [];
   }
 }
 
