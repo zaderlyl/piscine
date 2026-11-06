@@ -4,6 +4,7 @@ import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
+import { debloquerEmmet } from "./emmet.js";
 
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
@@ -157,6 +158,7 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
+  if (!echecs.length && testsExo) debloquerEmmet(exo.emmetDebloque);
 });
 
 
