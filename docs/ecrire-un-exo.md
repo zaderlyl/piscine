@@ -89,6 +89,28 @@ Règles : un message clair par test (l'élève le lit), et le code des tests ne 
 - Les titres de section sont exacts : `## Énoncé` (avec accents), pas `## Enonce`.
 - `emmet_debloque` : les abréviations Emmet débloquées quand l'exo est réussi. Facultatif.
 
+## Principes pédagogiques
+
+Ces principes sont posés sur les exos HTML 00 à 04. Ils sont provisoires : on les ajuste quand on a vu de vrais élèves les utiliser.
+
+### Rythme
+- **Une idée nouvelle par exo.** Le 00 apprend `p`, le 04 apprend `h1` à `h6`. Quand un exo en demande plusieurs, on le coupe.
+- **On montre avant d'expliquer.** Les premiers exos produisent un résultat visible dans l'aperçu. Les notions qui ne s'affichent pas (`title`, `charset`, `description`) arrivent plus tard, dans une vraie petite page.
+- **Un exo ne redemande pas une notion qu'il n'a pas enseignée.** Si un test exige quelque chose, le cours ou un exo précédent l'a introduit.
+
+### Difficulté
+- Le premier exo d'une notion est guidé. Les suivants laissent plus de liberté.
+- Un exo se fait en quelques minutes. Au-delà, il faut le couper.
+
+### Indices
+- **Un seul indice par exo** pour l'instant. Il oriente sans donner la réponse complète.
+- À reconsidérer (deux niveaux d'indices) quand on aura observé des élèves bloqués.
+
+### Retours à l'élève
+- **Un message d'erreur dit ce qu'il faut ajouter ou corriger** (« Ajoute un h1 avec le texte Bienvenue dans le body »), jamais seulement ce qui ne va pas.
+- Un seul message par test, court, sans jargon non vu en cours.
+- Une page vide n'est jamais considérée comme réussie.
+
 ## Avant de proposer ton exo
 
 - [ ] Le fichier est au bon endroit et nommé correctement.
