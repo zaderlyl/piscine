@@ -16,6 +16,7 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 - **Hébergement confirmé** : le serveur de l'IUT, avec phpMyAdmin pour administrer la base. Les versions de PHP et MySQL sont des versions standard récentes. Les fichiers sont déposés avec FileZilla (SFTP), sans `git pull` sur le serveur.
 - **Développement en local** : PHP et MySQL sur chaque poste, une base créée par un script SQL versionné. Le serveur de l'IUT sert pour la mise en ligne, pas pour développer.
 - **Filet local** : le `localStorage` reste en secours. Quand l'élève est connecté, la base fait foi ; sans serveur, l'app continue de marcher en local. Au premier login, la progression locale est envoyée au serveur.
+- **Comptes profs** : le code d'inscription ne crée que des comptes `eleve`. Un compte `prof` est créé à la main en base (phpMyAdmin).
 
 ## À trancher
 
@@ -28,14 +29,14 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 ```
 users
   id, email (unique), prenom, nom, mot_de_passe_hash,
-  role ('eleve' ou 'prof'), actif, cree_le
+  role ('eleve' ou 'prof'), actif, cree_le, derniere_connexion
 
 progression
   user_id, exo (par exemple « html/vanilla/04 »), reussi, date_reussite
   clé primaire : (user_id, exo)
 ```
 
-Les promos, les brouillons et le chrono viendront dans leurs propres tables, quand on les développera. L'identifiant d'exo est celui de `exos/index.json`, comme dans la progression locale.
+Les promos, les brouillons et le chrono viendront dans leurs propres tables, quand on les développera. La durée de vie des données (README §14 : suppression des comptes après 3 ans, prolongation d'un an, suppression anticipée) demandera aussi une date d'expiration et un lien avec la promo.
 
 ## Parcours à construire
 
@@ -46,6 +47,7 @@ Les promos, les brouillons et le chrono viendront dans leurs propres tables, qua
 
 ## Sécurité, dès le départ
 
+- Protection CSRF : cookie `SameSite=Lax` au minimum ; un jeton CSRF sur les requêtes qui modifient des données reste à décider.
 - Requêtes préparées (PDO) partout, jamais de requête construite à la main avec les données de l'utilisateur.
 - `password_hash` et `password_verify`, jamais de mot de passe en clair.
 - Cookie de session `HttpOnly` et `SameSite`, HTTPS en ligne.
@@ -69,11 +71,3 @@ Une fois ce document validé, un découpage possible (à ajuster) :
 5. Écrans de connexion et d'inscription dans l'interface.
 6. Migration de la progression locale au premier login.
 7. Documentation de l'installation locale.
-
-## Questions pour l'IUT
-
-Déjà répondu : versions standard récentes, dépôt par SFTP (FileZilla), phpMyAdmin disponible. Restent :
-
-- Le serveur peut-il envoyer des mails (confirmation d'inscription, mot de passe oublié) ?
-- Quelles règles s'appliquent à l'hébergement de données d'élèves ?
-- Qui assure la maintenance, et pendant combien de temps après les études ?
