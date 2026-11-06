@@ -22,6 +22,7 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 
 - **Format de l'API** : fichiers PHP simples qui reçoivent et renvoient du JSON, ou un framework. À discuter en équipe.
 - **Répartition du travail** : après la réflexion.
+- **Versions exactes de PHP et MySQL** : à relever sur le serveur de l'IUT (phpMyAdmin les affiche) et à noter ici, car elles décident de ce qu'on peut utiliser dans le code.
 - **Réponses de l'IUT restantes** : envoi de mails depuis le serveur, règles sur les données d'élèves, maintenance.
 
 ## Schéma de base (première proposition)
