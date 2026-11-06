@@ -11,8 +11,8 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 - **Premier morceau** : compte + progression en base. La progression de l'issue #30 devient la première donnée stockée côté serveur.
 - **Pile** : PHP, MySQL, sessions PHP (README section 15). Le serveur de l'IUT héberge la vraie application.
 - **Un seul serveur pour le front et l'API** : le HTML et le JS sont servis par le même serveur PHP que l'API. Pas de CORS, les cookies de session fonctionnent normalement. GitHub Pages ne sert plus qu'à la vitrine et aux prototypes.
-- **Inscription de test** : l'élève saisit son mail, son prénom, son nom, un mot de passe et un **code d'inscription universel** (`MMIpiscine`). La confirmation par mail et le code de promo viendront plus tard.
-- **Le code universel n'est pas dans le code versionné** : il est dans un fichier de configuration local (ignoré par Git), avec un fichier d'exemple dans le dépôt.
+- **Inscription de test** : l'élève saisit son mail, son prénom, son nom, un mot de passe et un **code d'inscription universel**. La confirmation par mail et le code de promo viendront plus tard.
+- **Le code universel n'est pas dans le code versionné** : il est dans un fichier de configuration local, `config.local.php`, ignoré par Git, avec un fichier d'exemple `config.exemple.php` versionné dans le dépôt
 - **Hébergement confirmé** : le serveur de l'IUT, avec phpMyAdmin pour administrer la base. Les versions de PHP et MySQL sont des versions standard récentes. Les fichiers sont déposés avec FileZilla (SFTP), sans `git pull` sur le serveur.
 - **Développement en local** : PHP et MySQL sur chaque poste, une base créée par un script SQL versionné. Le serveur de l'IUT sert pour la mise en ligne, pas pour développer.
 - **Filet local** : le `localStorage` reste en secours. Quand l'élève est connecté, la base fait foi ; sans serveur, l'app continue de marcher en local. Au premier login, la progression locale est envoyée au serveur.
@@ -62,7 +62,7 @@ Chaque membre a besoin de PHP et de MySQL (Homebrew, XAMPP ou Laragon). Le déta
 
 Une fois ce document validé, un découpage possible (à ajuster) :
 
-1. Base et configuration : script SQL, fichier de configuration d'exemple, connexion à MySQL.
+1. Base et configuration : script SQL, `config.exemple.php`, ajout de `config.local.php` au `.gitignore`, connexion à MySQL.
 2. Inscription avec le code universel.
 3. Connexion, déconnexion et session.
 4. API de la progression.
