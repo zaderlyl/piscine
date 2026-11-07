@@ -56,26 +56,35 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 
 ### 3.1. Rôle et approche pédagogique (R1.12)
 - **Choix du formalisme** : éviter la surcharge d'un pseudo-code universitaire artificiel ; les notions sont formalisées avec une syntaxe directe (compatible JavaScript épuré) ou en organigrammes visuels.
-- **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO/AFNOR) et à sa table de trace (état des variables ligne par ligne).
+- **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO 5807) et à sa table de trace (état des variables ligne par ligne).
 
-### 3.2. Types de données et mémoire
+### 3.2. Types de données, séquences et modèle mémoire
 - **Variables et affectation** :
   - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
   - Constantes (`const` par défaut) et variables réassignables (`let`).
   - Distinction entre l'affectation (`=`) et le test d'égalité stricte (`===`).
-- **Types primitifs fondamentaux** : nombres (entiers et flottants), chaînes de caractères, booléens (`true` / `false`).
+- **Le piège universel des flottants (norme IEEE 754)** :
+  - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
+  - Règle d'or pour le web (paniers d'achat, TVA, remises) : manipuler les montants en centimes entiers (`10 + 20 === 30`) ou utiliser un arrondi contrôlé (`Math.round()` ou tolérance `Number.EPSILON`).
+- **Chaînes de caractères comme séquences indexées** :
+  - Une chaîne est une séquence immuable indexée (`chaine[i]`, `.length`).
+  - Les mêmes algorithmes de parcours itératif s'appliquent pour valider un format, compter des occurrences ou extraire une sous-chaîne.
 - **Passage par valeur vs référence** :
-  - Les primitifs sont copiés par valeur.
-  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire (comprendre l'impact d'une mutation).
+  - Les primitifs (nombres, chaînes, booléens) sont copiés par valeur.
+  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire (comprendre l'impact direct d'une mutation).
 
 ### 3.3. Structures de contrôle fondamentales
-- **Branchements conditionnels** :
+- **Branchements conditionnels et clauses de garde** :
   - Alternatives `if`, `else`, et enchaînements `else if`.
   - Opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`).
   - Algèbre de Boole : opérateurs logiques ET (`&&`), OU (`||`) et NON (`!`), évaluation en court-circuit.
+  - *Pattern des clauses de garde* : exploiter le court-circuit pour sécuriser l'accès aux données (`if (joueur !== null && joueur.hp > 0)`) et tester les cas d'invalidation en tête de fonction avec un `return` anticipé pour aplatir le code et éliminer l'imbrication excessive de conditions.
 - **Itérations bornées (boucle `for`)** :
   - Répétition avec compteur : initialisation, condition d'arrêt, incrémentation (`i++`).
-  - Parcours d'intervalles numériques et d'indices de tableaux.
+  - Parcours d'intervalles numériques et d'indices de collections.
+- **La boucle à rebours (Reverse Loop)** :
+  - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
+  - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
 - **Itérations non bornées (boucle `while`)** :
   - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un état).
   - Gestion impérative de la progression pour éviter la boucle infinie.
@@ -93,36 +102,39 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **La pile d'appels (Call Stack)** :
   - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
 
-### 3.5. Les 6 patterns algorithmiques incontournables
-Ces 6 patrons de conception élémentaires constituent 90% des algorithmes du développement web et du multimédia :
+### 3.5. Les 7 patterns algorithmiques incontournables
+Ces 7 patrons de conception élémentaires constituent le socle de tout développement web et multimédia :
 
-1. **L'accumulation** :
+1. **La permutation de valeurs (Swap)** :
+   - Échanger deux états sans écraser la valeur d'origine : utilisation de la variable temporaire (`temp = a; a = b; b = temp;`) et sa transcription moderne en déstructuration (`[a, b] = [b, a]`).
+2. **L'accumulation** :
    - Initialiser un accumulateur neutre (`total = 0` ou `chaine = ""`), parcourir une séquence et agréger chaque élément (somme, moyenne, concaténation).
-2. **Le comptage sélectif** :
+3. **Le comptage sélectif** :
    - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
-3. **La recherche d'extremum (Minimum / Maximum)** :
+4. **La recherche d'extremum (Minimum / Maximum)** :
    - Initialiser le candidat sur le premier élément de la séquence (`max = tab[0]`), puis comparer itérativement avec les suivants.
-4. **La recherche séquentielle & drapeau (Flag booléen)** :
-   - Déterminer la présence d'un élément ou valider une règle globale via un booléen (`trouve = false`, mis à `true` avec arrêt anticipé `break`).
-5. **Le filtrage et partitionnement manuel** :
+5. **La recherche séquentielle sur collections d'objets (Flag & ID)** :
+   - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`) ou valider une règle globale via un booléen (`trouve = false`, mis à `true` avec arrêt anticipé `break`). Prépare directement `.find()` en JS et `WHERE id = ?` en SQL.
+6. **Le filtrage et partitionnement manuel** :
    - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
-6. **La détection géométrique d'intersection (AABB)** :
+7. **La détection géométrique d'intersection (AABB)** :
    - Algorithme d'intersection de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && ...`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser.
 
 ### 3.6. Robustesse et analyse de complexité
 - **Sensibilité à la complexité intuitive (Big-O)** :
-  - Comparer intuitivement la performance d'un parcours linéaire simple $O(n)$ et de deux boucles imbriquées $O(n^2)$ (ex: pourquoi comparer chaque élément à tous les autres fait ralentir un jeu).
+  - Comparer intuitivement la performance d'un parcours linéaire simple $O(n)$ et de deux boucles imbriquées $O(n^2)$ (ex: pourquoi tester chaque projectile contre chaque ennemi ralentit le jeu quand leur nombre augmente).
 - **Cas limites (Edge cases)** :
   - Traitement systématique des cas critiques : tableau vide (`.length === 0`), index hors limites (`undefined`), division par zéro.
   - Détection et prévention du décalage d'indice (« Off-by-one » : confondre `<` et `<=`).
 
 ### 3.7. Débogage, traçabilité et observation (R1.12)
-- **Organigrammes normalisés (ISO/AFNOR)** :
-  - Ovales/rectangles arrondis (Début / Fin).
-  - Parallélogrammes (Entrées / Sorties de données).
-  - Rectangles d'action (Instructions de calcul ou d'affectation).
-  - Losanges de décision (Conditions binaires avec branches Vrai / Faux).
-  - Flèches de boucle remontantes (visualisation du cycle itératif).
+- **Organigrammes normalisés (ISO 5807)** :
+  - Ovales/rectangles arrondis : Début / Fin.
+  - Parallélogrammes : Entrées / Sorties de données.
+  - Rectangles simples : Actions ou calculs élémentaires.
+  - Rectangles à double barre latérale verticale : Processus prédéfinis / Appels de fonctions (liaison avec la décomposition fonctionnelle).
+  - Losanges de décision : Conditions binaires avec branches Vrai / Faux.
+  - Flèches de boucle remontantes : Visualisation du cycle itératif.
 - **Table de trace manuelle** :
   - Remplir pas à pas un tableau à double entrée : numéro d'étape, ligne de code active, état de chaque variable, évaluation de la condition.
 - **Outils d'instrumentation moderne** :
