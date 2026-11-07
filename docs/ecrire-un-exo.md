@@ -91,25 +91,40 @@ Règles : un message clair par test (l'élève le lit), et le code des tests ne 
 
 ## Principes pédagogiques
 
-Ces principes sont posés sur les exos HTML 00 à 04. Ils sont provisoires : on les ajuste quand on a vu de vrais élèves les utiliser.
+Ces principes guident l'écriture de tous les exercices de la plateforme (HTML, CSS, JS, Git, etc.). Ils garantissent une progression fluide, bienveillante et sans frustration.
 
-### Rythme
-- **Une idée nouvelle par exo.** Le 00 apprend `p`, le 04 apprend `h1` à `h6`. Quand un exo en demande plusieurs, on le coupe.
-- **On montre avant d'expliquer.** Les premiers exos produisent un résultat visible dans l'aperçu. Les notions qui ne s'affichent pas (`title`, `charset`, `description`) arrivent plus tard, dans une vraie petite page.
-- **Un exo ne redemande pas une notion qu'il n'a pas enseignée.** Si un test exige quelque chose, le cours ou un exo précédent l'a introduit.
+### 1. Typologie des exercices
+Chaque module alterne trois types d'exercices :
+- **Base** : Découverte d'une seule notion nouvelle dans un cadre guidé (ex. : `04` pour les titres `h1` à `h6`).
+- **Imbriquer** : Combinaison de deux notions déjà apprises (ex. : `07` pour un titre contenant du gras `<h1><strong>...</strong></h1>`, ou un lien autour d'une image).
+- **Reproduire** : Mini-palier sans consigne de code détaillée (ex. : `10`). L'élève reproduit un résultat visuel d'après un modèle, en mobilisant ses acquis en autonomie.
 
-### Difficulté
-- Le premier exo d'une notion est guidé. Les suivants laissent plus de liberté.
-- Un exo se fait en quelques minutes. Au-delà, il faut le couper.
+### 2. Rythme et taille d'un pas
+- **Une seule idée nouvelle par exercice.** Le `00` apprend `p`, le `04` apprend `h1` à `h6`. Si un exercice demande d'assimiler plusieurs notions complexes d'un coup, on le coupe.
+- **On montre avant d'expliquer (résultat visuel d'abord).** Les premiers exercices produisent un résultat visible immédiat dans l'aperçu. Les notions qui ne s'affichent pas (`head`, `meta charset`, `description`) arrivent plus tard, dans le contexte d'une vraie page complète.
+- **Aucun prérequis caché.** Si un test exige une balise, un attribut ou une structure, cette notion doit impérativement avoir été introduite dans le cours ou un exercice précédent.
+- **Texte libre par défaut.** L'élève est libre de son contenu textuel, sauf quand le test a besoin d'un mot-clé précis pour vérifier l'exercice.
 
-### Indices
-- **Un seul indice par exo** pour l'instant. Il oriente sans donner la réponse complète.
-- À reconsidérer (deux niveaux d'indices) quand on aura observé des élèves bloqués.
+### 3. Difficulté et autonomie
+- **Toujours du code à produire.** L'élève part toujours d'un éditeur vide : pas de code à trous, pas de bug artificiel à réparer, pas de code à prédire.
+- **Durée cible : 2 à 5 minutes par exercice classique.** Un exercice qui prend plus de temps est soit trop verbeux, soit trop dense.
+- **Difficulté en profondeur, pas en dureté.** La complexité vient de la combinaison de briques simples, jamais de pièges syntaxiques obscurs.
 
-### Retours à l'élève
-- **Un message d'erreur dit ce qu'il faut ajouter ou corriger** (« Ajoute un h1 avec le texte Bienvenue dans le body »), jamais seulement ce qui ne va pas.
-- Un seul message par test, court, sans jargon non vu en cours.
-- Une page vide n'est jamais considérée comme réussie.
+### 4. Indices (aide progressive)
+- **Un seul indice par exercice** dans la section `## Indice`.
+- L'indice donne la forme générale ou le modèle syntaxique (`<balise>...</balise>`), sans jamais fournir la réponse exacte à copier-coller.
+- Au-delà, l'élève s'appuie sur le cours, la documentation ou demande de l'aide à un camarade en présentiel.
+
+### 5. Retours à l'élève et messages de tests
+- **Formulation constructive obligatoire.** Le message d'erreur d'un test doit dire explicitement **ce qu'il faut ajouter ou corriger**, en commençant par un verbe d'action (« Ajoute un titre principal h1 dans le body »).
+- **Jamais de constat passif.** Éviter les messages froids du type `❌ Erreur`, `❌ h1 manquant` ou `Assertion failed`.
+- **Clarté sans jargon.** Nommer précisément les balises entre crochets (`<h1>`, `<p>`) et les zones concernées (`dans le head`, `dans le body`), sans terme technique non vu en cours.
+- **Tolérance technique.** Les tests vérifient la sémantique et le DOM, pas des détails invisibles et frustrants (comme le nombre exact d'espaces d'indentation).
+- **Une page vide n'est jamais validée.**
+
+### 6. Rôle des tests automatiques vs Échange PTP
+- **Ce que la machine teste :** La présence des éléments, la conformité de l'arborescence DOM et le comportement minimal attendu.
+- **Ce que l'échange PTP valide :** La compréhension réelle de l'élève (« Pourquoi as-tu utilisé cette balise ? », « À quoi sert cet attribut ? »). La pédagogie repose sur l'explication orale entre pairs.
 
 ## Avant de proposer ton exo
 
