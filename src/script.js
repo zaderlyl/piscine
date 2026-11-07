@@ -121,9 +121,11 @@ if (new URLSearchParams(location.search).has("auteur")) {
   onglets.append(boutonSolution);
 }
 
-boutonPhp.textContent = "Exécuter PHP";
-boutonPhp.addEventListener("click", lancerPhp);
-onglets.append(boutonPhp);
+if (EXO.startsWith("php/")) {
+  boutonPhp.textContent = "Exécuter PHP";
+  boutonPhp.addEventListener("click", lancerPhp);
+  onglets.append(boutonPhp);
+}
 
 // bouton "suivant"
 
