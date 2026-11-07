@@ -59,10 +59,11 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO 5807) et à sa table de trace (état des variables ligne par ligne).
 
 ### 3.2. Types de données, séquences et modèle mémoire
-- **Variables et affectation** :
+- **Variables, affectation et interdiction de l'égalité lâche (`==`)** :
   - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
   - Constantes (`const` par défaut) et variables réassignables (`let`).
-  - Distinction entre l'affectation (`=`) et le test d'égalité stricte (`===`).
+  - Distinction entre l'affectation (`=`) et le test d'égalité.
+  - *Interdiction formelle de l'égalité lâche (`==`)* : la coercition implicite de type de l'opérateur `==` produit des aberrations imprévisibles (`"" == 0` renvoie `true`, `false == "0"` renvoie `true`). L'égalité stricte (`===`) et l'inégalité stricte (`!==`) sont posées dès le premier jour comme les seules syntaxes autorisées.
 - **Distinction entre `null` et `undefined`** :
   - `null` représente l'absence intentionnelle et explicite de valeur (ex: joueur sans bouclier équipé).
   - `undefined` signale une variable déclarée sans valeur ou un accès à un index hors limites dans un tableau (`tab[10]` sur un tableau de 3 éléments).
@@ -92,7 +93,7 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Le parcours de grille en deux dimensions (double boucle 2D)** :
   - Double boucle imbriquée (`for (let y = 0; y < hauteur; y++)` avec `for (let x = 0; x < largeur; x++)`).
   - Socle immédiat pour manipuler une matrice de tuiles dans Phaser ou dessiner une grille de pixels sur Canvas 2D.
-  - C'est l'exemple le plus concret pour comprendre la complexité en $O(n^2)$ (largeur × hauteur opérations).
+  - C'est l'exemple le plus concret pour comprendre le coût des boucles imbriquées (largeur × hauteur opérations).
 - **La boucle à rebours (Reverse Loop)** :
   - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
   - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
