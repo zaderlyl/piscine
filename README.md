@@ -486,7 +486,7 @@ Git (app et exos), VS Code, environnement local PHP/MySQL (XAMPP, Laragon ou Doc
 | **Dépôt GitHub** | Code de l'app et exos en Markdown, avec historique Git |
 | **GitHub Pages** | Travail et construction : vitrine et **prototypes qui tournent dans le navigateur** (php-wasm, SQLite côté navigateur, faux terminal Bash, éditeur + aperçu, tests JS). Fichiers statiques uniquement : ni PHP ni MySQL |
 | **Serveur de l'IUT** | Hébergement de la **vraie application** : PHP, MySQL (administré via phpMyAdmin), comptes, tirage PTP, mails |
-| **Environnement local** | Développement de la partie PHP/MySQL, puis déploiement sur le serveur de l'IUT (SFTP ou `git pull`, selon ce qu'il autorise) |
+| **Environnement local** | Développement de la partie PHP/MySQL, puis déploiement sur le serveur de l'IUT (dépôt des fichiers en SFTP (FileZilla) ou `git pull`, selon ce qu'il autorise) |
 
 - Le serveur de l'IUT est accessible **de n'importe où** (pas seulement depuis le réseau de l'école).
 - Les pages GitHub Pages sont publiques par défaut : ne pas y publier les `## Solution` des exos (dépôt privé, ou solutions exclues du dépôt public).
