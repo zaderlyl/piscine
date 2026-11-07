@@ -63,6 +63,9 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
   - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
   - Constantes (`const` par défaut) et variables réassignables (`let`).
   - Distinction entre l'affectation (`=`) et le test d'égalité stricte (`===`).
+- **Distinction entre `null` et `undefined`** :
+  - `null` représente l'absence intentionnelle et explicite de valeur (ex: joueur sans bouclier équipé).
+  - `undefined` signale une variable déclarée sans valeur ou un accès à un index hors limites dans un tableau (`tab[10]` sur un tableau de 3 éléments).
 - **Le piège universel des flottants (norme IEEE 754)** :
   - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
   - Règle d'or pour le web (paniers d'achat, TVA, remises) : manipuler les montants en centimes entiers (`10 + 20 === 30`) ou utiliser un arrondi contrôlé (`Math.round()` ou tolérance `Number.EPSILON`).
@@ -71,7 +74,7 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
   - Les mêmes algorithmes de parcours itératif s'appliquent pour valider un format, compter des occurrences ou extraire une sous-chaîne.
 - **Passage par valeur vs référence** :
   - Les primitifs (nombres, chaînes, booléens) sont copiés par valeur.
-  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire (comprendre l'impact direct d'une mutation).
+  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire : modifier une propriété à l'intérieur d'une fonction affecte directement l'objet externe en mémoire.
 
 ### 3.3. Structures de contrôle fondamentales
 - **Branchements conditionnels et clauses de garde** :
@@ -82,12 +85,16 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Itérations bornées (boucle `for`)** :
   - Répétition avec compteur : initialisation, condition d'arrêt, incrémentation (`i++`).
   - Parcours d'intervalles numériques et d'indices de collections.
+- **Le parcours de grille en deux dimensions (double boucle 2D)** :
+  - Double boucle imbriquée (`for (let y = 0; y < hauteur; y++)` avec `for (let x = 0; x < largeur; x++)`).
+  - Socle immédiat pour manipuler une matrice de tuiles dans Phaser ou dessiner une grille de pixels sur Canvas 2D.
+  - C'est l'exemple le plus concret pour comprendre la complexité en $O(n^2)$ ($largeur \times hauteur$ opérations).
 - **La boucle à rebours (Reverse Loop)** :
   - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
   - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
-- **Itérations non bornées (boucle `while`)** :
-  - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un état).
-  - Gestion impérative de la progression pour éviter la boucle infinie.
+- **Itérations non bornées (boucle `while`) et règle des 3 phases** :
+  - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un événement).
+  - *Règle des 3 phases (anti-boucle infinie)* : 1. initialisation de la condition en amont, 2. évaluation en tête de boucle, et 3. **mise à jour impérative de l'état avant l'accolade fermante**.
 - **Ruptures de séquence** : interruption avec `break`, saut d'itération avec `continue`.
 
 ### 3.4. Décomposition fonctionnelle et modularité
@@ -96,9 +103,9 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Portée des identifiants (Scope)** :
   - Portée de bloc : variables locales invisibles à l'extérieur de leur bloc englobant `{ ... }`.
   - Dangers des variables globales (collisions de noms et effets de bord incontrôlés).
-- **Pureté et déterminisme** :
+- **Pureté et immutabilité** :
   - Fonctions pures : pour les mêmes entrées, renvoient toujours la même sortie, sans modifier l'état extérieur.
-  - Fonctions à effets de bord : modification de variables globales ou d'affichages.
+  - *Règle de pureté sur les collections* : ne jamais muter un tableau ou un objet reçu en argument. Toujours créer une copie locale en amont (`[...tab]` ou `{...objet}`) avant d'appliquer des opérations de tri ou d'altération (`sort`, `splice`, `pop`) pour éviter de corrompre l'état extérieur.
 - **La pile d'appels (Call Stack)** :
   - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
 
@@ -107,22 +114,22 @@ Ces 7 patrons de conception élémentaires constituent le socle de tout dévelop
 
 1. **La permutation de valeurs (Swap)** :
    - Échanger deux états sans écraser la valeur d'origine : utilisation de la variable temporaire (`temp = a; a = b; b = temp;`) et sa transcription moderne en déstructuration (`[a, b] = [b, a]`).
-2. **L'accumulation** :
-   - Initialiser un accumulateur neutre (`total = 0` ou `chaine = ""`), parcourir une séquence et agréger chaque élément (somme, moyenne, concaténation).
+2. **L'accumulation et élément neutre** :
+   - Initialiser l'accumulateur sur son élément neutre : `0` pour une somme (`total = 0`), chaîne vide pour du texte (`chaine = ""`), mais impérativement **`1`** pour un produit ou un cumul de multiplicateurs (`total = 1`), sous peine d'obtenir un résultat bloqué à zéro.
 3. **Le comptage sélectif** :
    - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
 4. **La recherche d'extremum (Minimum / Maximum)** :
-   - Initialiser le candidat sur le premier élément de la séquence (`max = tab[0]`), puis comparer itérativement avec les suivants.
+   - *Clause de garde obligatoire sur tableau vide* : vérifier impérativement `if (tab.length === 0)` avant toute recherche. Initialiser avec `max = tab[0]` sur un tableau vide injecte `undefined` et fausse toutes les comparaisons ultérieures (`undefined < 10` renvoie `false`).
 5. **La recherche séquentielle sur collections d'objets (Flag & ID)** :
-   - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`) ou valider une règle globale via un booléen (`trouve = false`, mis à `true` avec arrêt anticipé `break`). Prépare directement `.find()` en JS et `WHERE id = ?` en SQL.
+   - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`).
+   - *Le piège universel du `return` dans le `else`* : à bannir formellement (`if (...) return tab[i]; else return null;`), car cette erreur arrête la boucle dès le tout premier élément testé. L'échec d'une recherche ne se constate **qu'après** la sortie complète de la boucle. Prépare directement `.find()` en JS et `WHERE id = ?` en SQL.
 6. **Le filtrage et partitionnement manuel** :
    - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
 7. **La détection géométrique d'intersection (AABB)** :
    - Algorithme d'intersection de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && ...`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser.
 
 ### 3.6. Robustesse et analyse de complexité
-- **Sensibilité à la complexité intuitive (Big-O)** :
-  - Comparer intuitivement la performance d'un parcours linéaire simple $O(n)$ et de deux boucles imbriquées $O(n^2)$ (ex: pourquoi tester chaque projectile contre chaque ennemi ralentit le jeu quand leur nombre augmente).
+- **Sensibilité à la complexité intuitive** : comparer un parcours linéaire simple en $O(n)$ et un double parcours imbriqué en $O(n^2)$ (ex. tester chaque entité contre toutes les autres).
 - **Cas limites (Edge cases)** :
   - Traitement systématique des cas critiques : tableau vide (`.length === 0`), index hors limites (`undefined`), division par zéro.
   - Détection et prévention du décalage d'indice (« Off-by-one » : confondre `<` et `<=`).
