@@ -48,27 +48,86 @@ Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire
 - Accessibilité : contraste, focus visible, WCAG (R1.11, R3.12)
 - Framework : Bootstrap (README)
 
-## 3. Algorithmique
+## 3. Algorithmique & Résolution de problèmes
 
-Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directement en JS.
+L'algorithmique est abordée immédiatement avant JavaScript, le premier langage qui calcule et prend des décisions. Elle pose les schémas de pensée universels indispensables pour tout le reste du cursus (JS, Canvas 2D, Phaser, PHP et SQL).
 
-- **Variables et types** : nombres, chaînes de caractères, booléens (`let`, `const`)
-- **Conditions et branchements** : `if`, `else`, `else if`, opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`) et logiques (`&&`, `||`, `!`)
-- **Boucles fondamentales** : boucle `while` (tant que) et boucle `for` (itérations avec compteur)
-- **Fonctions** :
-  - Déclaration et syntaxe
-  - Paramètres d'entrée et arguments
-  - Valeur de retour (`return`)
-  - Portée des variables (portée de bloc, variables locales vs globales)
-  - Fonctions pures et effets de bord
-- **Structures de données fondamentales** :
-  - Tableaux : création, indexation `[0]`, `.length`, ajout `.push()`
-  - Parcours de tableau : boucles, accumulation de valeurs
-  - Objets : paires clé-valeur, lecture et assignation de propriétés
-- **Débogage et observation** :
-  - Organigrammes algorithmiques (norme ISO : début, action, losange de condition, bouclage)
-  - Tables de trace manuelle (valeurs des variables à chaque tour)
-  - Points d'arrêt et `console.log`
+Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logique.md](visualisation-logique.md)) pour matérialiser l'exécution pas à pas.
+
+### 3.1. Rôle et approche pédagogique (R1.12)
+- **Choix du formalisme** : éviter la surcharge d'un pseudo-code universitaire artificiel ; les notions sont formalisées avec une syntaxe directe (compatible JavaScript épuré) ou en organigrammes visuels.
+- **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO/AFNOR) et à sa table de trace (état des variables ligne par ligne).
+
+### 3.2. Types de données et mémoire
+- **Variables et affectation** :
+  - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
+  - Constantes (`const` par défaut) et variables réassignables (`let`).
+  - Distinction entre l'affectation (`=`) et le test d'égalité stricte (`===`).
+- **Types primitifs fondamentaux** : nombres (entiers et flottants), chaînes de caractères, booléens (`true` / `false`).
+- **Passage par valeur vs référence** :
+  - Les primitifs sont copiés par valeur.
+  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire (comprendre l'impact d'une mutation).
+
+### 3.3. Structures de contrôle fondamentales
+- **Branchements conditionnels** :
+  - Alternatives `if`, `else`, et enchaînements `else if`.
+  - Opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`).
+  - Algèbre de Boole : opérateurs logiques ET (`&&`), OU (`||`) et NON (`!`), évaluation en court-circuit.
+- **Itérations bornées (boucle `for`)** :
+  - Répétition avec compteur : initialisation, condition d'arrêt, incrémentation (`i++`).
+  - Parcours d'intervalles numériques et d'indices de tableaux.
+- **Itérations non bornées (boucle `while`)** :
+  - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un état).
+  - Gestion impérative de la progression pour éviter la boucle infinie.
+- **Ruptures de séquence** : interruption avec `break`, saut d'itération avec `continue`.
+
+### 3.4. Décomposition fonctionnelle et modularité
+- **Découpage en sous-problèmes** : transformer un problème complexe en fonctions unitaires indépendantes (« diviser pour régner »).
+- **Signature d'une fonction** : paramètres d'entrée (arguments) et valeur de retour unique (`return`).
+- **Portée des identifiants (Scope)** :
+  - Portée de bloc : variables locales invisibles à l'extérieur de leur bloc englobant `{ ... }`.
+  - Dangers des variables globales (collisions de noms et effets de bord incontrôlés).
+- **Pureté et déterminisme** :
+  - Fonctions pures : pour les mêmes entrées, renvoient toujours la même sortie, sans modifier l'état extérieur.
+  - Fonctions à effets de bord : modification de variables globales ou d'affichages.
+- **La pile d'appels (Call Stack)** :
+  - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
+
+### 3.5. Les 6 patterns algorithmiques incontournables
+Ces 6 patrons de conception élémentaires constituent 90% des algorithmes du développement web et du multimédia :
+
+1. **L'accumulation** :
+   - Initialiser un accumulateur neutre (`total = 0` ou `chaine = ""`), parcourir une séquence et agréger chaque élément (somme, moyenne, concaténation).
+2. **Le comptage sélectif** :
+   - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
+3. **La recherche d'extremum (Minimum / Maximum)** :
+   - Initialiser le candidat sur le premier élément de la séquence (`max = tab[0]`), puis comparer itérativement avec les suivants.
+4. **La recherche séquentielle & drapeau (Flag booléen)** :
+   - Déterminer la présence d'un élément ou valider une règle globale via un booléen (`trouve = false`, mis à `true` avec arrêt anticipé `break`).
+5. **Le filtrage et partitionnement manuel** :
+   - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
+6. **La détection géométrique d'intersection (AABB)** :
+   - Algorithme d'intersection de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && ...`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser.
+
+### 3.6. Robustesse et analyse de complexité
+- **Sensibilité à la complexité intuitive (Big-O)** :
+  - Comparer intuitivement la performance d'un parcours linéaire simple $O(n)$ et de deux boucles imbriquées $O(n^2)$ (ex: pourquoi comparer chaque élément à tous les autres fait ralentir un jeu).
+- **Cas limites (Edge cases)** :
+  - Traitement systématique des cas critiques : tableau vide (`.length === 0`), index hors limites (`undefined`), division par zéro.
+  - Détection et prévention du décalage d'indice (« Off-by-one » : confondre `<` et `<=`).
+
+### 3.7. Débogage, traçabilité et observation (R1.12)
+- **Organigrammes normalisés (ISO/AFNOR)** :
+  - Ovales/rectangles arrondis (Début / Fin).
+  - Parallélogrammes (Entrées / Sorties de données).
+  - Rectangles d'action (Instructions de calcul ou d'affectation).
+  - Losanges de décision (Conditions binaires avec branches Vrai / Faux).
+  - Flèches de boucle remontantes (visualisation du cycle itératif).
+- **Table de trace manuelle** :
+  - Remplir pas à pas un tableau à double entrée : numéro d'étape, ligne de code active, état de chaque variable, évaluation de la condition.
+- **Outils d'instrumentation moderne** :
+  - Utilisation stratégique de `console.log` pour inspecter l'état.
+  - Pose de points d'arrêt (`debugger`) dans les outils de développement du navigateur pour observer l'exécution instruction par instruction.
 
 Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
 
