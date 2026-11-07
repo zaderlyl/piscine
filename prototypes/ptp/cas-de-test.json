@@ -1,0 +1,109 @@
+{
+  "_doc": "Cas de test communs à la logique JavaScript (ptp-logique.js) et à la future version PHP. Chaque cas : des élèves, des réglages, des actions datées (ms depuis t0), puis l'état attendu. Les cas ne dépendent pas du tirage aléatoire (un seul candidat possible, ou résultat sans tirage). Actions : valider (élève valide un exo), tick (le temps avance, tous les élèves non listés dans `absents` envoient un signal).",
+  "cas": [
+    {
+      "nom": "plafond-17-connectes",
+      "eleves": 17,
+      "attendu": { "plafond": 4 }
+    },
+    {
+      "nom": "plafond-arrondi-au-superieur",
+      "eleves": 16,
+      "attendu": { "plafond": 4 }
+    },
+    {
+      "nom": "plafond-sans-les-absents",
+      "eleves": 17,
+      "absentsDepuis": ["P0", "P1", "P2", "P3", "P4", "P5", "P6"],
+      "attendu": { "plafond": 2 }
+    },
+    {
+      "nom": "personne-de-connecte-report-sans-geler",
+      "eleves": ["A"],
+      "config": { "toujours": false },
+      "etatInitial": { "A": { "declenche": true } },
+      "actions": [{ "t": 0, "valider": "A" }],
+      "attendu": {
+        "eleves": { "A": { "etat": "libre", "declenche": true, "exoIdx": 1 } },
+        "echanges": [{ "eleve": "A", "etat": "reporte" }]
+      }
+    },
+    {
+      "nom": "plafond-atteint-report-sans-geler",
+      "eleves": ["A", "B", "C", "D", "E", "F"],
+      "config": { "toujours": true },
+      "etatInitial": { "B": { "etat": "en_echange", "echangeActif": true }, "C": { "etat": "en_echange", "echangeActif": true } },
+      "actions": [{ "t": 0, "valider": "A" }],
+      "attendu": {
+        "eleves": { "A": { "etat": "libre", "exoIdx": 1 } },
+        "echanges": [{ "eleve": "A", "etat": "reporte" }]
+      }
+    },
+    {
+      "nom": "recherche-2-min-puis-perdu",
+      "eleves": ["A", "B", "C", "D"],
+      "config": { "toujours": true },
+      "etatInitial": { "B": { "etat": "en_echange" }, "C": { "etat": "en_echange" }, "D": { "etat": "en_echange" } },
+      "actions": [
+        { "t": 0, "valider": "A" },
+        { "t": 100000, "tick": true },
+        { "t": 130000, "tick": true }
+      ],
+      "attendu": {
+        "eleves": { "A": { "etat": "libre", "declenche": false, "exoIdx": 1, "exoEnAttente": false } },
+        "echanges": [{ "eleve": "A", "etat": "perdu" }]
+      }
+    },
+    {
+      "nom": "recherche-encore-en-cours-a-100-s",
+      "eleves": ["A", "B", "C", "D"],
+      "config": { "toujours": true },
+      "etatInitial": { "B": { "etat": "en_echange" }, "C": { "etat": "en_echange" }, "D": { "etat": "en_echange" } },
+      "actions": [
+        { "t": 0, "valider": "A" },
+        { "t": 100000, "tick": true }
+      ],
+      "attendu": {
+        "eleves": { "A": { "etat": "en_recherche" } },
+        "echanges": [{ "eleve": "A", "etat": "recherche" }]
+      }
+    },
+    {
+      "nom": "correcteur-sans-reponse-puis-perdu",
+      "eleves": ["A", "B"],
+      "config": { "toujours": true },
+      "actions": [
+        { "t": 0, "valider": "A" },
+        { "t": 31000, "tick": true },
+        { "t": 121000, "tick": true }
+      ],
+      "attendu": {
+        "eleves": { "A": { "etat": "libre", "exoIdx": 1 }, "B": { "etat": "libre" } },
+        "echanges": [{ "eleve": "A", "etat": "perdu" }]
+      }
+    },
+    {
+      "nom": "un-seul-candidat-est-tire",
+      "eleves": ["A", "B"],
+      "config": { "toujours": true },
+      "actions": [{ "t": 0, "valider": "A" }],
+      "attendu": {
+        "eleves": { "A": { "etat": "en_recherche" }, "B": { "etat": "reserve" } },
+        "echanges": [{ "eleve": "A", "etat": "verification", "correcteur": "B" }]
+      }
+    },
+    {
+      "nom": "malus-de-paire-s-attenue",
+      "eleves": ["A", "B"],
+      "pairesDernier": { "A|B": 0 },
+      "attendu": {
+        "malusPaire": [
+          { "a": "A", "b": "B", "t": 0, "valeur": 0.1 },
+          { "a": "A", "b": "B", "t": 3600000, "valeur": 0.55 },
+          { "a": "A", "b": "B", "t": 7200000, "valeur": 0.775 },
+          { "a": "A", "b": "C", "t": 0, "valeur": 1 }
+        ]
+      }
+    }
+  ]
+}
