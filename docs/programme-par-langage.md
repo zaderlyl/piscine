@@ -69,6 +69,10 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Le piège universel des flottants (norme IEEE 754)** :
   - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
   - Règle d'or pour le web (paniers d'achat, TVA, remises) : manipuler les montants en centimes entiers (`10 + 20 === 30`) ou utiliser un arrondi contrôlé (`Math.round()` ou tolérance `Number.EPSILON`).
+- **L'opérateur Modulo (%) et l'arithmétique cyclique** :
+  - Reste de la division entière, indispensable pour tester l'alternance et la parité (`n % 2 === 0`).
+  - Navigation cyclique sans débordement d'indice (ex. carrousel d'images, sélection d'arme en boucle) : `index = (index + 1) % tab.length`.
+  - Conversion d'un tableau plat 1D en coordonnées de grille 2D : `colonneX = index % largeur` et `ligneY = Math.floor(index / largeur)`.
 - **Chaînes de caractères comme séquences indexées** :
   - Une chaîne est une séquence immuable indexée (`chaine[i]`, `.length`).
   - Les mêmes algorithmes de parcours itératif s'appliquent pour valider un format, compter des occurrences ou extraire une sous-chaîne.
@@ -88,7 +92,7 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
 - **Le parcours de grille en deux dimensions (double boucle 2D)** :
   - Double boucle imbriquée (`for (let y = 0; y < hauteur; y++)` avec `for (let x = 0; x < largeur; x++)`).
   - Socle immédiat pour manipuler une matrice de tuiles dans Phaser ou dessiner une grille de pixels sur Canvas 2D.
-  - C'est l'exemple le plus concret pour comprendre la complexité en $O(n^2)$ ($largeur \times hauteur$ opérations).
+  - C'est l'exemple le plus concret pour comprendre la complexité en $O(n^2)$ (largeur × hauteur opérations).
 - **La boucle à rebours (Reverse Loop)** :
   - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
   - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
@@ -105,7 +109,7 @@ Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logiqu
   - Dangers des variables globales (collisions de noms et effets de bord incontrôlés).
 - **Pureté et immutabilité** :
   - Fonctions pures : pour les mêmes entrées, renvoient toujours la même sortie, sans modifier l'état extérieur.
-  - *Règle de pureté sur les collections* : ne jamais muter un tableau ou un objet reçu en argument. Toujours créer une copie locale en amont (`[...tab]` ou `{...objet}`) avant d'appliquer des opérations de tri ou d'altération (`sort`, `splice`, `pop`) pour éviter de corrompre l'état extérieur.
+  - *Règle de pureté sur les collections* : ne jamais muter un tableau ou un objet reçu en argument. Attention à la copie superficielle (Shallow Copy) : `[...tab]` crée un nouveau tableau mais conserve les références vers les objets internes. Si la collection contient des objets modifiables en profondeur, utiliser `structuredClone(tab)` pour garantir une indépendance mémoire totale.
 - **La pile d'appels (Call Stack)** :
   - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
 
