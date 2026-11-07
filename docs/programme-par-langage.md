@@ -184,6 +184,10 @@ Le module PHP introduit le développement côté serveur (Back-End) et le cycle 
 - **Boucles et parcours** : boucles `while`, `for`, et parcours de tableaux avec `foreach ($tableau as $cle => $valeur)`.
 - **Tableaux associatifs** : structures clé-valeur (`['id' => 1, 'nom' => 'Potion']`), fonctions natives de tableaux (`array_push`, `in_array`, `array_filter`).
 - **Fonctions personnalisées** : déclaration, typage des arguments et des valeurs de retour (`function calculerTotal(array $items): float`).
+- **Gestion moderne des dates et du temps** :
+  - Définition du fuseau horaire par défaut : `date_default_timezone_set('Europe/Paris')`.
+  - Manipulation de l'objet natif immuable `DateTimeImmutable` (évite les effets de bord de `DateTime`).
+  - Formatage d'affichage français (`->format('d/m/Y H:i')`) et formatage standard SQL (`->format('Y-m-d H:i:s')`).
 - **Templating serveur modulaire** : découpage d'une page HTML en composants avec `require_once` et `include` (`header.php`, `navbar.php`, `footer.php`).
 
 ### 7.2. Formulaires, Upload de fichiers ($_FILES) & Sécurité XSS / CSRF (R2.13)
@@ -217,16 +221,23 @@ Le module PHP introduit le développement côté serveur (Back-End) et le cycle 
 - **Autoloading moderne sans bundler** : configuration de `spl_autoload_register()` pour charger automatiquement les classes à la volée selon leur nom de fichier, éliminant définitivement la forêt de `require_once` en haut des scripts.
 
 ### 7.5. Base de données avec PDO, Relations SQL & Sécurité (R2.13, R2.14)
-- **Sécurisation des identifiants (hygiène Git)** : isolation des identifiants de base de données dans un fichier de configuration local (`config.local.php` ou `.env`) exclu du versioning via `.gitignore`.
+- **Sécurisation des identifiants sans Composer** :
+  - En PHP natif sans dépendance externe (`vlucas/phpdotenv`), les fichiers `.env` ne sont pas lus automatiquement.
+  - La méthode robuste enseignée : un fichier PHP `config.local.php` retournant un tableau (`return ['db_user' => '...', 'db_pass' => '...'];`), exclu du dépôt par `.gitignore`, accompagné d'un gabarit versionné `config.example.php`.
 - **Connexion PDO sécurisée** : instanciation de l'objet `PDO` obligatoirement enrobée dans un bloc `try ... catch (PDOException $e)` pour empêcher l'affichage de la pile d'appels et des mots de passe en clair en cas d'erreur de connexion.
 - **Lecture sécurisée** : exécution de requêtes avec `query()` et récupération via `fetchAll(PDO::FETCH_ASSOC)`.
 - **Protection absolue contre les injections SQL** : interdiction totale de concaténer des variables dans le SQL. Utilisation systématique des requêtes préparées avec `prepare()` et `execute([$param])` ou `bindParam()`.
+- **Pagination SQL (anti-saturation mémoire)** :
+  - Calcul dynamique des clauses `LIMIT :limit OFFSET :offset` à partir du paramètre d'URL (`?page=2`).
+  - Décompte préalable du nombre total d'enregistrements via `SELECT COUNT(*) FROM table` pour calculer le nombre total de pages.
 - **Relations SQL et requêtes jointes (anti-piège du N+1)** :
   - Clés étrangères (`FOREIGN KEY`).
   - Utilisation systématique des jointures `INNER JOIN` et `LEFT JOIN` pour récupérer les entités reliées (ex: un article et les données de son auteur) en une seule requête SQL, bannissant l'anti-pattern de la boucle `foreach` contenant une requête SQL par ligne.
+- **Transactions PDO et intégrité relationnelle** :
+  - Sécurisation des opérations multi-tables (ex: création d'une commande + décrémentation du stock) via `$pdo->beginTransaction()`, `$pdo->commit()` et `$pdo->rollBack()` dans un bloc `try / catch`. En cas d'erreur sur l'une des requêtes, la base annule toutes les modifications et reste dans un état intègre.
 - **Opérations CRUD complètes** :
   - **Create** : insertion sécurisée (`INSERT INTO ...`).
-  - **Read** : sélection filtrée avec jointure (`SELECT ... FROM articles JOIN users ON ... WHERE id = ?`).
+  - **Read** : sélection filtrée avec jointure et pagination (`SELECT ... LIMIT ... OFFSET ...`).
   - **Update** : mise à jour de données existantes (`UPDATE ... WHERE id = ?`).
   - **Delete** : suppression contrôlée avec confirmation (`DELETE ... WHERE id = ?`).
 
@@ -240,6 +251,9 @@ Le module PHP introduit le développement côté serveur (Back-End) et le cycle 
 ### 7.7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)
 - **En-têtes de réponse HTTP** : déclaration de `header('Content-Type: application/json; charset=utf-8')`.
 - **Sérialisation JSON** : transformation de structures PHP en JSON avec `json_encode()`.
+- **Le piège de la réception JSON (`php://input`)** :
+  - Lorsque le client JavaScript envoie un payload JSON via `fetch('/api', { method: 'POST', body: JSON.stringify(data) })`, la superglobale `$_POST` est totalement vide (car PHP ne peuple `$_POST` que pour les formulaires URL-encoded ou multipart).
+  - En PHP natif, il faut impérativement lire le flux d'entrée brut : `$json = file_get_contents('php://input');` puis décoder avec `$data = json_decode($json, true);`.
 - **Codes de statut HTTP réels** : utilisation impérative de `http_response_code(400)` (Bad Request), `401` (Unauthorized) ou `404` (Not Found) afin que la propriété `response.ok` du `fetch()` JS détecte immédiatement les erreurs sans passer par un statut 200 trompeur.
 - **Gestion du CORS en environnement de développement** : en-tête `header('Access-Control-Allow-Origin: *')` pour autoriser les requêtes venant d'un serveur local front (ex. Live Server port 5500) vers le serveur PHP (port 8000).
 

@@ -168,52 +168,56 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
 
-**1. Fondamentaux, Syntaxe PHP 8+ & Templating serveur**
+**1. Fondamentaux, Syntaxe PHP 8+, Dates & Templating serveur**
 - [ ] `00` : Premier script PHP, balises `<?php ?>` et affichage avec `echo`
 - [ ] `01` : Variables `$`, types primitifs et concaténation
 - [ ] `02` : Conditions `if`, `else`, opérateurs logiques et ternaire
 - [ ] `03` : Boucles fondamentales : `while`, `for` et `foreach`
 - [ ] `04` : Tableaux associatifs (clé => valeur) et fonctions de tableaux
 - [ ] `05` : Fonctions personnalisées avec typage des paramètres et du `return`
-- [ ] `06` : Templating modulaire : découper sa page avec `require_once` (`header`, `footer`)
+- [ ] `06` : Gestion des dates et fuseaux horaires : `DateTimeImmutable` et formatage SQL
+- [ ] `07` : Templating modulaire : découper sa page avec `require_once` (`header`, `footer`)
 
 **2. Formulaires, Upload de fichiers ($_FILES) & Sécurité XSS / CSRF (R2.13)**
-- [ ] `07` : Paramètres d'URL et superglobale `$_GET`
-- [ ] `08` : Réception de données de formulaires avec `$_POST`
-- [ ] `09` : Prévention des attaques XSS avec `htmlspecialchars()`
-- [ ] `10` : Validation et assainissement côté serveur (`filter_var`, champs obligatoires)
-- [ ] `11` : Upload sécurisé d'images avec `$_FILES` : `enctype`, type MIME réel et renommage
-- [ ] `12` : Protection contre les attaques CSRF : génération et vérification de token de session
+- [ ] `08` : Paramètres d'URL et superglobale `$_GET`
+- [ ] `09` : Réception de données de formulaires avec `$_POST`
+- [ ] `10` : Prévention des attaques XSS avec `htmlspecialchars()`
+- [ ] `11` : Validation et assainissement côté serveur (`filter_var`, champs obligatoires)
+- [ ] `12` : Upload sécurisé d'images avec `$_FILES` : `enctype`, type MIME réel et renommage
+- [ ] `13` : Protection contre les attaques CSRF : génération et vérification de token de session
 
 **3. État, Sessions & Authentification sécurisée (R2.13)**
-- [ ] `13` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
-- [ ] `14` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
-- [ ] `15` : Prévention de la fixation de session avec `session_regenerate_id(true)`
-- [ ] `16` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
-- [ ] `17` : Système complet de connexion / déconnexion et protection d'espace membre
+- [ ] `14` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
+- [ ] `15` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
+- [ ] `16` : Prévention de la fixation de session avec `session_regenerate_id(true)`
+- [ ] `17` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
+- [ ] `18` : Système complet de connexion / déconnexion et protection d'espace membre
 
 **4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
 *Transition naturelle depuis la POO JavaScript (séance 27).*
-- [ ] `18` : Déclaration de classe, propriétés typées et instanciation avec `new`
-- [ ] `19` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
-- [ ] `20` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
-- [ ] `21` : Héritage de classe avec `extends` et `parent::__construct()`
-- [ ] `22` : Autoloading de classes sans bundler avec `spl_autoload_register()`
+- [ ] `19` : Déclaration de classe, propriétés typées et instanciation avec `new`
+- [ ] `20` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
+- [ ] `21` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
+- [ ] `22` : Héritage de classe avec `extends` et `parent::__construct()`
+- [ ] `23` : Autoloading de classes sans bundler avec `spl_autoload_register()`
 
-**5. Base de données relationnelle avec PDO & Relations SQL (R2.13, R2.14)**
-*Sécurisation des identifiants (try/catch et .gitignore) et protection absolue contre les injections SQL.*
-- [ ] `23` : Connexion sécurisée avec `PDO` et gestion des erreurs avec `try / catch`
-- [ ] `24` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
-- [ ] `25` : Opérations CRUD complètes (Insertion, Lecture, Mise à jour, Suppression)
-- [ ] `26` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éviter le piège du N+1
+**5. Base de données avec PDO, Relations SQL & Transactions (R2.13, R2.14)**
+*Sécurisation des identifiants (config.local.php + .gitignore), try/catch et requêtes préparées.*
+- [ ] `24` : Configuration locale et connexion sécurisée `PDO` enrobée dans un `try / catch`
+- [ ] `25` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
+- [ ] `26` : Opérations CRUD complètes (Insertion, Lecture, Mise à jour, Suppression)
+- [ ] `27` : Pagination SQL (`LIMIT` et `OFFSET`) et décompte avec `COUNT(*)`
+- [ ] `28` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éviter le piège du N+1
+- [ ] `29` : Transactions PDO (`beginTransaction`, `commit`, `rollBack`) pour l'intégrité multi-tables
 
 **6. Architecture MVC & Routage (R2.13, SAÉ)**
-- [ ] `27` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
-- [ ] `28` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée unique `index.php`
+- [ ] `30` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
+- [ ] `31` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée unique `index.php`
 
 **7. API Back-End JSON & Échanges avec le Front-End (R2.13, R3.12)**
-- [ ] `29` : Création d'une API JSON : `header` Content-Type et sérialisation avec `json_encode()`
-- [ ] `30` : Codes de statut HTTP réels (`http_response_code`) et gestion du CORS pour le `fetch()` JS
+- [ ] `32` : Réception de requêtes JSON du client JS via le flux d'entrée brut `php://input`
+- [ ] `33` : Renvoyer du JSON avec `json_encode()` et les codes de statut HTTP réels (`http_response_code`)
+- [ ] `34` : Gestion des en-têtes CORS pour autoriser le `fetch()` JS depuis un serveur local
 
 ---
 
