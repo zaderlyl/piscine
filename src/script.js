@@ -6,11 +6,14 @@ import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 import { debloquerEmmet } from "./emmet.js";
 
-
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
-
-
+import {
+  marquerReussi,
+  estReussi,
+  chargerListeExos,
+  exoSuivant,
+} from "./progression.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -26,7 +29,7 @@ const exoChoisi = new URLSearchParams(location.search).get("exo");
 const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
-const CLE_SUSPENDU = "piscine-apercyu-suspendu";
+const CLE_SUSPENDU = "piscine-apercu-suspendu";
 
 const FICHIER_EXO = `../exos/${EXO}.md`;
 
@@ -42,17 +45,18 @@ let minuteurTests = null;
 let minuteur = null;
 let testsExo = "";
 
-
-
 function arreterApercu() {
   enregistrerBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
   location.reload();
 }
 
+// validation + exo suivant
 
-
-
+function validerExo() {
+  marquerReussi(EXO);
+  afficherSuivant();
+}
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
@@ -121,6 +125,27 @@ boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
 
+// bouton "suivant"
+
+const boutonSuivant = document.createElement("button");
+boutonSuivant.textContent = "Exo suivant →";
+boutonSuivant.classList.add("cache");
+onglets.append(boutonSuivant);
+
+const suivant = exoSuivant(EXO, await chargerListeExos());
+
+function afficherSuivant() {
+  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));
+}
+
+boutonSuivant.addEventListener("click", () => {
+  const params = new URLSearchParams(location.search);
+  params.set("exo", suivant);
+  location.search = params.toString();
+});
+
+afficherSuivant();
+
 afficherFichier("index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
@@ -162,9 +187,11 @@ window.addEventListener("message", (e) => {
   panneauResultats.textContent = echecs.length
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
-  if (!echecs.length && testsExo) debloquerEmmet(exo.emmetDebloque);
+  if (!echecs.length && e.data.resultats.length) {
+    if (testsExo && exo.emmetDebloque) debloquerEmmet(exo.emmetDebloque);
+    validerExo();
+  }
 });
-
 
 async function lancerPhp() {
   panneauResultats.textContent = "Exécution en cours...";
@@ -180,6 +207,9 @@ async function lancerPhp() {
     (echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")
       : "✅ Tous les tests passent");
+  if (!echecs.length && resultats.length) {
+    validerExo();
+  }
 
   clearTimeout(minuteurTests);
   afficherDansApercu(apercu, sortie);
