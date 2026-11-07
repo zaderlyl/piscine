@@ -2020,8 +2020,9 @@
         }
       },
 
-      // 8. PATTERN 4 : RECHERCHE D'EXTREMUM (FONCTION TROUVERMAX AVEC CLAUSE DE GARDE)
+      // 8. PATTERN 4 : RECHERCHE D'EXTREMUM (FONCTION TROUVERMAX AVEC CLAUSE DE GARDE & PORTEE LOCALE)
       extremum: {
+        nomFonction: "trouverMax()",
         titre: {
           js: "Organigramme (JS) : Pattern 4 - Maximum (Fonction trouverMax & Garde)",
           php: "Organigramme (PHP) : Pattern 4 - Maximum (Fonction trouverMax & Garde)"
@@ -2066,13 +2067,14 @@
           ]
         },
         variables: {
-          js: ["max", "i"],
-          php: ["$max", "$i"]
+          js: ["tab", "max", "tab (local)", "max (local)", "i (local)"],
+          php: ["$tab", "$max", "$tab (local)", "$max (local)", "$i (local)"]
         },
-        noeuds: ["noeud-debut", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
-        lignes: ["ligne-debut-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        noeuds: ["noeud-debut", "noeud-init-tab", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-init-tab", "ligne-init-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
         labels: ["label-garde-oui", "label-garde-non", "label-vrai", "label-faux"],
         svg: (lang) => {
+          const varTab = lang === "php" ? "$tab" : "tab";
           const varM = lang === "php" ? "$max" : "max";
           const varI = lang === "php" ? "$i" : "i";
           const condGarde = lang === "php" ? "count($tab) === 0 ?" : "tab.length === 0 ?";
@@ -2080,7 +2082,7 @@
           const affichage = lang === "php" ? "return $max" : "return max";
           const appel = lang === "php" ? "trouverMax($tab)" : "trouverMax(tab)";
           return `
-          <svg class="organigramme" viewBox="0 0 380 560">
+          <svg class="organigramme" viewBox="0 0 380 625">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
@@ -2091,135 +2093,261 @@
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="145" y="8" width="90" height="30" rx="15" />
-              <text class="texte-noeud" x="190" y="24">Début</text>
+              <rect class="forme-noeud" x="145" y="10" width="90" height="30" rx="15" />
+              <text class="texte-noeud" x="190" y="25">Début</text>
             </g>
 
-            <line id="ligne-debut-appel" class="ligne-flux" x1="190" y1="38" x2="190" y2="60" marker-end="url(#fleche)" />
+            <line id="ligne-debut-init-tab" class="ligne-flux" x1="190" y1="40" x2="190" y2="65" marker-end="url(#fleche)" />
 
+            <g id="noeud-init-tab" class="noeud">
+              <rect class="forme-noeud" x="105" y="65" width="170" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="82">${varTab} &larr; [14, 42, 9]</text>
+            </g>
+
+            <line id="ligne-init-appel" class="ligne-flux" x1="190" y1="99" x2="190" y2="125" marker-end="url(#fleche)" />
+
+            <!-- Nœud d'appel avec double barre ISO 5807 -->
             <g id="noeud-appel" class="noeud">
-              <rect class="forme-noeud" x="110" y="60" width="160" height="34" rx="3" />
-              <line x1="122" y1="60" x2="122" y2="94" stroke="#1e293b" stroke-width="1.5" />
-              <line x1="258" y1="60" x2="258" y2="94" stroke="#1e293b" stroke-width="1.5" />
-              <text class="texte-noeud" x="190" y="78">${appel}</text>
+              <rect class="forme-noeud" x="110" y="125" width="160" height="36" rx="3" />
+              <line x1="122" y1="125" x2="122" y2="161" stroke="#1e293b" stroke-width="1.5" />
+              <line x1="258" y1="125" x2="258" y2="161" stroke="#1e293b" stroke-width="1.5" />
+              <text class="texte-noeud" x="190" y="143">${appel}</text>
             </g>
 
-            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="94" x2="190" y2="120" marker-end="url(#fleche)" />
+            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="161" x2="190" y2="190" marker-end="url(#fleche)" />
 
-            <!-- Nœud clause de garde -->
+            <!-- Clause de garde -->
             <g id="noeud-garde" class="noeud">
-              <polygon class="forme-noeud" points="190,120 270,148 190,176 110,148" />
-              <text class="texte-noeud" x="190" y="148">${condGarde}</text>
+              <polygon class="forme-noeud" points="190,190 270,218 190,246 110,218" />
+              <text class="texte-noeud" x="190" y="218">${condGarde}</text>
             </g>
 
             <!-- Branche Oui (vide -> return null) -->
-            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="148" x2="295" y2="148" marker-end="url(#fleche)" />
-            <text id="label-garde-oui" class="etiquette-branche" x="274" y="140">Oui</text>
+            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="218" x2="295" y2="218" marker-end="url(#fleche)" />
+            <text id="label-garde-oui" class="etiquette-branche" x="274" y="210">Oui</text>
 
             <g id="noeud-ret-vide" class="noeud">
-              <rect class="forme-noeud" x="295" y="132" width="75" height="32" rx="3" />
-              <text class="texte-noeud" x="332" y="149">return null</text>
+              <rect class="forme-noeud" x="295" y="202" width="75" height="32" rx="3" />
+              <text class="texte-noeud" x="332" y="219">return null</text>
             </g>
 
-            <path id="ligne-null-fin" class="ligne-flux" d="M 332 164 V 535 H 230" marker-end="url(#fleche)" />
+            <path id="ligne-null-fin" class="ligne-flux" d="M 332 234 V 595 H 230" marker-end="url(#fleche)" />
 
             <!-- Branche Non (non vide -> max = tab[0], i = 1) -->
-            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="176" x2="190" y2="205" marker-end="url(#fleche)" />
-            <text id="label-garde-non" class="etiquette-branche" x="195" y="193">Non</text>
+            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="246" x2="190" y2="275" marker-end="url(#fleche)" />
+            <text id="label-garde-non" class="etiquette-branche" x="195" y="262">Non</text>
 
             <g id="noeud-init" class="noeud">
-              <rect class="forme-noeud" x="105" y="205" width="170" height="36" rx="3" />
-              <text class="texte-noeud" x="190" y="224">${varM} &larr; tab[0], ${varI} &larr; 1</text>
+              <rect class="forme-noeud" x="105" y="275" width="170" height="36" rx="3" />
+              <text class="texte-noeud" x="190" y="294">${varM} &larr; tab[0], ${varI} &larr; 1</text>
             </g>
 
-            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="241" x2="190" y2="270" marker-end="url(#fleche)" />
+            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="311" x2="190" y2="340" marker-end="url(#fleche)" />
 
             <g id="noeud-cond" class="noeud">
-              <polygon class="forme-noeud" points="190,270 260,298 190,326 120,298" />
-              <text class="texte-noeud" x="190" y="298">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
+              <polygon class="forme-noeud" points="190,340 260,368 190,396 120,368" />
+              <text class="texte-noeud" x="190" y="368">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
             </g>
 
-            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="326" x2="190" y2="355" marker-end="url(#fleche)" />
+            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="396" x2="190" y2="425" marker-end="url(#fleche)" />
 
             <g id="noeud-test" class="noeud">
-              <polygon class="forme-noeud" points="190,355 270,383 190,411 110,383" />
-              <text class="texte-noeud" x="190" y="383">${condTest}</text>
+              <polygon class="forme-noeud" points="190,425 270,453 190,481 110,453" />
+              <text class="texte-noeud" x="190" y="453">${condTest}</text>
             </g>
 
-            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 383 H 60 V 420" marker-end="url(#fleche)" />
-            <text id="label-vrai" class="etiquette-branche" x="65" y="375">Oui</text>
+            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 453 H 60 V 490" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="65" y="445">Oui</text>
 
             <g id="noeud-maj-max" class="noeud">
-              <rect class="forme-noeud" x="10" y="420" width="115" height="34" rx="3" />
-              <text class="texte-noeud" x="67" y="438">${varM} &larr; tab[i]</text>
+              <rect class="forme-noeud" x="10" y="490" width="115" height="34" rx="3" />
+              <text class="texte-noeud" x="67" y="508">${varM} &larr; tab[i]</text>
             </g>
 
-            <path id="ligne-maj-i" class="ligne-flux" d="M 67 454 V 478 H 135" marker-end="url(#fleche)" />
+            <path id="ligne-maj-i" class="ligne-flux" d="M 67 524 V 548 H 135" marker-end="url(#fleche)" />
 
-            <path id="ligne-test-faux" class="ligne-flux" d="M 270 383 H 320 V 478 H 245" marker-end="url(#fleche)" />
-            <text id="label-faux" class="etiquette-branche" x="280" y="375">Non</text>
+            <path id="ligne-test-faux" class="ligne-flux" d="M 270 453 H 320 V 548 H 245" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="280" y="445">Non</text>
 
             <g id="noeud-incr-i" class="noeud">
-              <rect class="forme-noeud" x="135" y="460" width="110" height="34" rx="3" />
-              <text class="texte-noeud" x="190" y="478">${varI} &larr; ${varI} + 1</text>
+              <rect class="forme-noeud" x="135" y="530" width="110" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="548">${varI} &larr; ${varI} + 1</text>
             </g>
 
-            <path id="ligne-boucle" class="ligne-flux" d="M 135 478 H 10 V 298 H 117" marker-end="url(#fleche)" />
+            <path id="ligne-boucle" class="ligne-flux" d="M 135 548 H 10 V 368 H 117" marker-end="url(#fleche)" />
 
-            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 298 H 350 V 505 H 240" marker-end="url(#fleche)" />
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 368 H 350 V 575 H 240" marker-end="url(#fleche)" />
 
             <g id="noeud-sortie" class="noeud">
-              <rect class="forme-noeud" x="145" y="500" width="95" height="30" rx="3" />
-              <text class="texte-noeud" x="192" y="516">${affichage}</text>
+              <rect class="forme-noeud" x="145" y="565" width="95" height="30" rx="3" />
+              <text class="texte-noeud" x="192" y="581">${affichage}</text>
             </g>
 
-            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="530" x2="190" y2="540" marker-end="url(#fleche)" />
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="595" x2="190" y2="602" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="150" y="540" width="80" height="20" rx="10" />
-              <text class="texte-noeud" x="190" y="551">Fin</text>
+              <rect class="forme-noeud" x="150" y="602" width="80" height="20" rx="10" />
+              <text class="texte-noeud" x="190" y="613">Fin</text>
             </g>
           </svg>
         `},
         generateur: function* (lang) {
-          let max = undefined, i = undefined;
+          let tab = undefined, max = undefined;
+          let tabLoc = undefined, maxLoc = undefined, iLoc = undefined;
           const lOffset = lang === "php" ? 3 : 0;
           const prefix = lang === "php" ? "$" : "";
 
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Début du programme.", indexActif: null };
+          // Étape 0 : Début
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'tab']: tab, [prefix + 'max']: max }, cond: "—", act: "Départ du programme principal. Portée globale active.", pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-appel", ligneSvg: "ligne-debut-appel", ligne: 13 + lOffset, statut: "Appel", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: `Appel de trouverMax(${prefix}tab) avec tab = [14, 42, 9].`, indexActif: null };
+          // Étape 1 : Initialisation globale de tab
+          tab = [14, 42, 9];
+          yield { noeud: "noeud-init-tab", ligneSvg: "ligne-debut-init-tab", ligne: 12 + lOffset, statut: "Affectation", vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max }, mod: prefix + 'tab', cond: "—", act: `Programme principal : création du tableau ${prefix}tab = [14, 42, 9].`, pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "3 === 0 (Faux)", act: "Tableau non vide (taille 3 !== 0) : la clause de garde laisse passer l'exécution.", indexActif: null };
+          // Étape 2 : Appel de trouverMax
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-init-appel", ligne: 13 + lOffset, statut: "Appel fonction", vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max }, cond: "—", act: `Appel trouverMax(${prefix}tab) : empilement du cadre local sur la pile d'appels !`, pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`] };
 
-          max = 14; i = 1;
-          yield { noeud: "noeud-init", ligneSvg: "ligne-garde-init", ligne: 3 + lOffset, statut: "Initialisation", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", act: `Étape 2 canonique : ${prefix}max initialisé sur le premier élément tab[0] (14).`, indexActif: 0, indexTrouve: 0 };
+          // Étape 3 : Entrée et clause de garde
+          tabLoc = [...tab];
+          yield {
+            noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'tab (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: lang === "php" ? "count($tab) === 0 (Faux : 3)" : "tab.length === 0 (Faux : 3)",
+            act: "Entrée dans trouverMax : paramètre local tab reçu. Taille = 3 (!== 0) : la garde laisse passer.",
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+
+          // Étape 4 : Initialisation locale
+          maxLoc = 14; iLoc = 1;
+          yield {
+            noeud: "noeud-init", ligneSvg: "ligne-garde-init", ligne: 3 + lOffset, statut: "Initialisation",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'max (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—",
+            act: `Dans trouverMax : variable locale ${prefix}max initialisée sur tab[0] (14) et ${prefix}i à 1.`,
+            indexActif: 0, indexTrouve: 0,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
 
           // Tour 1 : i = 1, tab[1] = 42
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 1", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> inspection de tab[1] (42).", indexActif: 1 };
-          yield { noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test tab[1]", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "42 > 14 (VRAI)", act: "42 > 14 est VRAI ! Nouveau maximum trouvé.", indexActif: 1 };
-          max = 42;
-          yield { noeud: "noeud-maj-max", ligneSvg: "ligne-test-vrai", ligne: 6 + lOffset, statut: "Mise à jour", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", act: `${prefix}max devient 42.`, indexActif: 1, indexTrouve: 1 };
-          i++;
-          yield { noeud: "noeud-incr-i", ligneSvg: "ligne-maj-i", ligne: 4 + lOffset, statut: "Incrément", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'i', cond: "—", act: `Pas : ${prefix}i passe à 2.`, indexActif: null };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Remontée vers le test." };
+          yield {
+            noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 1",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> inspection locale de tab[1] (42).", indexActif: 1,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          yield {
+            noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test tab[1]",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "42 > 14 (VRAI)", act: "42 > 14 est VRAI ! Nouveau maximum local trouvé.", indexActif: 1,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          maxLoc = 42;
+          yield {
+            noeud: "noeud-maj-max", ligneSvg: "ligne-test-vrai", ligne: 6 + lOffset, statut: "Mise à jour",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'max (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", act: `Variable locale ${prefix}max devient 42.`, indexActif: 1, indexTrouve: 1,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          iLoc++;
+          yield {
+            noeud: "noeud-incr-i", ligneSvg: "ligne-maj-i", ligne: 4 + lOffset, statut: "Incrément",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'i (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", act: `Pas : ${prefix}i local passe à 2.`, indexActif: null,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          yield {
+            noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", act: "Remontée vers le test.",
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
 
           // Tour 2 : i = 2, tab[2] = 9
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 2", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "2 < 3 (Vrai)", act: "2 < 3 est VRAI -> inspection de tab[2] (9).", indexActif: 2 };
-          yield { noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test tab[2]", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "9 > 42 (Faux)", act: "9 > 42 est FAUX. Pas de mise à jour.", indexActif: 2 };
-          i++;
-          yield { noeud: "noeud-incr-i", ligneSvg: "ligne-test-faux", ligne: 4 + lOffset, statut: "Incrément", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'i', cond: "—", act: `Pas : ${prefix}i passe à 3.`, indexActif: null };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Remontée vers le test final." };
+          yield {
+            noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 2",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "2 < 3 (Vrai)", act: "2 < 3 est VRAI -> inspection locale de tab[2] (9).", indexActif: 2,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          yield {
+            noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test tab[2]",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "9 > 42 (Faux)", act: "9 > 42 est FAUX. Pas de mise à jour.", indexActif: 2,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          iLoc++;
+          yield {
+            noeud: "noeud-incr-i", ligneSvg: "ligne-test-faux", ligne: 4 + lOffset, statut: "Incrément",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'i (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", act: `Pas : ${prefix}i local passe à 3.`, indexActif: null,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+          yield {
+            noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", act: "Remontée vers le test final.",
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
 
-          // Sortie
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 4 + lOffset, statut: "Sortie", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "3 < 3 (Faux)", act: "3 < 3 est FAUX ! Sortie de boucle.", indexActif: null };
-          yield { noeud: "noeud-sortie", ligneSvg: "ligne-cond-sortie", ligne: 9 + lOffset, statut: "Return", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "42", act: `Instruction return : la fonction renvoie max = 42.` };
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 14 + lOffset, statut: "Terminé", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "Max : 42", act: `Affichage final : maximum = 42.`, termine: true };
+          // Sortie de boucle
+          yield {
+            noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 4 + lOffset, statut: "Sortie",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "3 < 3 (Faux)", act: "3 < 3 est FAUX ! Fin de boucle.", indexActif: null,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+
+          // Instruction return
+          yield {
+            noeud: "noeud-sortie", ligneSvg: "ligne-cond-sortie", ligne: 9 + lOffset, statut: "Return",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", sortie: "42", act: `Instruction return : la fonction renvoie la valeur locale 42 à l'appelant.`,
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+
+          // Retour appelant & affectation de la variable globale max
+          max = maxLoc;
+          yield {
+            noeud: "noeud-appel", ligneSvg: "ligne-init-appel", ligne: 13 + lOffset, statut: "Retour appelant",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max },
+            mod: prefix + 'max',
+            porteeLocale: null,
+            cond: "—", act: `Cadre local dépilé et détruit ! max (local) et i (local) n'existent plus. La variable globale ${prefix}max reçoit 42.`,
+            pileAppels: ["Programme principal"]
+          };
+
+          // Sortie console & Fin
+          yield {
+            noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 14 + lOffset, statut: "Terminé",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max },
+            cond: "—", sortie: "Max : 42", act: `Affichage final : maximum = 42. Exécution terminée avec succès.`,
+            termine: true,
+            pileAppels: ["Programme principal"]
+          };
         }
       },
 
-      // 8bis. PATTERN 4bis : EXTREMUM SUR TABLEAU VIDE (GARDE DECLENCHEE)
+      // 8bis. PATTERN 4bis : EXTREMUM SUR TABLEAU VIDE (GARDE DECLENCHEE & PORTEE LOCALE)
       extremum_vide: {
+        nomFonction: "trouverMax()",
         titre: {
           js: "Organigramme (JS) : Pattern 4bis - Garde activée (Tableau vide [])",
           php: "Organigramme (PHP) : Pattern 4bis - Garde activée (Tableau vide [])"
@@ -2264,13 +2392,14 @@
           ]
         },
         variables: {
-          js: ["max", "i"],
-          php: ["$max", "$i"]
+          js: ["tab", "max", "tab (local)", "max (local)", "i (local)"],
+          php: ["$tab", "$max", "$tab (local)", "$max (local)", "$i (local)"]
         },
-        noeuds: ["noeud-debut", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
-        lignes: ["ligne-debut-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        noeuds: ["noeud-debut", "noeud-init-tab", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-init-tab", "ligne-init-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
         labels: ["label-garde-oui", "label-garde-non", "label-vrai", "label-faux"],
         svg: (lang) => {
+          const varTab = lang === "php" ? "$tab" : "tab";
           const varM = lang === "php" ? "$max" : "max";
           const varI = lang === "php" ? "$i" : "i";
           const condGarde = lang === "php" ? "count($tab) === 0 ?" : "tab.length === 0 ?";
@@ -2278,7 +2407,7 @@
           const affichage = lang === "php" ? "return $max" : "return max";
           const appel = lang === "php" ? "trouverMax($tab)" : "trouverMax(tab)";
           return `
-          <svg class="organigramme" viewBox="0 0 380 560">
+          <svg class="organigramme" viewBox="0 0 380 625">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
@@ -2289,114 +2418,165 @@
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="145" y="8" width="90" height="30" rx="15" />
-              <text class="texte-noeud" x="190" y="24">Début</text>
+              <rect class="forme-noeud" x="145" y="10" width="90" height="30" rx="15" />
+              <text class="texte-noeud" x="190" y="25">Début</text>
             </g>
 
-            <line id="ligne-debut-appel" class="ligne-flux" x1="190" y1="38" x2="190" y2="60" marker-end="url(#fleche)" />
+            <line id="ligne-debut-init-tab" class="ligne-flux" x1="190" y1="40" x2="190" y2="65" marker-end="url(#fleche)" />
 
+            <g id="noeud-init-tab" class="noeud">
+              <rect class="forme-noeud" x="105" y="65" width="170" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="82">${varTab} &larr; []</text>
+            </g>
+
+            <line id="ligne-init-appel" class="ligne-flux" x1="190" y1="99" x2="190" y2="125" marker-end="url(#fleche)" />
+
+            <!-- Nœud d'appel avec double barre ISO 5807 -->
             <g id="noeud-appel" class="noeud">
-              <rect class="forme-noeud" x="110" y="60" width="160" height="34" rx="3" />
-              <line x1="122" y1="60" x2="122" y2="94" stroke="#1e293b" stroke-width="1.5" />
-              <line x1="258" y1="60" x2="258" y2="94" stroke="#1e293b" stroke-width="1.5" />
-              <text class="texte-noeud" x="190" y="78">${appel}</text>
+              <rect class="forme-noeud" x="110" y="125" width="160" height="36" rx="3" />
+              <line x1="122" y1="125" x2="122" y2="161" stroke="#1e293b" stroke-width="1.5" />
+              <line x1="258" y1="125" x2="258" y2="161" stroke="#1e293b" stroke-width="1.5" />
+              <text class="texte-noeud" x="190" y="143">${appel}</text>
             </g>
 
-            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="94" x2="190" y2="120" marker-end="url(#fleche)" />
+            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="161" x2="190" y2="190" marker-end="url(#fleche)" />
 
-            <!-- Nœud clause de garde -->
+            <!-- Clause de garde -->
             <g id="noeud-garde" class="noeud">
-              <polygon class="forme-noeud" points="190,120 270,148 190,176 110,148" />
-              <text class="texte-noeud" x="190" y="148">${condGarde}</text>
+              <polygon class="forme-noeud" points="190,190 270,218 190,246 110,218" />
+              <text class="texte-noeud" x="190" y="218">${condGarde}</text>
             </g>
 
             <!-- Branche Oui (vide -> return null) -->
-            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="148" x2="295" y2="148" marker-end="url(#fleche)" />
-            <text id="label-garde-oui" class="etiquette-branche" x="274" y="140">Oui</text>
+            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="218" x2="295" y2="218" marker-end="url(#fleche)" />
+            <text id="label-garde-oui" class="etiquette-branche" x="274" y="210">Oui</text>
 
             <g id="noeud-ret-vide" class="noeud">
-              <rect class="forme-noeud" x="295" y="132" width="75" height="32" rx="3" />
-              <text class="texte-noeud" x="332" y="149">return null</text>
+              <rect class="forme-noeud" x="295" y="202" width="75" height="32" rx="3" />
+              <text class="texte-noeud" x="332" y="219">return null</text>
             </g>
 
-            <path id="ligne-null-fin" class="ligne-flux" d="M 332 164 V 535 H 230" marker-end="url(#fleche)" />
+            <path id="ligne-null-fin" class="ligne-flux" d="M 332 234 V 595 H 230" marker-end="url(#fleche)" />
 
             <!-- Branche Non (non vide -> max = tab[0], i = 1) -->
-            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="176" x2="190" y2="205" marker-end="url(#fleche)" />
-            <text id="label-garde-non" class="etiquette-branche" x="195" y="193">Non</text>
+            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="246" x2="190" y2="275" marker-end="url(#fleche)" />
+            <text id="label-garde-non" class="etiquette-branche" x="195" y="262">Non</text>
 
             <g id="noeud-init" class="noeud">
-              <rect class="forme-noeud" x="105" y="205" width="170" height="36" rx="3" />
-              <text class="texte-noeud" x="190" y="224">${varM} &larr; tab[0], ${varI} &larr; 1</text>
+              <rect class="forme-noeud" x="105" y="275" width="170" height="36" rx="3" />
+              <text class="texte-noeud" x="190" y="294">${varM} &larr; tab[0], ${varI} &larr; 1</text>
             </g>
 
-            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="241" x2="190" y2="270" marker-end="url(#fleche)" />
+            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="311" x2="190" y2="340" marker-end="url(#fleche)" />
 
             <g id="noeud-cond" class="noeud">
-              <polygon class="forme-noeud" points="190,270 260,298 190,326 120,298" />
-              <text class="texte-noeud" x="190" y="298">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
+              <polygon class="forme-noeud" points="190,340 260,368 190,396 120,368" />
+              <text class="texte-noeud" x="190" y="368">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
             </g>
 
-            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="326" x2="190" y2="355" marker-end="url(#fleche)" />
+            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="396" x2="190" y2="425" marker-end="url(#fleche)" />
 
             <g id="noeud-test" class="noeud">
-              <polygon class="forme-noeud" points="190,355 270,383 190,411 110,383" />
-              <text class="texte-noeud" x="190" y="383">${condTest}</text>
+              <polygon class="forme-noeud" points="190,425 270,453 190,481 110,453" />
+              <text class="texte-noeud" x="190" y="453">${condTest}</text>
             </g>
 
-            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 383 H 60 V 420" marker-end="url(#fleche)" />
-            <text id="label-vrai" class="etiquette-branche" x="65" y="375">Oui</text>
+            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 453 H 60 V 490" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="65" y="445">Oui</text>
 
             <g id="noeud-maj-max" class="noeud">
-              <rect class="forme-noeud" x="10" y="420" width="115" height="34" rx="3" />
-              <text class="texte-noeud" x="67" y="438">${varM} &larr; tab[i]</text>
+              <rect class="forme-noeud" x="10" y="490" width="115" height="34" rx="3" />
+              <text class="texte-noeud" x="67" y="508">${varM} &larr; tab[i]</text>
             </g>
 
-            <path id="ligne-maj-i" class="ligne-flux" d="M 67 454 V 478 H 135" marker-end="url(#fleche)" />
+            <path id="ligne-maj-i" class="ligne-flux" d="M 67 524 V 548 H 135" marker-end="url(#fleche)" />
 
-            <path id="ligne-test-faux" class="ligne-flux" d="M 270 383 H 320 V 478 H 245" marker-end="url(#fleche)" />
-            <text id="label-faux" class="etiquette-branche" x="280" y="375">Non</text>
+            <path id="ligne-test-faux" class="ligne-flux" d="M 270 453 H 320 V 548 H 245" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="280" y="445">Non</text>
 
             <g id="noeud-incr-i" class="noeud">
-              <rect class="forme-noeud" x="135" y="460" width="110" height="34" rx="3" />
-              <text class="texte-noeud" x="190" y="478">${varI} &larr; ${varI} + 1</text>
+              <rect class="forme-noeud" x="135" y="530" width="110" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="548">${varI} &larr; ${varI} + 1</text>
             </g>
 
-            <path id="ligne-boucle" class="ligne-flux" d="M 135 478 H 10 V 298 H 117" marker-end="url(#fleche)" />
+            <path id="ligne-boucle" class="ligne-flux" d="M 135 548 H 10 V 368 H 117" marker-end="url(#fleche)" />
 
-            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 298 H 350 V 505 H 240" marker-end="url(#fleche)" />
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 368 H 350 V 575 H 240" marker-end="url(#fleche)" />
 
             <g id="noeud-sortie" class="noeud">
-              <rect class="forme-noeud" x="145" y="500" width="95" height="30" rx="3" />
-              <text class="texte-noeud" x="192" y="516">${affichage}</text>
+              <rect class="forme-noeud" x="145" y="565" width="95" height="30" rx="3" />
+              <text class="texte-noeud" x="192" y="581">${affichage}</text>
             </g>
 
-            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="530" x2="190" y2="540" marker-end="url(#fleche)" />
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="595" x2="190" y2="602" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="150" y="540" width="80" height="20" rx="10" />
-              <text class="texte-noeud" x="190" y="551">Fin</text>
+              <rect class="forme-noeud" x="150" y="602" width="80" height="20" rx="10" />
+              <text class="texte-noeud" x="190" y="613">Fin</text>
             </g>
           </svg>
         `},
         generateur: function* (lang) {
-          let max = undefined, i = undefined;
+          let tab = undefined, max = undefined;
+          let tabLoc = undefined, maxLoc = undefined, iLoc = undefined;
           const lOffset = lang === "php" ? 3 : 0;
           const prefix = lang === "php" ? "$" : "";
 
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Début du programme avec un tableau vide [].", indexActif: null };
+          // Étape 0 : Début
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'tab']: tab, [prefix + 'max']: max }, cond: "—", act: "Départ du programme avec tableau vide. Portée globale active.", pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-appel", ligneSvg: "ligne-debut-appel", ligne: 13 + lOffset, statut: "Appel", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: `Appel de trouverMax(${prefix}tab) avec ${prefix}tab = [].`, indexActif: null };
+          // Étape 1 : Init global tab = []
+          tab = [];
+          yield { noeud: "noeud-init-tab", ligneSvg: "ligne-debut-init-tab", ligne: 12 + lOffset, statut: "Affectation", vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max }, mod: prefix + 'tab', cond: "—", act: `Programme principal : création du tableau vide ${prefix}tab = [].`, pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: lang === "php" ? "count($tab) === 0 (VRAI)" : "tab.length === 0 (VRAI)", act: "Tableau vide ! La clause de garde se déclenche immédiatement (VRAI).", indexActif: null };
+          // Étape 2 : Appel de trouverMax([])
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-init-appel", ligne: 13 + lOffset, statut: "Appel fonction", vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max }, cond: "—", act: `Appel trouverMax(${prefix}tab) : empilement du cadre local sur la pile d'appels.`, pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`] };
 
+          // Étape 3 : Entrée et clause de garde
+          tabLoc = [];
+          yield {
+            noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            mod: prefix + 'tab (local)',
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: lang === "php" ? "count($tab) === 0 (VRAI : 0)" : "tab.length === 0 (VRAI : 0)",
+            act: "Cadre local actif : paramètre tab = []. La garde teste tab.length === 0 : condition VRAIE !",
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+
+          // Étape 4 : Déclenchement de la garde et return null (max global est toujours undefined !)
+          yield {
+            noeud: "noeud-ret-vide", ligneSvg: "ligne-garde-vide", ligne: 2 + lOffset, statut: "Garde déclenchée",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
+            porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
+            cond: "—", sortie: "null",
+            act: "Instruction 'return null;' : arrêt immédiat, accès illégal à tab[0] évité ! La fonction renvoie null.",
+            pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
+          };
+
+          // Étape 5 : Retour appelant & affectation de la variable globale max = null
           max = null;
-          yield { noeud: "noeud-ret-vide", ligneSvg: "ligne-garde-vide", ligne: 2 + lOffset, statut: "Garde déclenchée", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", sortie: "null", act: "Exécution de 'return null;' : arrêt immédiat, accès illégal à tab[0] évité !", indexActif: null };
+          yield {
+            noeud: "noeud-appel", ligneSvg: "ligne-null-fin", ligne: 13 + lOffset, statut: "Retour appelant",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max },
+            mod: prefix + 'max',
+            porteeLocale: null,
+            cond: "—",
+            act: `Cadre local dépilé et détruit ! La variable globale ${prefix}max reçoit le résultat du return : null.`,
+            pileAppels: ["Programme principal"]
+          };
 
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-null-fin", ligne: 14 + lOffset, statut: "Terminé", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "Max : null", act: `Affichage final : Max = null. Aucune erreur d'exécution.`, termine: true };
+          // Étape 6 : Sortie console & Fin
+          yield {
+            noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 14 + lOffset, statut: "Terminé",
+            vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max },
+            cond: "—", sortie: "Max : null",
+            act: "Affichage final : Max = null. Protection réussie sans erreur d'exécution.",
+            termine: true,
+            pileAppels: ["Programme principal"]
+          };
         }
       },
-
       // 10. PATTERN 6 : FILTRAGE DANS UNE NOUVELLE COLLECTION (FILTER & PUSH)
       filtrage: {
         titre: {
@@ -3121,6 +3301,13 @@
       langueActive = lang;
       const ex = EXEMPLES[id];
 
+      // Nettoyer toute surbrillance résiduelle des cases de tableau
+      if (casesTableau) {
+        casesTableau.querySelectorAll(".cellule-tab").forEach(c => {
+          c.classList.remove("active", "trouvee");
+        });
+      }
+
       // 1. Boutons langage
       btnsLang.forEach(btn => {
         btn.classList.toggle("actif", btn.dataset.lang === lang);
@@ -3180,13 +3367,15 @@
         }
       } else if (zoneTableau) {
         zoneTableau.style.display = "none";
+        if (casesTableau) casesTableau.innerHTML = "";
       }
 
       // 7. Charger l'inspecteur de variables (avec distinction de portée / pile d'appels)
       barreVars.innerHTML = "";
       const listeVars = ex.variables[lang];
+      const hasLocalScope = listeVars.some(v => v.includes("local"));
 
-      if (id === "fonction") {
+      if (hasLocalScope) {
         // Cadre global
         const cadreGlobal = document.createElement("div");
         cadreGlobal.className = "cadre-portee";
@@ -3200,14 +3389,15 @@
         `;
         barreVars.appendChild(cadreGlobal);
 
-        // Cadre local (doubler)
+        // Cadre local de la fonction
+        const nomFn = ex.nomFonction || (id === "fonction" ? "doubler()" : "trouverMax()");
         const cadreLocal = document.createElement("div");
         cadreLocal.className = "cadre-portee locale";
-        cadreLocal.id = "cadre-local-doubler";
+        cadreLocal.id = "cadre-local-fonction";
         cadreLocal.style.display = "none";
         cadreLocal.innerHTML = `
           <div class="titre-portee">
-            <span>Pile d'appels : Cadre local doubler()</span>
+            <span>Pile d'appels : Cadre local ${nomFn}</span>
             <span style="font-size: 10px; color: #7c3aed; font-weight: bold;">Pile : #2</span>
           </div>
           <div class="vars-portee" id="vars-locales"></div>
@@ -3405,7 +3595,7 @@
       }
 
       // 5. Cadre local de la fonction (Call Stack) : destruction immédiate hors de la fonction
-      const cadreLocal = document.getElementById("cadre-local-doubler");
+      const cadreLocal = document.getElementById("cadre-local-fonction") || document.getElementById("cadre-local-doubler") || document.querySelector(".cadre-portee.locale");
       if (cadreLocal) {
         if (etape.porteeLocale) {
           cadreLocal.style.setProperty("display", "flex", "important");
