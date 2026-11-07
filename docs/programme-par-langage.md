@@ -150,8 +150,8 @@ Ces 7 patrons de conception sont universels et constituent la boîte à outils q
 6. **Le filtrage et partitionnement** :
    - Parcourir une collection source pour créer une nouvelle collection ne conservant que les éléments conformes (socle conceptuel de `.filter()` en JS, `array_filter()` en PHP et `WHERE` en SQL).
 7. **La validation globale par drapeau (Flag)** :
-   - Déterminer si une condition s'applique à tous les éléments ou au moins un élément (socle de `.every()` et `.some()`).
-   - *Application géométrique multimédia* : le test d'intersection AABB (boîtes englobantes alignées sur les axes) pour la détection de contact dans les jeux Canvas 2D et Phaser.
+   - Déterminer si une collection valide universellement un critère (tous les éléments : socle de `.every()`) ou existentiellement (au moins un élément : socle de `.some()`).
+   - *Mécanique* : initialiser un drapeau booléen (`tousValides = true`), parcourir la collection, et inverser le drapeau dès la première anomalie avec interruption immédiate par `break`.
 
 #### 3.6. Méthodologie d'analyse : Table de trace (R1.12) et ISO 5807
 - **Organigrammes normalisés (ISO 5807)** :
@@ -168,6 +168,9 @@ Ces 7 patrons de conception sont universels et constituent la boîte à outils q
 ### PARTIE B : APPROFONDISSEMENTS & CULTURE DEV (NIVEAU 2 - OUVERTURE)
 
 #### 3.7. Pièges classiques du web et du multimédia
+- **Détection géométrique d'intersection (AABB)** :
+  - Test de collision de deux rectangles alignés sur les axes (
+1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y), servant de socle immédiat aux collisions dans Canvas 2D et Phaser (dissocié des patterns de collections).
 - **Conversions de type et valeurs de formulaires HTML** :
   - Les valeurs issues d'un formulaire (`<input>`) sont toujours reçues sous forme de chaînes de caractères (`"42"`).
   - `Number("")` renvoie `0`, tandis que `Number("abc")` renvoie `NaN`.
@@ -198,7 +201,7 @@ Ces 7 patrons de conception sont universels et constituent la boîte à outils q
 - **Complexité intuitive** :
   - Parcours linéaire $O(n)$ : le temps d'exécution croît proportionnellement à la taille des données.
   - Double parcours quadratique $O(n^2)$ : tester chaque élément contre tous les autres (ex. détection de collision brute entre toutes les entités).
-  - *Distinction sur les grilles 2D* : une double boucle parcourant une grille de $L$ colonnes par $H$ lignes réalise $L \times H$ opérations, ce qui est une complexité linéaire $O(N)$ par rapport au nombre total de tuiles $N$. Elle n'est en $O(n^2)$ que si $n$ représente la longueur du côté d'une grille carrée.
+  - *Distinction sur les grilles 2D* : une double boucle parcourant une grille de $L$ colonnes par $H$ lignes réalise $L     imes H$ opérations, ce qui est une complexité linéaire $O(N)$ par rapport au nombre total de tuiles $N$. Elle n'est en $O(n^2)$ que si $n$ représente la longueur du côté d'une grille carrée.
 - **Le piège du décalage d'un (« Off-by-one »)** :
   - Confondre `<` et `<=` lors de l'accès à un tableau de longueur $N$ (le dernier élément valide est à l'indice $N - 1$).
 - **Immutabilité profonde** :
