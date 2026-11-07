@@ -27,13 +27,13 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 
 Ordre des langages et notions attendues : [programme-par-langage.md](programme-par-langage.md).
 
-Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
+### Module HTML : 42 exos prévus (`00` à `41`, voir README section 3)
 
 **Squelette**
-- [ ] `00` : À quoi sert HTML
-- [ ] `01` : Squelette à la main
-- [ ] `02` : `head` (title, meta)
-- [ ] `03` : Le squelette en un raccourci (débloque `!`)
+- [x] `00` : À quoi sert HTML
+- [x] `01` : Squelette à la main
+- [x] `02` : `head` (title, meta)
+- [x] `03` : Le squelette en un raccourci (débloque `!`)
 
 **Texte**
 - [x] `04` : Titres h1 à h6
@@ -93,7 +93,71 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `40` : Palier : une page complète à cahier des charges
 - [ ] `41` : Projet : page personnelle
 
-L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
+---
+
+### Module JavaScript & Algorithmique (R1.12, R3.12)
+
+Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
+
+**1. Fondamentaux, Algorithmique & Syntaxe moderne (vanilla)**
+- [x] `00` : À quoi sert JavaScript (variables, `const`)
+- [x] `01` : Variables modifiables avec `let`
+- [x] `02` : Calculs et opérations arithmétiques
+- [x] `03` : La condition `if` et `else`
+- [x] `04` : Répéter avec la boucle `for`
+- [x] `05` : Créer sa première fonction (`return`)
+- [ ] `06` : La boucle `while` (tant que)
+- [ ] `07` : Fonctions fléchées `() => {}` et paramètres par défaut
+- [ ] `08` : Tableaux simples : déclaration, indexation et `.length`
+- [ ] `09` : Objets littéraux : paires clé-valeur
+- [ ] `10` : Déstructuration et opérateur Spread `...`
+- [ ] `11` : Données fiables avec le chaînage optionnel `?.` et le nullish coalescing `??`
+- [ ] `12` : Palier : simulation d'un inventaire de jeu complet
+
+**2. DOM moderne, Événements et Persistance locale (vanilla)**
+- [ ] `13` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
+- [ ] `14` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
+- [ ] `15` : Écouter un événement avec `addEventListener` et l'objet `e`
+- [ ] `16` : Délégation d'événements : gérer une liste dynamique avec `e.target`
+- [ ] `17` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
+- [ ] `18` : Sauvegarder des données locales avec `localStorage` (thème et score)
+- [ ] `19` : Retours sonores légers avec HTML5 `new Audio()`
+- [ ] `20` : Animation d'apparition au défilement avec `IntersectionObserver`
+
+**3. Asynchronisme, Données et Formulaires (vanilla)**
+- [ ] `21` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
+- [ ] `22` : Requêtes réseau modernes avec `fetch()` et `async / await`
+- [ ] `23` : Gestion des erreurs réseau avec `try...catch`
+- [ ] `24` : Formulaires automatiques avec l'objet `FormData`
+- [ ] `25` : Chargement simultané de ressources avec `Promise.all()`
+- [ ] `26` : Modélisation objet : `class`, `constructor` et héritage
+
+**4. Graphisme 2D Canvas (canvas)**
+- [ ] `01` : Initialiser le canvas 2D et tracer des formes géométriques
+- [ ] `02` : Couleurs, styles, images et effacement
+- [ ] `03` : Boucle d'animation fluide avec `requestAnimationFrame`
+- [ ] `04` : Pointer Events (`pointerdown`, `pointermove`) pour le dessin et le tactile
+- [ ] `05` : Détection de collisions (AABB) et mini-jeu d'arcade
+
+**5. Visualisation de données avec Chart.js (chartjs)**
+- [ ] `01` : Premier graphique en barres avec Chart.js
+- [ ] `02` : Graphique en courbes et personnalisation des axes
+- [ ] `03` : Graphique circulaire (camembert / donut)
+- [ ] `04` : Mise à jour dynamique des données avec `chart.update()`
+
+**6. Moteur de jeu 2D avec Phaser (phaser)**
+- [ ] `01` : Configuration et scène Phaser (`preload`, `create`, `update`)
+- [ ] `02` : Spritesheets, animations et physique Arcade
+- [ ] `03` : Contrôles au clavier, sauts et limites du monde
+- [ ] `04` : Collisions, score et sauvegarde du record avec `localStorage`
+
+**7. Interactivité déclarative avec Alpine.js (alpine)**
+- [ ] `01` : État réactif avec `x-data` et affichage avec `x-text`
+- [ ] `02` : Événements (`@click`) et bascule d'affichage (`x-show`)
+- [ ] `03` : Rendu de listes dynamiques avec `x-for`
+- [ ] `04` : Transitions et animations légères avec `x-transition`
+
+---
 
 ## Ensuite
 

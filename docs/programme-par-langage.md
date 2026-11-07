@@ -76,48 +76,67 @@ Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fo
 
 Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-ressources progressives selon le référentiel :
 
-### 4.1. JS Vanilla — DOM et Événements (R3.12)
-- **Sélection d'éléments** : `document.querySelector()`, `document.querySelectorAll()`
-- **Modification du DOM** : `.textContent`, `.innerHTML`, `.setAttribute()`, attributs de style
-- **Classes CSS dynamiques** : `.classList.add()`, `.classList.remove()`, `.classList.toggle()`
-- **Écouteurs d'événements** : `addEventListener()`, gestion des clics, saisies (`input`), survols (`mouseover`)
-- **Gestion des formulaires** : validation avant envoi, interception de l'événement `submit`, `preventDefault()`
+### 4.1. Fondamentaux & Syntaxe moderne ES6+ (R1.12)
+- **Variables et types** : `const` par défaut, `let` pour les réassignations, types primitifs (string, number, boolean).
+- **Opérateurs et conditions** : `if`, `else`, opérateur ternaire, égalité stricte (`===`), chaînage optionnel (`?.`) et coalescence des nuls (`??`).
+- **Boucles fondamentales** : boucle `while` (tant que), boucle `for` avec compteur, parcours moderne avec `for...of`.
+- **Fonctions modernes** :
+  - Déclaration classique et fonctions fléchées (`() => {}`).
+  - Paramètres par défaut et valeur de retour (`return`).
+  - Portée de bloc (`block scope`) et conservation lexicale du `this`.
+- **Structures de données** :
+  - Tableaux : indexation, `.length`, `.push()`.
+  - Objets littéraux : paires clé-valeur.
+  - Déstructuration d'objets et de tableaux (`const { x, y } = point;`).
+  - Opérateur Spread et Rest (`...`) pour cloner et fusionner sans mutation.
 
-### 4.2. JS Vanilla — Programmation fonctionnelle, Objets et Asynchronisme (R2.13, R3.12)
-- **Méthodes avancées de tableaux** : `.forEach()`, `.map()`, `.filter()`, `.reduce()`, `.find()`, `.sort()`
-- **Fonctions modernes** : fonctions fléchées (`=>`), paramètres par défaut, déstructuration d'objets et de tableaux
-- **Conception objet et classes** : syntaxe `class`, constructeur `constructor`, méthodes, héritage avec `extends`
-- **Asynchronisme et API** : promesses, syntaxe `async / await`, requêtes réseau avec `fetch()`, manipulation du format JSON
+### 4.2. DOM moderne, Événements et Persistance (R1.12, R3.12)
+- **Sélection et manipulation du DOM** : `document.querySelector()`, `document.querySelectorAll()`, `.textContent`, `.classList` (`add`, `remove`, `toggle`), attributs `dataset`.
+- **Gestion des événements** : écouteurs `addEventListener()`, objet d'événement `e`, interception `preventDefault()`.
+- **Délégation d'événements** : propagation des événements (bubbling), détection avec `e.target` pour gérer dynamiquement des listes sans multiplier les écouteurs.
+- **Rendu dynamique propre** : utilisation de la balise `<template>` et clonage via `.cloneNode(true)` pour éviter les concaténations non sécurisées avec `innerHTML`.
+- **Persistance locale sans serveur** : Web Storage (`localStorage` et `sessionStorage`), sauvegarde d'état (meilleur score de jeu, préférences de thème clair/sombre).
+- **Multimédia audio léger** : objet HTML5 `Audio` (`new Audio()`, lecture, pause, volume) pour les retours sonores d'interface et bruitages de jeux.
+- **Défilement et visibilité** : API `IntersectionObserver` (déclenchement d'animations à l'apparition, lazy-loading d'images pour portfolios et vitrines).
 
-### 4.3. Graphisme 2D avec l'API Canvas (R3.12)
-- Balise `<canvas>` et obtention du contexte 2D (`getContext("2d")`)
-- Formes géométriques de base : rectangles (`fillRect`, `strokeRect`), tracés vectoriels (`beginPath`, `moveTo`, `lineTo`, `arc`)
-- Couleurs, contours, opacité et dégradés
-- Textes et affichage d'images dans le canvas
-- Boucle d'animation fluide avec `requestAnimationFrame()` (gestion du delta time et effacement avec `clearRect`)
-- Détection de collisions simples (boîtes englobantes AABB) et interactions souris/clavier sur canvas
+### 4.3. Asynchronisme, Données et API (R2.13, R3.12)
+- **Méthodes fonctionnelles de tableau** : `.forEach()`, `.map()`, `.filter()`, `.reduce()`, `.find()`, `.sort()`.
+- **Asynchronisme moderne** : requêtes réseau avec `fetch()`, syntaxe linéaire `async / await` avec gestion propre des erreurs via `try...catch` (évite les chaînes verbeuses de `.then()`).
+- **Manipulation des données JSON** : consommation d'API REST, parsing et sérialisation (`JSON.parse()`, `JSON.stringify()`).
+- **Formulaires modernes** : objet `FormData` pour collecter automatiquement tous les champs et les envoyer proprement via `fetch` en méthode `POST`.
+- **Parallélisation** : `Promise.all()` pour charger simultanément plusieurs ressources distantes (données JSON + assets graphiques).
+- **Conception objet** : syntaxe `class`, constructeur `constructor`, méthodes et héritage (`extends`).
 
-### 4.4. Moteur de jeu 2D avec Phaser (R3.12 et projets)
-- Initialisation et configuration d'une instance `Phaser.Game`
-- Architecture des scènes Phaser et cycle de vie : `preload()`, `create()`, `update()`
-- Chargement d'assets : images, feuilles de sprites (`spritesheets`), sons
-- Physique Arcade : vélocité, gravité, rebonds, limites de monde (`collideWorldBounds`)
-- Gestion des collisions : `physics.add.collider()`, `physics.add.overlap()`
-- Contrôles au clavier : gestion des flèches et de la touche saut
-- Gestion d'état de jeu : collecte d'objets, score à l'écran, vies, défaite/victoire
+### 4.4. Graphisme 2D avec l'API Canvas (R3.12)
+- Balise `<canvas>` et obtention du contexte 2D (`getContext("2d")`).
+- Formes géométriques : rectangles (`fillRect`, `strokeRect`), tracés vectoriels (`beginPath`, `moveTo`, `lineTo`, `arc`).
+- Couleurs, contours, typographie et dessin d'images sur le canvas.
+- Boucle d'animation fluide avec `requestAnimationFrame()` (delta time et nettoyage via `clearRect`).
+- Événements unifiés : Pointer Events (`pointerdown`, `pointermove`, `pointerup`) pour supporter souris, stylet et tactile sans distinction.
+- Détection de collisions simples (boîtes englobantes AABB) et mini-jeu d'arcade interactif.
 
-### 4.5. Interactivité déclarative avec Alpine.js (R3.12)
-- Intégration légère sans bundler
-- Directives d'état : `x-data`, `x-text`, `x-html`, `x-bind`
-- Gestion des événements et interactions : `x-on:click` (`@click`), `x-show`, `x-if`
-- Répétition déclarative de listes : `x-for`
-- Transitions et animations : `x-transition`
+### 4.5. Visualisation de données avec Chart.js (R3.12)
+- Rendu de graphiques dynamiques sur balise `<canvas>`.
+- Types de graphiques : barres (`bar`), courbes/lignes (`line`), camemberts et beignets (`pie`, `doughnut`).
+- Paramétrage complet : séries de données (`datasets`), axes, couleurs, légendes et tooltips.
+- Mise à jour dynamique des données en temps réel (`chart.update()`).
+- Cas d'usage MMI : dashboards de statistiques, data-visualisation interactive pour projets et SAÉ.
 
-### 4.6. Visualisation de données avec Chart.js (R3.12)
-- Rendu de graphiques sur Canvas
-- Types de graphiques : barres (`bar`), lignes (`line`), camemberts (`pie`, `doughnut`)
-- Paramétrage des séries de données (`datasets`), axes, légendes et tooltips
-- Mise à jour dynamique des données en temps réel
+### 4.6. Moteur de jeu 2D avec Phaser (R3.12 et projets)
+- Initialisation et configuration d'une instance `Phaser.Game`.
+- Architecture des scènes Phaser et cycle de vie : `preload()`, `create()`, `update()`.
+- Chargement d'assets : images, feuilles de sprites (`spritesheets`), effets sonores.
+- Physique Arcade : vélocité, gravité, rebonds, limites de monde (`collideWorldBounds`).
+- Gestion des collisions : `physics.add.collider()`, `physics.add.overlap()`.
+- Contrôles au clavier et tactile : déplacements, saut, tirs.
+- Gestion d'état de jeu : collecte d'objets, score à l'écran, vies, défaite/victoire et sauvegarde du record avec `localStorage`.
+
+### 4.7. Interactivité déclarative avec Alpine.js (R3.12)
+- Intégration ultra-légère sans outillage de build.
+- Directives d'état : `x-data`, `x-text`, `x-html`, `x-bind`.
+- Gestion des événements et interactions : `x-on:click` (`@click`), `x-show`, `x-if`.
+- Répétition déclarative de listes : `x-for`.
+- Transitions et animations : `x-transition`.
 
 C'est à cette étape que la visualisation de la logique (variables, boucles, fonctions) a le plus de sens : voir [visualisation-logique.md](visualisation-logique.md).
 
