@@ -164,6 +164,54 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 ---
 
+### Module PHP & Architecture Web (R1.13, R2.13, R2.14)
+
+Programme détaillé des 6 sous-modules : [programme-par-langage.md](programme-par-langage.md).
+
+**1. Fondamentaux, Syntaxe PHP 8+ & Templating serveur**
+- [ ] `00` : Premier script PHP, balises `<?php ?>` et affichage avec `echo`
+- [ ] `01` : Variables `$`, types primitifs et concaténation
+- [ ] `02` : Conditions `if`, `else`, opérateurs logiques et ternaire
+- [ ] `03` : Boucles fondamentales : `while`, `for` et `foreach`
+- [ ] `04` : Tableaux associatifs (clé => valeur) et fonctions de tableaux
+- [ ] `05` : Fonctions personnalisées avec typage des paramètres et du `return`
+- [ ] `06` : Templating modulaire : découper sa page avec `require_once` (`header`, `footer`)
+
+**2. Formulaires, Superglobales & Sécurité XSS (R2.13)**
+- [ ] `07` : Paramètres d'URL et superglobale `$_GET`
+- [ ] `08` : Réception de données de formulaires avec `$_POST`
+- [ ] `09` : Prévention des attaques XSS avec `htmlspecialchars()`
+- [ ] `10` : Validation et assainissement côté serveur (`filter_var`, champs obligatoires)
+- [ ] `11` : Formulaire complet avec gestion d'erreurs et conservation des valeurs
+
+**3. État, Sessions & Authentification sécurisée (R2.13)**
+- [ ] `12` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
+- [ ] `13` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
+- [ ] `14` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
+- [ ] `15` : Système complet de connexion / déconnexion et protection de page privée
+
+**4. Base de données relationnelle avec PDO & SQL (R2.13, R2.14)**
+*Protection absolue contre les injections SQL : requêtes préparées obligatoires.*
+- [ ] `16` : Connexion à la base de données avec l'extension `PDO`
+- [ ] `17` : Lecture de données avec `query()` et `fetchAll(PDO::FETCH_ASSOC)`
+- [ ] `18` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
+- [ ] `19` : Opérations CRUD (1) : Insertion de données avec `INSERT INTO`
+- [ ] `20` : Opérations CRUD (2) : Modification de données avec `UPDATE`
+- [ ] `21` : Opérations CRUD (3) : Suppression sécurisée avec `DELETE` et confirmation
+
+**5. Programmation Orientée Objet (POO) moderne (R2.13, R3.12)**
+- [ ] `22` : Déclaration de classe, propriétés typées et instanciation avec `new`
+- [ ] `23` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
+- [ ] `24` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
+- [ ] `25` : Héritage de classe avec `extends` et réutilisation de méthodes
+
+**6. Architecture MVC & API Back-End (R2.13, SAÉ)**
+- [ ] `26` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
+- [ ] `27` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée `index.php`
+- [ ] `28` : Point de terminaison API JSON (`header` Content-Type et `json_encode`) pour alimenter le front JS
+
+---
+
 ## Ensuite
 
 Dans l'ordre du README : comptes et rôles, import des exos Markdown, module HTML complet, gel de l'écran et chrono, échanges PTP, signalements, modules CSS/SVG/JS, Bash/PHP/MySQL, projets, pilote.

@@ -175,14 +175,65 @@ Référentiel : R4.DWeb-DI.08, « création de scripts ».
 
 ## 7. PHP
 
-- Syntaxe : variables, tableaux, conditions, boucles, fonctions
-- Générer des pages à partir de données (AC14.03)
-- Formulaires et validation des données côté serveur (R2.13)
-- Accès à une base de données avec PDO (SQLite en simulation)
-- Requêtes préparées et échappement des données, pour la sécurité
-- Sessions
-- POO et MVC (R2.13, R3.12)
-- Serveur local (R1.13) : installer un environnement PHP et MySQL en local (XAMPP, Laragon ou Docker, voir [lancer le projet](lancer-le-projet.md))
+Le module PHP introduit la programmation côté serveur (Back-End) et le cycle de vie des requêtes HTTP (R2.13). Il s'appuie sur la POO vue en JS et prépare le terrain pour l'interaction avec les bases de données SQL. Il se structure en 6 sous-modules progressifs :
+
+### 7.1. Fondamentaux, Syntaxe PHP 8+ & Templating serveur (R2.13)
+- **Balises et syntaxe** : balises d'ouverture `<?php`, instruction d'affichage `echo`, terminaison par point-virgule `;`.
+- **Variables et typage** : préfixe `$`, typage dynamique et strict (`declare(strict_types=1)`), types primitifs (string, int, float, bool).
+- **Opérateurs et conditions** : concaténation avec le point `.`, conditions `if`, `else`, `elseif`, opérateur ternaire et opérateur null-safe `?->`.
+- **Boucles et parcours** : boucles `while`, `for`, et boucle spécialisée `foreach ($tableau as $cle => $valeur)`.
+- **Tableaux associatifs** : structures clé-valeur (`['id' => 1, 'nom' => 'Potion']`), fonctions natives de tableaux (`array_push`, `in_array`, `array_filter`).
+- **Fonctions personnalisées** : déclaration, typage des arguments et des valeurs de retour (`function calculerTotal(array $items): float`).
+- **Templating serveur modulaire** : découpage d'une page HTML en composants avec `require_once` et `include` (`header.php`, `navbar.php`, `footer.php`).
+
+### 7.2. Formulaires, Superglobales & Sécurité XSS (R2.13)
+- **Cycle HTTP** : différence entre requête GET (lecture, recherche, partage d'URL) et requête POST (envoi de données, modification).
+- **Lecture des données** : superglobales `$_GET` et `$_POST`.
+- **Sécurité XSS (Cross-Site Scripting)** : neutralisation systématique des failles XSS à l'affichage via `htmlspecialchars($valeur, ENT_QUOTES, 'UTF-8')`.
+- **Validation et assainissement** : vérification des champs requis (`empty()`, `isset()`), nettoyage avec `trim()`, validation de formats avec `filter_var()` (emails, entiers, URL).
+- **Gestion des retours utilisateurs** : persistance des valeurs saisies dans le formulaire en cas d'erreur et affichage de messages d'alerte.
+
+### 7.3. Sessions, Cookies & Authentification sécurisée (R2.13)
+- **Cookies HTTP** : fonctionnement des en-têtes `Set-Cookie`, création avec `setcookie()`, lecture via `$_COOKIE` et limites de sécurité (`httponly`, `secure`).
+- **Mécanisme des sessions** : initialisation avec `session_start()`, stockage d'état côté serveur dans la superglobale `$_SESSION`, destruction propre (`session_destroy()`).
+- **Sécurité des mots de passe** : hachage irréversible avec l'algorithme par défaut via `password_hash($mdp, PASSWORD_DEFAULT)` et vérification avec `password_verify()`.
+- **Espace membre privé** : contrôle d'accès sur les pages protégées (redirection `header('Location: login.php'); exit;` si non authentifié) et déconnexion.
+
+### 7.4. Base de données relationnelle avec PDO & SQL (R2.13, R2.14)
+- **Connexion PDO** : instanciation de l'objet `PDO` avec DSN (SQLite ou MySQL), gestion des erreurs avec le mode `PDO::ERRMODE_EXCEPTION`.
+- **Lecture sécurisée** : exécution de requêtes avec `query()` et récupération des résultats via `fetch()` et `fetchAll(PDO::FETCH_ASSOC)`.
+- **Protection contre les injections SQL** : interdiction absolue de concaténer des variables dans le SQL. Utilisation systématique des requêtes préparées avec `prepare()` et `execute([$param])` ou `bindParam()`.
+- **Opérations CRUD complètes** :
+  - **Create** : insertion sécurisée (`INSERT INTO table (...) VALUES (...)`).
+  - **Read** : sélection filtrée (`SELECT ... WHERE id = ?`).
+  - **Update** : mise à jour de données existantes (`UPDATE table SET ... WHERE id = ?`).
+  - **Delete** : suppression contrôlée avec confirmation (`DELETE FROM table WHERE id = ?`).
+
+### 7.5. Programmation Orientée Objet (POO) moderne (R2.13, R3.12)
+- **Classes et objets** : déclaration `class`, propriétés typées, instanciation avec `new`.
+- **Constructeur moderne PHP 8** : constructeur `__construct` avec promotion de propriétés pour un code concis.
+- **Encapsulation** : visibilité `public` et `private`, méthodes accesseurs (getters) et mutateurs (setters).
+- **Héritage** : mot-clé `extends`, réutilisation de méthodes parentes avec `parent::`.
+
+### 7.6. Architecture MVC & API Back-End (R2.13, SAÉ)
+- **Séparation des responsabilités (MVC)** :
+  - **Modèle** : classes représentant les données et assurant les requêtes PDO.
+  - **Vue** : templates HTML/PHP purs sans logique métier, affichant les données transmises.
+  - **Contrôleur** : réception de la requête, appel du modèle, sélection et affichage de la vue.
+- **Routage minimaliste** : point d'entrée unique `index.php` avec analyse du paramètre d'action (`?page=articles` ou `?action=detail`).
+- **API REST et JSON** : conception d'un point de terminaison renvoyant du JSON (`header('Content-Type: application/json')` et `json_encode($donnees)`) pour alimenter le front-end JavaScript (`fetch`).
+
+### 7.7. Points de vigilance pour l'animation en classe PHP
+
+Deux points fondamentaux doivent être anticipés lors des séances PHP :
+
+1. **La sécurité dès la première ligne de code** :
+   - *XSS* : Ne jamais laisser un élève écrire `echo $_POST['nom'];` sans le corriger immédiatement avec `htmlspecialchars()`. Les mauvaises habitudes de concaténation brute sont très difficiles à désapprendre.
+   - *Injections SQL* : Bannir totalement `"SELECT * FROM users WHERE nom = '" . $_POST['nom'] . "'"` dès la première démonstration. Les requêtes préparées `prepare()` doivent être le seul réflexe enseigné.
+
+2. **L'environnement d'exécution (serveur local obligatoire)** :
+   - *Erreur classique* : comme pour les modules JS, les étudiants tentent régulièrement d'ouvrir leurs scripts PHP par un double-clic dans l'explorateur de fichiers. Le navigateur affiche alors le code source brut au lieu de l'exécuter.
+   - *Consigne* : vérifier que le serveur local (Laragon, serveur interne PHP `php -S localhost:8000`, Docker ou simulateur php-wasm de la plateforme) est actif avant de commencer.
 
 WordPress est reporté (README).
 
