@@ -166,7 +166,7 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 ### Module PHP & Architecture Web (R1.13, R2.13, R2.14)
 
-Programme détaillé des 6 sous-modules : [programme-par-langage.md](programme-par-langage.md).
+Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
 
 **1. Fondamentaux, Syntaxe PHP 8+ & Templating serveur**
 - [ ] `00` : Premier script PHP, balises `<?php ?>` et affichage avec `echo`
@@ -177,38 +177,43 @@ Programme détaillé des 6 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `05` : Fonctions personnalisées avec typage des paramètres et du `return`
 - [ ] `06` : Templating modulaire : découper sa page avec `require_once` (`header`, `footer`)
 
-**2. Formulaires, Superglobales & Sécurité XSS (R2.13)**
+**2. Formulaires, Upload de fichiers ($_FILES) & Sécurité XSS / CSRF (R2.13)**
 - [ ] `07` : Paramètres d'URL et superglobale `$_GET`
 - [ ] `08` : Réception de données de formulaires avec `$_POST`
 - [ ] `09` : Prévention des attaques XSS avec `htmlspecialchars()`
 - [ ] `10` : Validation et assainissement côté serveur (`filter_var`, champs obligatoires)
-- [ ] `11` : Formulaire complet avec gestion d'erreurs et conservation des valeurs
+- [ ] `11` : Upload sécurisé d'images avec `$_FILES` : `enctype`, type MIME réel et renommage
+- [ ] `12` : Protection contre les attaques CSRF : génération et vérification de token de session
 
 **3. État, Sessions & Authentification sécurisée (R2.13)**
-- [ ] `12` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
-- [ ] `13` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
-- [ ] `14` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
-- [ ] `15` : Système complet de connexion / déconnexion et protection de page privée
+- [ ] `13` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
+- [ ] `14` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
+- [ ] `15` : Prévention de la fixation de session avec `session_regenerate_id(true)`
+- [ ] `16` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
+- [ ] `17` : Système complet de connexion / déconnexion et protection d'espace membre
 
-**4. Base de données relationnelle avec PDO & SQL (R2.13, R2.14)**
-*Protection absolue contre les injections SQL : requêtes préparées obligatoires.*
-- [ ] `16` : Connexion à la base de données avec l'extension `PDO`
-- [ ] `17` : Lecture de données avec `query()` et `fetchAll(PDO::FETCH_ASSOC)`
-- [ ] `18` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
-- [ ] `19` : Opérations CRUD (1) : Insertion de données avec `INSERT INTO`
-- [ ] `20` : Opérations CRUD (2) : Modification de données avec `UPDATE`
-- [ ] `21` : Opérations CRUD (3) : Suppression sécurisée avec `DELETE` et confirmation
+**4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
+*Transition naturelle depuis la POO JavaScript (séance 27).*
+- [ ] `18` : Déclaration de classe, propriétés typées et instanciation avec `new`
+- [ ] `19` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
+- [ ] `20` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
+- [ ] `21` : Héritage de classe avec `extends` et `parent::__construct()`
+- [ ] `22` : Autoloading de classes sans bundler avec `spl_autoload_register()`
 
-**5. Programmation Orientée Objet (POO) moderne (R2.13, R3.12)**
-- [ ] `22` : Déclaration de classe, propriétés typées et instanciation avec `new`
-- [ ] `23` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
-- [ ] `24` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
-- [ ] `25` : Héritage de classe avec `extends` et réutilisation de méthodes
+**5. Base de données relationnelle avec PDO & Relations SQL (R2.13, R2.14)**
+*Sécurisation des identifiants (try/catch et .gitignore) et protection absolue contre les injections SQL.*
+- [ ] `23` : Connexion sécurisée avec `PDO` et gestion des erreurs avec `try / catch`
+- [ ] `24` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
+- [ ] `25` : Opérations CRUD complètes (Insertion, Lecture, Mise à jour, Suppression)
+- [ ] `26` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éviter le piège du N+1
 
-**6. Architecture MVC & API Back-End (R2.13, SAÉ)**
-- [ ] `26` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
-- [ ] `27` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée `index.php`
-- [ ] `28` : Point de terminaison API JSON (`header` Content-Type et `json_encode`) pour alimenter le front JS
+**6. Architecture MVC & Routage (R2.13, SAÉ)**
+- [ ] `27` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
+- [ ] `28` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée unique `index.php`
+
+**7. API Back-End JSON & Échanges avec le Front-End (R2.13, R3.12)**
+- [ ] `29` : Création d'une API JSON : `header` Content-Type et sérialisation avec `json_encode()`
+- [ ] `30` : Codes de statut HTTP réels (`http_response_code`) et gestion du CORS pour le `fetch()` JS
 
 ---
 

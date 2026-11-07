@@ -175,65 +175,89 @@ Référentiel : R4.DWeb-DI.08, « création de scripts ».
 
 ## 7. PHP
 
-Le module PHP introduit la programmation côté serveur (Back-End) et le cycle de vie des requêtes HTTP (R2.13). Il s'appuie sur la POO vue en JS et prépare le terrain pour l'interaction avec les bases de données SQL. Il se structure en 6 sous-modules progressifs :
+Le module PHP introduit le développement côté serveur (Back-End) et le cycle de vie des requêtes HTTP (R2.13). Il assure la transition directe depuis la POO JavaScript vers l'architecture Back-End, la manipulation des bases de données relationnelles et la conception d'API JSON. Il se découpe en 7 sous-modules progressifs :
 
 ### 7.1. Fondamentaux, Syntaxe PHP 8+ & Templating serveur (R2.13)
 - **Balises et syntaxe** : balises d'ouverture `<?php`, instruction d'affichage `echo`, terminaison par point-virgule `;`.
 - **Variables et typage** : préfixe `$`, typage dynamique et strict (`declare(strict_types=1)`), types primitifs (string, int, float, bool).
-- **Opérateurs et conditions** : concaténation avec le point `.`, conditions `if`, `else`, `elseif`, opérateur ternaire et opérateur null-safe `?->`.
-- **Boucles et parcours** : boucles `while`, `for`, et boucle spécialisée `foreach ($tableau as $cle => $valeur)`.
+- **Opérateurs et conditions** : concaténation avec le point `.`, conditions `if`, `else`, `elseif`, opérateur ternaire, null-safe `?->` et null-coalescing `??`.
+- **Boucles et parcours** : boucles `while`, `for`, et parcours de tableaux avec `foreach ($tableau as $cle => $valeur)`.
 - **Tableaux associatifs** : structures clé-valeur (`['id' => 1, 'nom' => 'Potion']`), fonctions natives de tableaux (`array_push`, `in_array`, `array_filter`).
 - **Fonctions personnalisées** : déclaration, typage des arguments et des valeurs de retour (`function calculerTotal(array $items): float`).
 - **Templating serveur modulaire** : découpage d'une page HTML en composants avec `require_once` et `include` (`header.php`, `navbar.php`, `footer.php`).
 
-### 7.2. Formulaires, Superglobales & Sécurité XSS (R2.13)
-- **Cycle HTTP** : différence entre requête GET (lecture, recherche, partage d'URL) et requête POST (envoi de données, modification).
+### 7.2. Formulaires, Upload de fichiers ($_FILES) & Sécurité XSS / CSRF (R2.13)
+- **Cycle HTTP** : différence fondamentale entre requête GET (lecture, recherche, partage d'URL) et requête POST (envoi sécurisé, mutation).
 - **Lecture des données** : superglobales `$_GET` et `$_POST`.
 - **Sécurité XSS (Cross-Site Scripting)** : neutralisation systématique des failles XSS à l'affichage via `htmlspecialchars($valeur, ENT_QUOTES, 'UTF-8')`.
 - **Validation et assainissement** : vérification des champs requis (`empty()`, `isset()`), nettoyage avec `trim()`, validation de formats avec `filter_var()` (emails, entiers, URL).
-- **Gestion des retours utilisateurs** : persistance des valeurs saisies dans le formulaire en cas d'erreur et affichage de messages d'alerte.
+- **Upload de fichiers sécurisé (`$_FILES`)** :
+  - Attribut de formulaire obligatoire : `enctype="multipart/form-data"`.
+  - Vérification de l'état d'upload via `$_FILES['image']['error'] === UPLOAD_ERR_OK` et contrôle de la taille maximale.
+  - Validation du type MIME réel avec `mime_content_type()` (interdiction de se fier à la simple extension).
+  - Renommage aléatoire sécurisé (`uniqid() . bin2hex(random_bytes(8)) . '.jpg'`) et déplacement avec `move_uploaded_file()` vers un dossier public dédié pour empêcher l'exécution de scripts malveillants.
+- **Protection contre le CSRF (Cross-Site Request Forgery)** :
+  - Génération d'un token aléatoire dans `$_SESSION['csrf_token'] = bin2hex(random_bytes(32))`.
+  - Transmission dans le formulaire via un champ masqué `<input type="hidden" name="csrf_token" value="...">`.
+  - Vérification stricte avec `hash_equals()` avant d'exécuter toute action POST.
 
 ### 7.3. Sessions, Cookies & Authentification sécurisée (R2.13)
-- **Cookies HTTP** : fonctionnement des en-têtes `Set-Cookie`, création avec `setcookie()`, lecture via `$_COOKIE` et limites de sécurité (`httponly`, `secure`).
+- **Cookies HTTP** : fonctionnement des en-têtes `Set-Cookie`, création avec `setcookie()`, lecture via `$_COOKIE` et drapeaux de sécurité indispensables (`httponly`, `secure`, `samesite`).
 - **Mécanisme des sessions** : initialisation avec `session_start()`, stockage d'état côté serveur dans la superglobale `$_SESSION`, destruction propre (`session_destroy()`).
+- **Prévention de la fixation de session** : appel impératif de `session_regenerate_id(true)` immédiatement après validation du mot de passe lors de la connexion pour invalider l'identifiant de pré-session.
 - **Sécurité des mots de passe** : hachage irréversible avec l'algorithme par défaut via `password_hash($mdp, PASSWORD_DEFAULT)` et vérification avec `password_verify()`.
 - **Espace membre privé** : contrôle d'accès sur les pages protégées (redirection `header('Location: login.php'); exit;` si non authentifié) et déconnexion.
 
-### 7.4. Base de données relationnelle avec PDO & SQL (R2.13, R2.14)
-- **Connexion PDO** : instanciation de l'objet `PDO` avec DSN (SQLite ou MySQL), gestion des erreurs avec le mode `PDO::ERRMODE_EXCEPTION`.
-- **Lecture sécurisée** : exécution de requêtes avec `query()` et récupération des résultats via `fetch()` et `fetchAll(PDO::FETCH_ASSOC)`.
-- **Protection contre les injections SQL** : interdiction absolue de concaténer des variables dans le SQL. Utilisation systématique des requêtes préparées avec `prepare()` et `execute([$param])` ou `bindParam()`.
+### 7.4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)
+- **Transition naturelle depuis la POO JS** : réutilisation directe des concepts de classes abordés en séance JS 27.
+- **Classes et objets en PHP 8** : déclaration `class`, typage strict des propriétés, instanciation avec `new`.
+- **Constructeur moderne** : promotion de propriétés dans `__construct(public string $nom, private int $prix)` pour un code concis et lisible.
+- **Encapsulation et visibilité** : portée `public`, `private` et `protected`, accesseurs (getters) et mutateurs (setters).
+- **Héritage** : mot-clé `extends`, surcharge de méthodes et appel du parent avec `parent::__construct()`.
+- **Autoloading moderne sans bundler** : configuration de `spl_autoload_register()` pour charger automatiquement les classes à la volée selon leur nom de fichier, éliminant définitivement la forêt de `require_once` en haut des scripts.
+
+### 7.5. Base de données avec PDO, Relations SQL & Sécurité (R2.13, R2.14)
+- **Sécurisation des identifiants (hygiène Git)** : isolation des identifiants de base de données dans un fichier de configuration local (`config.local.php` ou `.env`) exclu du versioning via `.gitignore`.
+- **Connexion PDO sécurisée** : instanciation de l'objet `PDO` obligatoirement enrobée dans un bloc `try ... catch (PDOException $e)` pour empêcher l'affichage de la pile d'appels et des mots de passe en clair en cas d'erreur de connexion.
+- **Lecture sécurisée** : exécution de requêtes avec `query()` et récupération via `fetchAll(PDO::FETCH_ASSOC)`.
+- **Protection absolue contre les injections SQL** : interdiction totale de concaténer des variables dans le SQL. Utilisation systématique des requêtes préparées avec `prepare()` et `execute([$param])` ou `bindParam()`.
+- **Relations SQL et requêtes jointes (anti-piège du N+1)** :
+  - Clés étrangères (`FOREIGN KEY`).
+  - Utilisation systématique des jointures `INNER JOIN` et `LEFT JOIN` pour récupérer les entités reliées (ex: un article et les données de son auteur) en une seule requête SQL, bannissant l'anti-pattern de la boucle `foreach` contenant une requête SQL par ligne.
 - **Opérations CRUD complètes** :
-  - **Create** : insertion sécurisée (`INSERT INTO table (...) VALUES (...)`).
-  - **Read** : sélection filtrée (`SELECT ... WHERE id = ?`).
-  - **Update** : mise à jour de données existantes (`UPDATE table SET ... WHERE id = ?`).
-  - **Delete** : suppression contrôlée avec confirmation (`DELETE FROM table WHERE id = ?`).
+  - **Create** : insertion sécurisée (`INSERT INTO ...`).
+  - **Read** : sélection filtrée avec jointure (`SELECT ... FROM articles JOIN users ON ... WHERE id = ?`).
+  - **Update** : mise à jour de données existantes (`UPDATE ... WHERE id = ?`).
+  - **Delete** : suppression contrôlée avec confirmation (`DELETE ... WHERE id = ?`).
 
-### 7.5. Programmation Orientée Objet (POO) moderne (R2.13, R3.12)
-- **Classes et objets** : déclaration `class`, propriétés typées, instanciation avec `new`.
-- **Constructeur moderne PHP 8** : constructeur `__construct` avec promotion de propriétés pour un code concis.
-- **Encapsulation** : visibilité `public` et `private`, méthodes accesseurs (getters) et mutateurs (setters).
-- **Héritage** : mot-clé `extends`, réutilisation de méthodes parentes avec `parent::`.
-
-### 7.6. Architecture MVC & API Back-End (R2.13, SAÉ)
+### 7.6. Architecture MVC & Routage (R2.13, SAÉ)
 - **Séparation des responsabilités (MVC)** :
-  - **Modèle** : classes représentant les données et assurant les requêtes PDO.
-  - **Vue** : templates HTML/PHP purs sans logique métier, affichant les données transmises.
-  - **Contrôleur** : réception de la requête, appel du modèle, sélection et affichage de la vue.
-- **Routage minimaliste** : point d'entrée unique `index.php` avec analyse du paramètre d'action (`?page=articles` ou `?action=detail`).
-- **API REST et JSON** : conception d'un point de terminaison renvoyant du JSON (`header('Content-Type: application/json')` et `json_encode($donnees)`) pour alimenter le front-end JavaScript (`fetch`).
+  - **Modèle** : classes métiers et repositories instanciant PDO pour interroger la base de données.
+  - **Vue** : templates HTML/PHP purs avec variables injectées, sans requêtes SQL ni logique métier.
+  - **Contrôleur** : réception de la requête, interrogation du modèle, sélection et transmission des données à la vue.
+- **Routage minimaliste** : point d'entrée unique `index.php` avec analyse du paramètre de route ou d'action (`?page=articles` ou `?action=detail&id=12`).
 
-### 7.7. Points de vigilance pour l'animation en classe PHP
+### 7.7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)
+- **En-têtes de réponse HTTP** : déclaration de `header('Content-Type: application/json; charset=utf-8')`.
+- **Sérialisation JSON** : transformation de structures PHP en JSON avec `json_encode()`.
+- **Codes de statut HTTP réels** : utilisation impérative de `http_response_code(400)` (Bad Request), `401` (Unauthorized) ou `404` (Not Found) afin que la propriété `response.ok` du `fetch()` JS détecte immédiatement les erreurs sans passer par un statut 200 trompeur.
+- **Gestion du CORS en environnement de développement** : en-tête `header('Access-Control-Allow-Origin: *')` pour autoriser les requêtes venant d'un serveur local front (ex. Live Server port 5500) vers le serveur PHP (port 8000).
 
-Deux points fondamentaux doivent être anticipés lors des séances PHP :
+### 7.8. Points de vigilance pour l'animation en classe PHP
 
-1. **La sécurité dès la première ligne de code** :
-   - *XSS* : Ne jamais laisser un élève écrire `echo $_POST['nom'];` sans le corriger immédiatement avec `htmlspecialchars()`. Les mauvaises habitudes de concaténation brute sont très difficiles à désapprendre.
-   - *Injections SQL* : Bannir totalement `"SELECT * FROM users WHERE nom = '" . $_POST['nom'] . "'"` dès la première démonstration. Les requêtes préparées `prepare()` doivent être le seul réflexe enseigné.
+Trois points critiques doivent être anticipés lors des séances PHP :
 
-2. **L'environnement d'exécution (serveur local obligatoire)** :
-   - *Erreur classique* : comme pour les modules JS, les étudiants tentent régulièrement d'ouvrir leurs scripts PHP par un double-clic dans l'explorateur de fichiers. Le navigateur affiche alors le code source brut au lieu de l'exécuter.
-   - *Consigne* : vérifier que le serveur local (Laragon, serveur interne PHP `php -S localhost:8000`, Docker ou simulateur php-wasm de la plateforme) est actif avant de commencer.
+1. **La sécurité par défaut dès le jour 1** :
+   - *XSS* : neutraliser immédiatement toute écriture brute avec `htmlspecialchars()`.
+   - *Injections SQL* : bannir formellement toute concaténation de variables dans les requêtes SQL ; imposer `prepare()` dès la première démonstration.
+   - *CSRF* : exiger le token CSRF sur tous les formulaires modifiant des données en POST.
+   - *Credentials PDO* : enrober obligatoirement la connexion PDO dans un `try / catch` et vérifier le `.gitignore` pour ne pas pousser d'identifiants sur GitHub.
+
+2. **L'obligation du protocole HTTP local** :
+   - Rappeler qu'un fichier PHP ne s'ouvre jamais via le protocole `file:///`. Un serveur HTTP local (Laragon, serveur interne `php -S`, Docker ou le bac à sable php-wasm de la plateforme) doit être démarré.
+
+3. **Le piège CORS et les statuts HTTP lors des échanges Front/Back** :
+   - Si les étudiants connectent leur front JS (port 5500) à leur API PHP (port 8000), vérifier que le header CORS est présent et que les statuts d'erreur HTTP (`400`, `404`) sont envoyés pour ne pas induire le front en erreur.
 
 WordPress est reporté (README).
 
