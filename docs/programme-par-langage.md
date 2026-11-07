@@ -206,7 +206,7 @@ Il est calibré pour le volume horaire du BUT MMI (~30 à 40 heures encadrées) 
   - Neutralisation systématique à l'affichage texte avec `htmlspecialchars($valeur, ENT_QUOTES, 'UTF-8')`.
   - Assainissement des liens : interdiction des fausses URLs injectant du JavaScript (`javascript:alert(1)`) en exigeant une validation stricte du protocole HTTP/HTTPS via `filter_var($url, FILTER_VALIDATE_URL)`.
 - **Le pattern PRG (Post-Redirect-Get)** :
-  - Après le traitement réussi d'un formulaire POST, redirection impérative avec `header('Location: succes.php'); exit;`.
+  - Redirection après validation (`header('Location: ...'); exit;`) et transmission des alertes de succès/erreur via un message flash temporaire en session (`$_SESSION['flash']`, consommé puis supprimé avec `unset()` à l'affichage).
   - Règle didactique : élimine définitivement le renvoi accidentel du formulaire et la duplication des données lors d'un rafraîchissement (touche F5).
 - **Protection contre le CSRF (Cross-Site Request Forgery)** :
   - Génération d'un token aléatoire stocké en session : `$_SESSION['csrf_token'] = bin2hex(random_bytes(32));`.
@@ -217,7 +217,7 @@ Il est calibré pour le volume horaire du BUT MMI (~30 à 40 heures encadrées) 
   - Vérification de l'état d'upload via `$_FILES['image']['error'] === UPLOAD_ERR_OK` et contrôle de la taille maximale.
   - Contrôle du type MIME réel via `mime_content_type()` (interdiction de se fier à l'extension).
   - Renommage aléatoire unique (`uniqid() . bin2hex(random_bytes(8)) . '.jpg'`) et déplacement avec `move_uploaded_file()`.
-  - Sécurisation du dossier de stockage : neutralisation de l'exécution de scripts PHP uploadés via un fichier `.htaccess` (`php_flag engine off` ou `SetHandler none`).
+  - Sécurisation du stockage : neutralisation de l'exécution de scripts soit par placement du dossier hors de la racine web (`../uploads/`), soit via `.htaccess` (`php_flag engine off`) sous Apache.
 
 ### 7.4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)
 *Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant d'aborder la persistance.*

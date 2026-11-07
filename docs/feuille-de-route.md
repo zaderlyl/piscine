@@ -179,9 +179,9 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 - [ ] `04` : Authentification complète : hachage (`password_hash`, `password_verify`), régénération (`session_regenerate_id(true)`) et protection de page
 
 **3. Formulaires sécurisés, Uploads & Pattern PRG (R2.13)**
-- [ ] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel (`htmlspecialchars`, validation URL) et pattern PRG (Post-Redirect-Get)
+- [ ] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel, pattern PRG (Post-Redirect-Get) et messages flash en session (`$_SESSION['flash']`)
 - [ ] `06` : Protection CSRF : génération de token en session, vérification avec `hash_equals()` et conservation des données
-- [ ] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel (`mime_content_type`), renommage unique et `.htaccess`
+- [ ] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel, renommage et stockage sécurisé (hors racine web ou `.htaccess`)
 
 **4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
 *Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant la persistance.*
