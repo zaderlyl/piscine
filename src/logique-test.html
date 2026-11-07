@@ -684,11 +684,13 @@
       <button type="button" class="tab-exemple" data-id="accum">5. Accumulation (Pattern 2)</button>
       <button type="button" class="tab-exemple" data-id="comptage">6. Comptage (Pattern 3)</button>
       <button type="button" class="tab-exemple" data-id="extremum">7. Extremum (Pattern 4)</button>
-      <button type="button" class="tab-exemple" data-id="recherche">8. Recherche trouvé (Pattern 5)</button>
-      <button type="button" class="tab-exemple" data-id="recherche_absent">9. Recherche absent (Pattern 5bis)</button>
-      <button type="button" class="tab-exemple" data-id="flag">10. Drapeau Flag (Pattern 7)</button>
-      <button type="button" class="tab-exemple" data-id="syracuse">11. Syracuse (Collatz)</button>
-      <button type="button" class="tab-exemple" data-id="fonction">12. Fonction & Portée</button>
+      <button type="button" class="tab-exemple" data-id="extremum_vide">8. Extremum vide (Pattern 4bis)</button>
+      <button type="button" class="tab-exemple" data-id="recherche">9. Recherche trouvé (Pattern 5)</button>
+      <button type="button" class="tab-exemple" data-id="recherche_absent">10. Recherche absent (Pattern 5bis)</button>
+      <button type="button" class="tab-exemple" data-id="filtrage">11. Filtrage (Pattern 6)</button>
+      <button type="button" class="tab-exemple" data-id="flag">12. Drapeau Flag (Pattern 7)</button>
+      <button type="button" class="tab-exemple" data-id="syracuse">13. Syracuse (Collatz)</button>
+      <button type="button" class="tab-exemple" data-id="fonction">14. Fonction & Portée</button>
     </nav>
 
     <!-- Contrôles pas à pas (avec pas précédent et vitesse) -->
@@ -2018,36 +2020,48 @@
         }
       },
 
-      // 8. PATTERN 4 : RECHERCHE D'EXTREMUM (MAX AVEC CLAUSE DE GARDE)
+      // 8. PATTERN 4 : RECHERCHE D'EXTREMUM (FONCTION TROUVERMAX AVEC CLAUSE DE GARDE)
       extremum: {
         titre: {
-          js: "Organigramme (JS) : Pattern 4 - Maximum (Garde & Init tab[0])",
-          php: "Organigramme (PHP) : Pattern 4 - Maximum (Garde & Init tab[0])"
+          js: "Organigramme (JS) : Pattern 4 - Maximum (Fonction trouverMax & Garde)",
+          php: "Organigramme (PHP) : Pattern 4 - Maximum (Fonction trouverMax & Garde)"
         },
         tableau: [14, 42, 9],
         nomTableau: { js: "tab", php: "$tab" },
         code: {
           js: [
-            "let tab = [14, 42, 9];",
-            "if (tab.length === 0) return null;",
-            "let max = tab[0];",
-            "for (let i = 1; i < tab.length; i++) {",
-            "  if (tab[i] > max) {",
-            "    max = tab[i];",
+            "function trouverMax(tab) {",
+            "  if (tab.length === 0) return null;",
+            "  let max = tab[0];",
+            "  for (let i = 1; i < tab.length; i++) {",
+            "    if (tab[i] > max) {",
+            "      max = tab[i];",
+            "    }",
             "  }",
+            "  return max;",
             "}",
+            "",
+            "let tab = [14, 42, 9];",
+            "let max = trouverMax(tab);",
             "console.log('Max :', max);"
           ],
           php: [
             "<?php",
-            "$tab = [14, 42, 9];",
-            "if (count($tab) === 0) return null;",
-            "$max = $tab[0];",
-            "for ($i = 1; $i < count($tab); $i++) {",
-            "  if ($tab[$i] > $max) {",
-            "    $max = $tab[$i];",
+            "declare(strict_types=1);",
+            "",
+            "function trouverMax(array $tab): ?int {",
+            "  if (count($tab) === 0) return null;",
+            "  $max = $tab[0];",
+            "  for ($i = 1; $i < count($tab); $i++) {",
+            "    if ($tab[$i] > $max) {",
+            "      $max = $tab[$i];",
+            "    }",
             "  }",
+            "  return $max;",
             "}",
+            "",
+            "$tab = [14, 42, 9];",
+            "$max = trouverMax($tab);",
             'echo "Max : $max";'
           ]
         },
@@ -2055,17 +2069,18 @@
           js: ["max", "i"],
           php: ["$max", "$i"]
         },
-        noeuds: ["noeud-debut", "noeud-garde", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
-        lignes: ["ligne-debut-garde", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
-        labels: ["label-vrai", "label-faux"],
+        noeuds: ["noeud-debut", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        labels: ["label-garde-oui", "label-garde-non", "label-vrai", "label-faux"],
         svg: (lang) => {
           const varM = lang === "php" ? "$max" : "max";
           const varI = lang === "php" ? "$i" : "i";
           const condGarde = lang === "php" ? "count($tab) === 0 ?" : "tab.length === 0 ?";
           const condTest = lang === "php" ? "$tab[$i] > $max ?" : "tab[i] > max ?";
-          const affichage = lang === "php" ? "echo $max" : "Afficher max";
+          const affichage = lang === "php" ? "return $max" : "return max";
+          const appel = lang === "php" ? "trouverMax($tab)" : "trouverMax(tab)";
           return `
-          <svg class="organigramme" viewBox="0 0 380 540">
+          <svg class="organigramme" viewBox="0 0 380 560">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
@@ -2076,84 +2091,109 @@
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="145" y="10" width="90" height="34" rx="17" />
-              <text class="texte-noeud" x="190" y="27">Début</text>
+              <rect class="forme-noeud" x="145" y="8" width="90" height="30" rx="15" />
+              <text class="texte-noeud" x="190" y="24">Début</text>
             </g>
 
-            <line id="ligne-debut-garde" class="ligne-flux" x1="190" y1="44" x2="190" y2="70" marker-end="url(#fleche)" />
+            <line id="ligne-debut-appel" class="ligne-flux" x1="190" y1="38" x2="190" y2="60" marker-end="url(#fleche)" />
 
+            <g id="noeud-appel" class="noeud">
+              <rect class="forme-noeud" x="110" y="60" width="160" height="34" rx="3" />
+              <line x1="122" y1="60" x2="122" y2="94" stroke="#1e293b" stroke-width="1.5" />
+              <line x1="258" y1="60" x2="258" y2="94" stroke="#1e293b" stroke-width="1.5" />
+              <text class="texte-noeud" x="190" y="78">${appel}</text>
+            </g>
+
+            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="94" x2="190" y2="120" marker-end="url(#fleche)" />
+
+            <!-- Nœud clause de garde -->
             <g id="noeud-garde" class="noeud">
-              <polygon class="forme-noeud" points="190,70 270,100 190,130 110,100" />
-              <text class="texte-noeud" x="190" y="100">${condGarde}</text>
+              <polygon class="forme-noeud" points="190,120 270,148 190,176 110,148" />
+              <text class="texte-noeud" x="190" y="148">${condGarde}</text>
             </g>
 
-            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="130" x2="190" y2="160" marker-end="url(#fleche)" />
+            <!-- Branche Oui (vide -> return null) -->
+            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="148" x2="295" y2="148" marker-end="url(#fleche)" />
+            <text id="label-garde-oui" class="etiquette-branche" x="274" y="140">Oui</text>
+
+            <g id="noeud-ret-vide" class="noeud">
+              <rect class="forme-noeud" x="295" y="132" width="75" height="32" rx="3" />
+              <text class="texte-noeud" x="332" y="149">return null</text>
+            </g>
+
+            <path id="ligne-null-fin" class="ligne-flux" d="M 332 164 V 535 H 230" marker-end="url(#fleche)" />
+
+            <!-- Branche Non (non vide -> max = tab[0], i = 1) -->
+            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="176" x2="190" y2="205" marker-end="url(#fleche)" />
+            <text id="label-garde-non" class="etiquette-branche" x="195" y="193">Non</text>
 
             <g id="noeud-init" class="noeud">
-              <rect class="forme-noeud" x="105" y="160" width="170" height="38" rx="3" />
-              <text class="texte-noeud" x="190" y="179">${varM} &larr; tab[0] (14), ${varI} &larr; 1</text>
+              <rect class="forme-noeud" x="105" y="205" width="170" height="36" rx="3" />
+              <text class="texte-noeud" x="190" y="224">${varM} &larr; tab[0], ${varI} &larr; 1</text>
             </g>
 
-            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="198" x2="190" y2="235" marker-end="url(#fleche)" />
+            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="241" x2="190" y2="270" marker-end="url(#fleche)" />
 
             <g id="noeud-cond" class="noeud">
-              <polygon class="forme-noeud" points="190,235 260,265 190,295 120,265" />
-              <text class="texte-noeud" x="190" y="265">${lang === "php" ? "$i < 3 ?" : "i < 3 ?"}</text>
+              <polygon class="forme-noeud" points="190,270 260,298 190,326 120,298" />
+              <text class="texte-noeud" x="190" y="298">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
             </g>
 
-            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="295" x2="190" y2="330" marker-end="url(#fleche)" />
+            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="326" x2="190" y2="355" marker-end="url(#fleche)" />
 
             <g id="noeud-test" class="noeud">
-              <polygon class="forme-noeud" points="190,330 270,360 190,390 110,360" />
-              <text class="texte-noeud" x="190" y="360">${condTest}</text>
+              <polygon class="forme-noeud" points="190,355 270,383 190,411 110,383" />
+              <text class="texte-noeud" x="190" y="383">${condTest}</text>
             </g>
 
-            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 360 H 60 V 400" marker-end="url(#fleche)" />
-            <text id="label-vrai" class="etiquette-branche" x="65" y="352">Oui</text>
+            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 383 H 60 V 420" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="65" y="375">Oui</text>
 
             <g id="noeud-maj-max" class="noeud">
-              <rect class="forme-noeud" x="10" y="400" width="115" height="38" rx="3" />
-              <text class="texte-noeud" x="67" y="419">${varM} &larr; tab[i]</text>
+              <rect class="forme-noeud" x="10" y="420" width="115" height="34" rx="3" />
+              <text class="texte-noeud" x="67" y="438">${varM} &larr; tab[i]</text>
             </g>
 
-            <path id="ligne-maj-i" class="ligne-flux" d="M 67 438 V 465 H 135" marker-end="url(#fleche)" />
+            <path id="ligne-maj-i" class="ligne-flux" d="M 67 454 V 478 H 135" marker-end="url(#fleche)" />
 
-            <path id="ligne-test-faux" class="ligne-flux" d="M 270 360 H 320 V 465 H 245" marker-end="url(#fleche)" />
-            <text id="label-faux" class="etiquette-branche" x="280" y="352">Non</text>
+            <path id="ligne-test-faux" class="ligne-flux" d="M 270 383 H 320 V 478 H 245" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="280" y="375">Non</text>
 
             <g id="noeud-incr-i" class="noeud">
-              <rect class="forme-noeud" x="135" y="445" width="110" height="38" rx="3" />
-              <text class="texte-noeud" x="190" y="464">${varI} &larr; ${varI} + 1</text>
+              <rect class="forme-noeud" x="135" y="460" width="110" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="478">${varI} &larr; ${varI} + 1</text>
             </g>
 
-            <path id="ligne-boucle" class="ligne-flux" d="M 135 464 H 10 V 265 H 117" marker-end="url(#fleche)" />
+            <path id="ligne-boucle" class="ligne-flux" d="M 135 478 H 10 V 298 H 117" marker-end="url(#fleche)" />
 
-            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 265 H 355 V 490 H 240" marker-end="url(#fleche)" />
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 298 H 350 V 505 H 240" marker-end="url(#fleche)" />
 
             <g id="noeud-sortie" class="noeud">
-              <polygon class="forme-noeud" points="145,490 250,490 230,520 125,520" />
-              <text class="texte-noeud" x="185" y="505">${affichage}</text>
+              <rect class="forme-noeud" x="145" y="500" width="95" height="30" rx="3" />
+              <text class="texte-noeud" x="192" y="516">${affichage}</text>
             </g>
 
-            <line id="ligne-sortie-fin" class="ligne-flux" x1="185" y1="520" x2="185" y2="535" marker-end="url(#fleche)" />
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="530" x2="190" y2="540" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="145" y="535" width="80" height="25" rx="12" />
-              <text class="texte-noeud" x="185" y="547">Fin</text>
+              <rect class="forme-noeud" x="150" y="540" width="80" height="20" rx="10" />
+              <text class="texte-noeud" x="190" y="551">Fin</text>
             </g>
           </svg>
         `},
         generateur: function* (lang) {
           let max = undefined, i = undefined;
-          const lOffset = lang === "php" ? 1 : 0;
+          const lOffset = lang === "php" ? 3 : 0;
           const prefix = lang === "php" ? "$" : "";
 
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Début de la recherche d'extremum.", indexActif: null };
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Début du programme.", indexActif: null };
 
-          yield { noeud: "noeud-garde", ligneSvg: "ligne-debut-garde", ligne: 2 + lOffset, statut: "Clause de garde", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "3 === 0 (Faux)", act: "Tableau non vide (3 === 0 est Faux) -> on continue en sécurité.", indexActif: null };
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-debut-appel", ligne: 13 + lOffset, statut: "Appel", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: `Appel de trouverMax(${prefix}tab) avec tab = [14, 42, 9].`, indexActif: null };
+
+          yield { noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "3 === 0 (Faux)", act: "Tableau non vide (taille 3 !== 0) : la clause de garde laisse passer l'exécution.", indexActif: null };
 
           max = 14; i = 1;
-          yield { noeud: "noeud-init", ligneSvg: "ligne-garde-init", ligne: 3 + lOffset, statut: "Initialisation", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", act: `Étape 2 canonique : ${prefix}max initialisé sur premier élément tab[0] (14).`, indexActif: 0, indexTrouve: 0 };
+          yield { noeud: "noeud-init", ligneSvg: "ligne-garde-init", ligne: 3 + lOffset, statut: "Initialisation", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", act: `Étape 2 canonique : ${prefix}max initialisé sur le premier élément tab[0] (14).`, indexActif: 0, indexTrouve: 0 };
 
           // Tour 1 : i = 1, tab[1] = 42
           yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 1", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> inspection de tab[1] (42).", indexActif: 1 };
@@ -2173,11 +2213,350 @@
 
           // Sortie
           yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 4 + lOffset, statut: "Sortie", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "3 < 3 (Faux)", act: "3 < 3 est FAUX ! Sortie de boucle.", indexActif: null };
-          yield { noeud: "noeud-sortie", ligneSvg: "ligne-sortie-fin", ligne: 9 + lOffset, statut: "Sortie E/S", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "Max : 42", act: `Affichage ${lang === "php" ? "echo" : "console.log"} : maximum = 42.` };
-          yield { noeud: "noeud-fin", ligne: 9 + lOffset, statut: "Terminé", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Fin recherche d'extremum.", termine: true };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-cond-sortie", ligne: 9 + lOffset, statut: "Return", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "42", act: `Instruction return : la fonction renvoie max = 42.` };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 14 + lOffset, statut: "Terminé", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "Max : 42", act: `Affichage final : maximum = 42.`, termine: true };
         }
       },
 
+      // 8bis. PATTERN 4bis : EXTREMUM SUR TABLEAU VIDE (GARDE DECLENCHEE)
+      extremum_vide: {
+        titre: {
+          js: "Organigramme (JS) : Pattern 4bis - Garde activée (Tableau vide [])",
+          php: "Organigramme (PHP) : Pattern 4bis - Garde activée (Tableau vide [])"
+        },
+        tableau: [],
+        nomTableau: { js: "tab", php: "$tab" },
+        code: {
+          js: [
+            "function trouverMax(tab) {",
+            "  if (tab.length === 0) return null;",
+            "  let max = tab[0];",
+            "  for (let i = 1; i < tab.length; i++) {",
+            "    if (tab[i] > max) {",
+            "      max = tab[i];",
+            "    }",
+            "  }",
+            "  return max;",
+            "}",
+            "",
+            "let tab = [];",
+            "let max = trouverMax(tab);",
+            "console.log('Max :', max);"
+          ],
+          php: [
+            "<?php",
+            "declare(strict_types=1);",
+            "",
+            "function trouverMax(array $tab): ?int {",
+            "  if (count($tab) === 0) return null;",
+            "  $max = $tab[0];",
+            "  for ($i = 1; $i < count($tab); $i++) {",
+            "    if ($tab[$i] > $max) {",
+            "      $max = $tab[$i];",
+            "    }",
+            "  }",
+            "  return $max;",
+            "}",
+            "",
+            "$tab = [];",
+            "$max = trouverMax($tab);",
+            'echo "Max : " . ($max ?? "null");'
+          ]
+        },
+        variables: {
+          js: ["max", "i"],
+          php: ["$max", "$i"]
+        },
+        noeuds: ["noeud-debut", "noeud-appel", "noeud-garde", "noeud-ret-vide", "noeud-init", "noeud-cond", "noeud-test", "noeud-maj-max", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-appel", "ligne-appel-garde", "ligne-garde-vide", "ligne-null-fin", "ligne-garde-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        labels: ["label-garde-oui", "label-garde-non", "label-vrai", "label-faux"],
+        svg: (lang) => {
+          const varM = lang === "php" ? "$max" : "max";
+          const varI = lang === "php" ? "$i" : "i";
+          const condGarde = lang === "php" ? "count($tab) === 0 ?" : "tab.length === 0 ?";
+          const condTest = lang === "php" ? "$tab[$i] > $max ?" : "tab[i] > max ?";
+          const affichage = lang === "php" ? "return $max" : "return max";
+          const appel = lang === "php" ? "trouverMax($tab)" : "trouverMax(tab)";
+          return `
+          <svg class="organigramme" viewBox="0 0 380 560">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+              </marker>
+            </defs>
+
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="145" y="8" width="90" height="30" rx="15" />
+              <text class="texte-noeud" x="190" y="24">Début</text>
+            </g>
+
+            <line id="ligne-debut-appel" class="ligne-flux" x1="190" y1="38" x2="190" y2="60" marker-end="url(#fleche)" />
+
+            <g id="noeud-appel" class="noeud">
+              <rect class="forme-noeud" x="110" y="60" width="160" height="34" rx="3" />
+              <line x1="122" y1="60" x2="122" y2="94" stroke="#1e293b" stroke-width="1.5" />
+              <line x1="258" y1="60" x2="258" y2="94" stroke="#1e293b" stroke-width="1.5" />
+              <text class="texte-noeud" x="190" y="78">${appel}</text>
+            </g>
+
+            <line id="ligne-appel-garde" class="ligne-flux" x1="190" y1="94" x2="190" y2="120" marker-end="url(#fleche)" />
+
+            <!-- Nœud clause de garde -->
+            <g id="noeud-garde" class="noeud">
+              <polygon class="forme-noeud" points="190,120 270,148 190,176 110,148" />
+              <text class="texte-noeud" x="190" y="148">${condGarde}</text>
+            </g>
+
+            <!-- Branche Oui (vide -> return null) -->
+            <line id="ligne-garde-vide" class="ligne-flux" x1="270" y1="148" x2="295" y2="148" marker-end="url(#fleche)" />
+            <text id="label-garde-oui" class="etiquette-branche" x="274" y="140">Oui</text>
+
+            <g id="noeud-ret-vide" class="noeud">
+              <rect class="forme-noeud" x="295" y="132" width="75" height="32" rx="3" />
+              <text class="texte-noeud" x="332" y="149">return null</text>
+            </g>
+
+            <path id="ligne-null-fin" class="ligne-flux" d="M 332 164 V 535 H 230" marker-end="url(#fleche)" />
+
+            <!-- Branche Non (non vide -> max = tab[0], i = 1) -->
+            <line id="ligne-garde-init" class="ligne-flux" x1="190" y1="176" x2="190" y2="205" marker-end="url(#fleche)" />
+            <text id="label-garde-non" class="etiquette-branche" x="195" y="193">Non</text>
+
+            <g id="noeud-init" class="noeud">
+              <rect class="forme-noeud" x="105" y="205" width="170" height="36" rx="3" />
+              <text class="texte-noeud" x="190" y="224">${varM} &larr; tab[0], ${varI} &larr; 1</text>
+            </g>
+
+            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="241" x2="190" y2="270" marker-end="url(#fleche)" />
+
+            <g id="noeud-cond" class="noeud">
+              <polygon class="forme-noeud" points="190,270 260,298 190,326 120,298" />
+              <text class="texte-noeud" x="190" y="298">${lang === "php" ? "$i < count($tab) ?" : "i < tab.length ?"}</text>
+            </g>
+
+            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="326" x2="190" y2="355" marker-end="url(#fleche)" />
+
+            <g id="noeud-test" class="noeud">
+              <polygon class="forme-noeud" points="190,355 270,383 190,411 110,383" />
+              <text class="texte-noeud" x="190" y="383">${condTest}</text>
+            </g>
+
+            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 383 H 60 V 420" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="65" y="375">Oui</text>
+
+            <g id="noeud-maj-max" class="noeud">
+              <rect class="forme-noeud" x="10" y="420" width="115" height="34" rx="3" />
+              <text class="texte-noeud" x="67" y="438">${varM} &larr; tab[i]</text>
+            </g>
+
+            <path id="ligne-maj-i" class="ligne-flux" d="M 67 454 V 478 H 135" marker-end="url(#fleche)" />
+
+            <path id="ligne-test-faux" class="ligne-flux" d="M 270 383 H 320 V 478 H 245" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="280" y="375">Non</text>
+
+            <g id="noeud-incr-i" class="noeud">
+              <rect class="forme-noeud" x="135" y="460" width="110" height="34" rx="3" />
+              <text class="texte-noeud" x="190" y="478">${varI} &larr; ${varI} + 1</text>
+            </g>
+
+            <path id="ligne-boucle" class="ligne-flux" d="M 135 478 H 10 V 298 H 117" marker-end="url(#fleche)" />
+
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 298 H 350 V 505 H 240" marker-end="url(#fleche)" />
+
+            <g id="noeud-sortie" class="noeud">
+              <rect class="forme-noeud" x="145" y="500" width="95" height="30" rx="3" />
+              <text class="texte-noeud" x="192" y="516">${affichage}</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="530" x2="190" y2="540" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="150" y="540" width="80" height="20" rx="10" />
+              <text class="texte-noeud" x="190" y="551">Fin</text>
+            </g>
+          </svg>
+        `},
+        generateur: function* (lang) {
+          let max = undefined, i = undefined;
+          const lOffset = lang === "php" ? 3 : 0;
+          const prefix = lang === "php" ? "$" : "";
+
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: "Début du programme avec un tableau vide [].", indexActif: null };
+
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-debut-appel", ligne: 13 + lOffset, statut: "Appel", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", act: `Appel de trouverMax(${prefix}tab) avec ${prefix}tab = [].`, indexActif: null };
+
+          yield { noeud: "noeud-garde", ligneSvg: "ligne-appel-garde", ligne: 2 + lOffset, statut: "Clause de garde", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: lang === "php" ? "count($tab) === 0 (VRAI)" : "tab.length === 0 (VRAI)", act: "Tableau vide ! La clause de garde se déclenche immédiatement (VRAI).", indexActif: null };
+
+          max = null;
+          yield { noeud: "noeud-ret-vide", ligneSvg: "ligne-garde-vide", ligne: 2 + lOffset, statut: "Garde déclenchée", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, mod: prefix + 'max', cond: "—", sortie: "null", act: "Exécution de 'return null;' : arrêt immédiat, accès illégal à tab[0] évité !", indexActif: null };
+
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-null-fin", ligne: 14 + lOffset, statut: "Terminé", vars: { [prefix + 'max']: max, [prefix + 'i']: i }, cond: "—", sortie: "Max : null", act: `Affichage final : Max = null. Aucune erreur d'exécution.`, termine: true };
+        }
+      },
+
+      // 10. PATTERN 6 : FILTRAGE DANS UNE NOUVELLE COLLECTION (FILTER & PUSH)
+      filtrage: {
+        titre: {
+          js: "Organigramme (JS) : Pattern 6 - Filtrage dans une nouvelle collection",
+          php: "Organigramme (PHP) : Pattern 6 - Filtrage dans un nouveau tableau"
+        },
+        tableau: [8, 14, 11],
+        nomTableau: { js: "notes", php: "$notes" },
+        code: {
+          js: [
+            "let notes = [8, 14, 11];",
+            "let admis = [];",
+            "for (let i = 0; i < notes.length; i++) {",
+            "  if (notes[i] >= 10) {",
+            "    admis.push(notes[i]);",
+            "  }",
+            "}",
+            "console.log('Admis :', admis);"
+          ],
+          php: [
+            "<?php",
+            "$notes = [8, 14, 11];",
+            "$admis = [];",
+            "for ($i = 0; $i < count($notes); $i++) {",
+            "  if ($notes[$i] >= 10) {",
+            "    $admis[] = $notes[$i];",
+            "  }",
+            "}",
+            'echo "Admis : " . implode(", ", $admis);'
+          ]
+        },
+        variables: {
+          js: ["i", "admis"],
+          php: ["$i", "$admis"]
+        },
+        noeuds: ["noeud-debut", "noeud-init", "noeud-cond", "noeud-test", "noeud-push", "noeud-incr-i", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-vrai", "ligne-test-faux", "ligne-push-incr", "ligne-maj-i", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        labels: ["label-vrai", "label-faux"],
+        svg: (lang) => {
+          const varI = lang === "php" ? "$i" : "i";
+          const varAdmis = lang === "php" ? "$admis" : "admis";
+          const condTest = lang === "php" ? "$notes[$i] >= 10 ?" : "notes[i] >= 10 ?";
+          const pushCode = lang === "php" ? "$admis[] = $notes[$i]" : "admis.push(notes[i])";
+          const affichage = lang === "php" ? 'echo "Admis : ..."' : 'console.log(admis)';
+          return `
+          <svg class="organigramme" viewBox="0 0 380 540">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+              </marker>
+            </defs>
+
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="145" y="10" width="90" height="34" rx="17" />
+              <text class="texte-noeud" x="190" y="27">Début</text>
+            </g>
+
+            <line id="ligne-debut-init" class="ligne-flux" x1="190" y1="44" x2="190" y2="75" marker-end="url(#fleche)" />
+
+            <g id="noeud-init" class="noeud">
+              <rect class="forme-noeud" x="100" y="75" width="180" height="38" rx="3" />
+              <text class="texte-noeud" x="190" y="94">${varAdmis} &larr; [], ${varI} &larr; 0</text>
+            </g>
+
+            <line id="ligne-init-cond" class="ligne-flux" x1="190" y1="113" x2="190" y2="150" marker-end="url(#fleche)" />
+
+            <g id="noeud-cond" class="noeud">
+              <polygon class="forme-noeud" points="190,150 260,180 190,210 120,180" />
+              <text class="texte-noeud" x="190" y="180">${lang === "php" ? "$i < 3 ?" : "i < 3 ?"}</text>
+            </g>
+
+            <line id="ligne-cond-test" class="ligne-flux" x1="190" y1="210" x2="190" y2="245" marker-end="url(#fleche)" />
+
+            <g id="noeud-test" class="noeud">
+              <polygon class="forme-noeud" points="190,245 270,275 190,305 110,275" />
+              <text class="texte-noeud" x="190" y="275">${condTest}</text>
+            </g>
+
+            <path id="ligne-test-vrai" class="ligne-flux" d="M 110 275 H 60 V 315" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="65" y="267">Oui (&ge;10)</text>
+
+            <g id="noeud-push" class="noeud">
+              <rect class="forme-noeud" x="5" y="315" width="135" height="38" rx="3" />
+              <text class="texte-noeud" x="72" y="334">${pushCode}</text>
+            </g>
+
+            <path id="ligne-push-incr" class="ligne-flux" d="M 72 353 V 385 H 135" marker-end="url(#fleche)" />
+
+            <path id="ligne-test-faux" class="ligne-flux" d="M 270 275 H 325 V 385 H 245" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="280" y="267">Non (&lt;10)</text>
+
+            <g id="noeud-incr-i" class="noeud">
+              <rect class="forme-noeud" x="135" y="365" width="110" height="38" rx="3" />
+              <text class="texte-noeud" x="190" y="384">${varI} &larr; ${varI} + 1</text>
+            </g>
+
+            <path id="ligne-boucle" class="ligne-flux" d="M 135 384 H 10 V 180 H 117" marker-end="url(#fleche)" />
+
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 260 180 H 355 V 435 H 245" marker-end="url(#fleche)" />
+
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="135,435 245,435 225,470 115,470" />
+              <text class="texte-noeud" x="180" y="452">${affichage}</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="180" y1="470" x2="180" y2="495" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="140" y="495" width="80" height="28" rx="14" />
+              <text class="texte-noeud" x="180" y="509">Fin</text>
+            </g>
+          </svg>
+        `},
+        generateur: function* (lang) {
+          let admis = undefined, i = undefined;
+          const lOffset = lang === "php" ? 1 : 0;
+          const prefix = lang === "php" ? "$" : "";
+          const retenus = [];
+
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'i']: i, [prefix + 'admis']: admis }, cond: "—", act: "Début de l'algorithme de filtrage.", indexActif: null };
+
+          admis = []; i = 0;
+          yield { noeud: "noeud-init", ligneSvg: "ligne-debut-init", ligne: 2 + lOffset, statut: "Initialisation", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'admis', cond: "—", act: `Création du nouveau tableau récepteur ${prefix}admis = [].`, indexActif: null };
+
+          // Tour 1 : i = 0, notes[0] = 8 (< 10 -> rejeté)
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 3 + lOffset, statut: "Tour 1", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "0 < 3 (Vrai)", act: "0 < 3 est VRAI -> inspection de notes[0] (8).", indexActif: 0, indexTrouve: [...retenus] };
+          yield { noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 4 + lOffset, statut: "Test notes[0]", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "8 >= 10 (Faux)", act: "8 >= 10 est FAUX. La note est rejetée (non admise).", indexActif: 0, indexTrouve: [...retenus] };
+          i++;
+          yield { noeud: "noeud-incr-i", ligneSvg: "ligne-test-faux", ligne: 3 + lOffset, statut: "Incrément", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'i', cond: "—", act: `Pas : ${prefix}i passe à 1.`, indexActif: null, indexTrouve: [...retenus] };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3 + lOffset, statut: "Bouclage", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "—", act: "Remontée vers le test." };
+
+          // Tour 2 : i = 1, notes[1] = 14 (>= 10 -> retenu)
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 3 + lOffset, statut: "Tour 2", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> inspection de notes[1] (14).", indexActif: 1, indexTrouve: [...retenus] };
+          yield { noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 4 + lOffset, statut: "Test notes[1]", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "14 >= 10 (VRAI)", act: "14 >= 10 est VRAI ! Élément admis.", indexActif: 1, indexTrouve: [...retenus] };
+          admis.push(14);
+          retenus.push(1);
+          yield { noeud: "noeud-push", ligneSvg: "ligne-test-vrai", ligne: 5 + lOffset, statut: "Insertion", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'admis', cond: "—", act: `Ajout de 14 dans le tableau : ${prefix}admis devient [14].`, indexActif: 1, indexTrouve: [...retenus] };
+          i++;
+          yield { noeud: "noeud-incr-i", ligneSvg: "ligne-push-incr", ligne: 3 + lOffset, statut: "Incrément", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'i', cond: "—", act: `Pas : ${prefix}i passe à 2.`, indexActif: null, indexTrouve: [...retenus] };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3 + lOffset, statut: "Bouclage", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "—", act: "Remontée vers le test." };
+
+          // Tour 3 : i = 2, notes[2] = 11 (>= 10 -> retenu)
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-init-cond", ligne: 3 + lOffset, statut: "Tour 3", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "2 < 3 (Vrai)", act: "2 < 3 est VRAI -> inspection de notes[2] (11).", indexActif: 2, indexTrouve: [...retenus] };
+          yield { noeud: "noeud-test", ligneSvg: "ligne-cond-test", ligne: 4 + lOffset, statut: "Test notes[2]", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "11 >= 10 (VRAI)", act: "11 >= 10 est VRAI ! Élément admis.", indexActif: 2, indexTrouve: [...retenus] };
+          admis.push(11);
+          retenus.push(2);
+          yield { noeud: "noeud-push", ligneSvg: "ligne-test-vrai", ligne: 5 + lOffset, statut: "Insertion", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'admis', cond: "—", act: `Ajout de 11 dans le tableau : ${prefix}admis devient [14, 11].`, indexActif: 2, indexTrouve: [...retenus] };
+          i++;
+          yield { noeud: "noeud-incr-i", ligneSvg: "ligne-push-incr", ligne: 3 + lOffset, statut: "Incrément", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, mod: prefix + 'i', cond: "—", act: `Pas : ${prefix}i passe à 3.`, indexActif: null, indexTrouve: [...retenus] };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3 + lOffset, statut: "Bouclage", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "—", act: "Remontée vers le test final." };
+
+          // Sortie
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 3 + lOffset, statut: "Sortie", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "3 < 3 (Faux)", act: "3 < 3 est FAUX ! Fin du parcours de la collection source.", indexActif: null, indexTrouve: [...retenus] };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-sortie-fin", ligne: 8 + lOffset, statut: "Sortie E/S", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "—", sortie: lang === "php" ? "Admis : 14, 11" : "Admis : [14, 11]", act: `Affichage final : nouveau tableau filtré [14, 11].`, indexTrouve: [...retenus] };
+          yield { noeud: "noeud-fin", ligne: 8 + lOffset, statut: "Terminé", vars: { [prefix + 'i']: i, [prefix + 'admis']: [...admis] }, cond: "—", act: "Fin de l'algorithme de filtrage.", termine: true, indexTrouve: [...retenus] };
+        }
+      },
       // 9. PATTERN 7 : VALIDATION GLOBALE PAR DRAPEAU (FLAG & ALL)
       flag: {
         titre: {
@@ -2785,16 +3164,20 @@
         nomTableau.textContent = typeof ex.nomTableau === "object" ? ex.nomTableau[lang] : (lang === "php" ? "$tab" : "tab");
         infoTableau.textContent = ex.tableau.length + " éléments";
         casesTableau.innerHTML = "";
-        ex.tableau.forEach((val, idx) => {
-          const c = document.createElement("div");
-          c.className = "cellule-tab";
-          c.id = `cell-tab-${idx}`;
-          c.innerHTML = `
-            <span class="val-tab">${val}</span>
-            <span class="idx-tab">[${idx}]</span>
-          `;
-          casesTableau.appendChild(c);
-        });
+        if (ex.tableau.length === 0) {
+          casesTableau.innerHTML = `<span style="font-size: 11px; color: #94a3b8; font-style: italic; padding: 4px;">Tableau vide ([])</span>`;
+        } else {
+          ex.tableau.forEach((val, idx) => {
+            const c = document.createElement("div");
+            c.className = "cellule-tab";
+            c.id = `cell-tab-${idx}`;
+            c.innerHTML = `
+              <span class="val-tab">${val}</span>
+              <span class="idx-tab">[${idx}]</span>
+            `;
+            casesTableau.appendChild(c);
+          });
+        }
       } else if (zoneTableau) {
         zoneTableau.style.display = "none";
       }
@@ -2985,9 +3368,21 @@
           const lf = document.getElementById("label-faux") || document.getElementById("label-faux1") || document.getElementById("label-for-faux");
           if (lf) lf.classList.add("actif");
         }
-        if (etape.ligneSvg === "ligne-cond-corps" || etape.ligneSvg === "ligne-cond-vrai" || etape.ligneSvg === "ligne-test-trouve") {
+        if (etape.ligneSvg === "ligne-cond-corps" || etape.ligneSvg === "ligne-cond-vrai" || etape.ligneSvg === "ligne-test-trouve" || etape.ligneSvg === "ligne-test-vrai") {
           const lv = document.getElementById("label-vrai") || document.getElementById("label-vrai1") || document.getElementById("label-trouve-oui");
           if (lv) lv.classList.add("actif");
+        }
+        if (etape.ligneSvg === "ligne-test-faux") {
+          const lf = document.getElementById("label-faux");
+          if (lf) lf.classList.add("actif");
+        }
+        if (etape.ligneSvg === "ligne-garde-vide") {
+          const lgv = document.getElementById("label-garde-oui");
+          if (lgv) lgv.classList.add("actif");
+        }
+        if (etape.ligneSvg === "ligne-garde-init") {
+          const lgn = document.getElementById("label-garde-non");
+          if (lgn) lgn.classList.add("actif");
         }
       }
 
@@ -2999,8 +3394,12 @@
           if (etape.indexActif !== undefined && etape.indexActif === idx) {
             c.classList.add("active");
           }
-          if (etape.indexTrouve !== undefined && etape.indexTrouve === idx) {
-            c.classList.add("trouvee");
+          if (etape.indexTrouve !== undefined) {
+            if (Array.isArray(etape.indexTrouve)) {
+              if (etape.indexTrouve.includes(idx)) c.classList.add("trouvee");
+            } else if (etape.indexTrouve === idx) {
+              c.classList.add("trouvee");
+            }
           }
         });
       }

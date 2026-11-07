@@ -169,8 +169,7 @@ Ces 7 patrons de conception sont universels et constituent la boîte à outils q
 
 #### 3.7. Pièges classiques du web et du multimédia
 - **Détection géométrique d'intersection (AABB)** :
-  - Test de collision de deux rectangles alignés sur les axes (
-1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y), servant de socle immédiat aux collisions dans Canvas 2D et Phaser (dissocié des patterns de collections).
+  - Test de collision de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser (dissocié des patterns de collections).
 - **Conversions de type et valeurs de formulaires HTML** :
   - Les valeurs issues d'un formulaire (`<input>`) sont toujours reçues sous forme de chaînes de caractères (`"42"`).
   - `Number("")` renvoie `0`, tandis que `Number("abc")` renvoie `NaN`.
@@ -201,7 +200,7 @@ Ces 7 patrons de conception sont universels et constituent la boîte à outils q
 - **Complexité intuitive** :
   - Parcours linéaire $O(n)$ : le temps d'exécution croît proportionnellement à la taille des données.
   - Double parcours quadratique $O(n^2)$ : tester chaque élément contre tous les autres (ex. détection de collision brute entre toutes les entités).
-  - *Distinction sur les grilles 2D* : une double boucle parcourant une grille de $L$ colonnes par $H$ lignes réalise $L     imes H$ opérations, ce qui est une complexité linéaire $O(N)$ par rapport au nombre total de tuiles $N$. Elle n'est en $O(n^2)$ que si $n$ représente la longueur du côté d'une grille carrée.
+  - *Distinction sur les grilles 2D* : une double boucle parcourant une grille de $L$ colonnes par $H$ lignes réalise $L \times H$ opérations, ce qui est une complexité linéaire $O(N)$ par rapport au nombre total de tuiles $N$. Elle n'est en $O(n^2)$ que si $n$ représente la longueur du côté d'une grille carrée.
 - **Le piège du décalage d'un (« Off-by-one »)** :
   - Confondre `<` et `<=` lors de l'accès à un tableau de longueur $N$ (le dernier élément valide est à l'indice $N - 1$).
 - **Immutabilité profonde** :
