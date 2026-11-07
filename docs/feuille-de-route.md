@@ -123,16 +123,18 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `18` : Sauvegarder des données locales avec `localStorage` (thème et score)
 - [ ] `19` : Retours sonores légers avec HTML5 `new Audio()`
 - [ ] `20` : Animation d'apparition au défilement avec `IntersectionObserver`
+- [ ] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
 
-**3. Asynchronisme, Données et Formulaires (vanilla)**
-- [ ] `21` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
-- [ ] `22` : Requêtes réseau modernes avec `fetch()` et `async / await`
-- [ ] `23` : Gestion des erreurs réseau avec `try...catch`
-- [ ] `24` : Formulaires automatiques avec l'objet `FormData`
-- [ ] `25` : Chargement simultané de ressources avec `Promise.all()`
-- [ ] `26` : Modélisation objet : `class`, `constructor` et héritage
+**3. Asynchronisme, Données et POO Passerelle (vanilla)**
+- [ ] `22` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
+- [ ] `23` : Requêtes réseau modernes avec `fetch()` et `async / await`
+- [ ] `24` : Gestion des erreurs réseau avec `try...catch`
+- [ ] `25` : Formulaires automatiques avec l'objet `FormData`
+- [ ] `26` : Chargement simultané de ressources avec `Promise.all()`
+- [ ] `27` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
 
 **4. Graphisme 2D Canvas (canvas)**
+*Démystification de la boucle de rendu et des collisions manuelles avant Phaser.*
 - [ ] `01` : Initialiser le canvas 2D et tracer des formes géométriques
 - [ ] `02` : Couleurs, styles, images et effacement
 - [ ] `03` : Boucle d'animation fluide avec `requestAnimationFrame`
@@ -146,6 +148,7 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `04` : Mise à jour dynamique des données avec `chart.update()`
 
 **6. Moteur de jeu 2D avec Phaser (phaser)**
+*Réutilisation de la POO (`class GameScene extends Phaser.Scene`) et de la physique Arcade.*
 - [ ] `01` : Configuration et scène Phaser (`preload`, `create`, `update`)
 - [ ] `02` : Spritesheets, animations et physique Arcade
 - [ ] `03` : Contrôles au clavier, sauts et limites du monde

@@ -95,17 +95,18 @@ Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-res
 - **Gestion des événements** : écouteurs `addEventListener()`, objet d'événement `e`, interception `preventDefault()`.
 - **Délégation d'événements** : propagation des événements (bubbling), détection avec `e.target` pour gérer dynamiquement des listes sans multiplier les écouteurs.
 - **Rendu dynamique propre** : utilisation de la balise `<template>` et clonage via `.cloneNode(true)` pour éviter les concaténations non sécurisées avec `innerHTML`.
+- **Modularité native sans bundler** : utilisation de `<script type="module">` avec `import` et `export` pour découper son code en modules sans Node ni Vite. *Point d'attention technique* : requiert un serveur local HTTP (Live Server, serveur Python ou bac à sable Piscine), car les navigateurs bloquent les imports sous le protocole `file:///` (règle CORS).
 - **Persistance locale sans serveur** : Web Storage (`localStorage` et `sessionStorage`), sauvegarde d'état (meilleur score de jeu, préférences de thème clair/sombre).
 - **Multimédia audio léger** : objet HTML5 `Audio` (`new Audio()`, lecture, pause, volume) pour les retours sonores d'interface et bruitages de jeux.
 - **Défilement et visibilité** : API `IntersectionObserver` (déclenchement d'animations à l'apparition, lazy-loading d'images pour portfolios et vitrines).
 
-### 4.3. Asynchronisme, Données et API (R2.13, R3.12)
+### 4.3. Asynchronisme, Données et POO Passerelle (R2.13, R3.12)
 - **Méthodes fonctionnelles de tableau** : `.forEach()`, `.map()`, `.filter()`, `.reduce()`, `.find()`, `.sort()`.
 - **Asynchronisme moderne** : requêtes réseau avec `fetch()`, syntaxe linéaire `async / await` avec gestion propre des erreurs via `try...catch` (évite les chaînes verbeuses de `.then()`).
 - **Manipulation des données JSON** : consommation d'API REST, parsing et sérialisation (`JSON.parse()`, `JSON.stringify()`).
 - **Formulaires modernes** : objet `FormData` pour collecter automatiquement tous les champs et les envoyer proprement via `fetch` en méthode `POST`.
 - **Parallélisation** : `Promise.all()` pour charger simultanément plusieurs ressources distantes (données JSON + assets graphiques).
-- **Conception objet** : syntaxe `class`, constructeur `constructor`, méthodes et héritage (`extends`).
+- **Conception objet (POO)** : syntaxe `class`, constructeur `constructor`, méthodes et héritage (`extends`). Enseignée via des modèles concrets d'entités de jeu (`class Entite`, `class Ennemi`, coordonnées `x`, `y`, méthode `deplacer()`), servant de tremplin direct pour étendre les scènes Phaser (`class GameScene extends Phaser.Scene`) et aborder la POO en PHP (Module 7).
 
 ### 4.4. Graphisme 2D avec l'API Canvas (R3.12)
 - Balise `<canvas>` et obtention du contexte 2D (`getContext("2d")`).
@@ -114,6 +115,7 @@ Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-res
 - Boucle d'animation fluide avec `requestAnimationFrame()` (delta time et nettoyage via `clearRect`).
 - Événements unifiés : Pointer Events (`pointerdown`, `pointermove`, `pointerup`) pour supporter souris, stylet et tactile sans distinction.
 - Détection de collisions simples (boîtes englobantes AABB) et mini-jeu d'arcade interactif.
+- *Rôle didactique clé* : cette étape permet aux étudiants de comprendre manuellement le cycle de rendu et la physique bas niveau, démystifiant totalement ce que fera le moteur Phaser sous le capot.
 
 ### 4.5. Visualisation de données avec Chart.js (R3.12)
 - Rendu de graphiques dynamiques sur balise `<canvas>`.
@@ -123,6 +125,7 @@ Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-res
 - Cas d'usage MMI : dashboards de statistiques, data-visualisation interactive pour projets et SAÉ.
 
 ### 4.6. Moteur de jeu 2D avec Phaser (R3.12 et projets)
+- Transition naturelle depuis Canvas 2D et la POO : réutilisation des concepts de boucle de rendu et d'héritage de classes (`class MainScene extends Phaser.Scene`).
 - Initialisation et configuration d'une instance `Phaser.Game`.
 - Architecture des scènes Phaser et cycle de vie : `preload()`, `create()`, `update()`.
 - Chargement d'assets : images, feuilles de sprites (`spritesheets`), effets sonores.
