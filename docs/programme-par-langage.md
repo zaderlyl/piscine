@@ -108,7 +108,9 @@ Le programme d'algorithmique est structuré en deux niveaux progressifs :
   - Empilement du cadre local lors de l'appel, et **destruction immédiate des variables locales lors du `return`**.
 - **Passage par valeur vs référence** :
   - Les primitifs (nombres, chaînes, booléens) sont transmis par copie de valeur.
-  - Les collections (tableaux, objets) sont transmises par référence mémoire : modifier un tableau dans une fonction altère directement la structure externe si elle n'a pas été clonée au préalable.
+  - **JavaScript** : les tableaux et les objets sont **partagés** entre l'appelant et la fonction (la fonction reçoit une copie de l'adresse, pas du contenu). Modifier le contenu (`tab[0] = 99`, `tab.sort()`, `tab.pop()`) altère donc le tableau de l'appelant s'il n'a pas été cloné au préalable. En revanche, réassigner le paramètre (`tab = []`) ne change rien à l'extérieur.
+  - **PHP** : les tableaux (`array`) sont transmis **par valeur** (copie à l'écriture) : modifier `$tab[0]` dans la fonction ne touche pas au tableau de l'appelant, sauf si le paramètre est déclaré par référence (`&$tab`). Seuls les **objets** (instances de classes) sont partagés comme en JavaScript.
+  - Piège de transition JS → PHP : le même code de tri en place a un effet visible chez l'appelant en JavaScript, mais pas en PHP.
 
 #### 3.5. Les 7 patterns algorithmiques incontournables
 Ces 7 patrons de conception sont universels et constituent la boîte à outils quotidienne du développeur :
