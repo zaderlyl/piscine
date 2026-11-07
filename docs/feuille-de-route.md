@@ -115,6 +115,7 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `12` : Palier : simulation d'un inventaire de jeu complet
 
 **2. DOM moderne, Événements et Persistance locale (vanilla)**
+*Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
 - [ ] `13` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
 - [ ] `14` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
 - [ ] `15` : Écouter un événement avec `addEventListener` et l'objet `e`
@@ -126,6 +127,7 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
 
 **3. Asynchronisme, Données et POO Passerelle (vanilla)**
+*Fil conducteur : réutilisation des données de l'inventaire du Module 1, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
 - [ ] `22` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
 - [ ] `23` : Requêtes réseau modernes avec `fetch()` et `async / await`
 - [ ] `24` : Gestion des erreurs réseau avec `try...catch`

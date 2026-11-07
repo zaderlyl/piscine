@@ -141,6 +141,19 @@ Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-res
 - Répétition déclarative de listes : `x-for`.
 - Transitions et animations : `x-transition`.
 
+### 4.8. Points de vigilance pour l'animation en classe
+
+Deux points critiques sont à anticiper par les intervenants pour garantir la fluidité des séances :
+
+1. **Le piège CORS sur les modules ES (séance 21 et `<script type="module">`)** :
+   - *Problème* : dès qu'un fichier HTML utilise `<script type="module">`, le navigateur applique la politique de sécurité Same-Origin et bloque le chargement local direct (`file:///`). Les étudiants qui ouvrent leur fichier par un double-clic obtiennent un écran blanc et une erreur bloquante en console.
+   - *Anticipation pédagogique* : expliquer le modèle client-serveur HTTP dès le début de la séance. Imposer l'utilisation d'un serveur local (extension VS Code **Live Server** ou le bac à sable de la plateforme) avant toute manipulation.
+
+2. **La gestion de la charge cognitive sur le Module 3 (séances 22 à 27)** :
+   - *Problème* : ce bloc enchaîne les méthodes fonctionnelles (`map`, `filter`, `reduce`), l'asynchronisme (`fetch`, `async / await`) et la POO (`class`, `extends`). C'est la zone où le risque de décrochage est le plus élevé si les concepts sont présentés de manière abstraite.
+   - *Solution fil conducteur* : réutiliser le jeu de données de l'inventaire manipulé au Module 1 (ex. un tableau d'objets `[ { nom, prix, stock, type } ]`). Les élèves n'ont aucune charge mentale sur la structure des données et se concentrent uniquement sur la nouvelle notion syntaxique.
+   - *Calibrage* : limiter chaque exercice de ce bloc à 5 à 10 lignes de code maximum, avec un résultat immédiatement observable, pour maintenir le rythme et la motivation avant d'aborder la gratification visuelle du Canvas 2D.
+
 C'est à cette étape que la visualisation de la logique (variables, boucles, fonctions) a le plus de sens : voir [visualisation-logique.md](visualisation-logique.md).
 
 ## 5. Git (proposition)
