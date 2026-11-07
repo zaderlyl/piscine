@@ -17,7 +17,9 @@ const suivant = document.getElementById("suivant");
 
 // Ordre des exos Git : le bouton « Exo suivant » suit cette liste. À compléter à chaque nouvel exo.
 const ORDRE = [
-  "git/visuel/01", "git/visuel/02", "git/visuel/03",
+  "git/visuel/01", "git/visuel/02", "git/visuel/03", "git/visuel/04",
+  "git/visuel/05", "git/visuel/06", "git/visuel/07", "git/visuel/08",
+  "git/visuel/09", "git/visuel/10", "git/visuel/11",
 ];
 
 const COURS_LIBRE = `Dans ce bac à sable, il n'y a pas d'exo. Tu pars d'un dossier qui contient
