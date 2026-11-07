@@ -48,30 +48,194 @@ Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire
 - Accessibilité : contraste, focus visible, WCAG (R1.11, R3.12)
 - Framework : Bootstrap (README)
 
-## 3. Algorithmique
+## 3. Algorithmique & Résolution de problèmes
 
-Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directement en JS.
+L'algorithmique est abordée immédiatement avant JavaScript, le premier langage qui calcule et prend des décisions. Elle pose les schémas de pensée universels indispensables pour tout le reste du cursus (JS, Canvas 2D, Phaser, PHP et SQL).
 
-- Variables et types (texte, nombre, booléen)
-- Conditions : `if` et `else`
-- Boucles : `for` et `while`
-- Fonctions : paramètres, retour, portée des variables
-- Tableaux : parcours, ajout, accès par index (tris, filtres et agrégation : voir JS)
-- Objets : clés et valeurs
-- Débogage : poser un point d'arrêt, afficher des valeurs dans la console
+Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logique.md](visualisation-logique.md)) pour matérialiser l'exécution pas à pas.
+
+### 3.1. Rôle et approche pédagogique (R1.12)
+- **Choix du formalisme** : éviter la surcharge d'un pseudo-code universitaire artificiel ; les notions sont formalisées avec une syntaxe directe (compatible JavaScript épuré) ou en organigrammes visuels.
+- **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO 5807) et à sa table de trace (état des variables ligne par ligne).
+
+### 3.2. Types de données, séquences et modèle mémoire
+- **Variables, affectation et interdiction de l'égalité lâche (`==`)** :
+  - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
+  - Constantes (`const` par défaut) et variables réassignables (`let`).
+  - Distinction entre l'affectation (`=`) et le test d'égalité.
+  - *Interdiction formelle de l'égalité lâche (`==`)* : la coercition implicite de type de l'opérateur `==` produit des aberrations imprévisibles (`"" == 0` renvoie `true`, `false == "0"` renvoie `true`). L'égalité stricte (`===`) et l'inégalité stricte (`!==`) sont posées dès le premier jour comme les seules syntaxes autorisées.
+- **Distinction entre `null` et `undefined`** :
+  - `null` représente l'absence intentionnelle et explicite de valeur (ex: joueur sans bouclier équipé).
+  - `undefined` signale une variable déclarée sans valeur ou un accès à un index hors limites dans un tableau (`tab[10]` sur un tableau de 3 éléments).
+- **Le piège universel des flottants (norme IEEE 754)** :
+  - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
+  - Règle d'or pour le web (paniers d'achat, TVA, remises) : manipuler les montants en centimes entiers (`10 + 20 === 30`) ou utiliser un arrondi contrôlé (`Math.round()` ou tolérance `Number.EPSILON`).
+- **L'opérateur Modulo (%) et l'arithmétique cyclique** :
+  - Reste de la division entière, indispensable pour tester l'alternance et la parité (`n % 2 === 0`).
+  - Navigation cyclique sans débordement d'indice (ex. carrousel d'images, sélection d'arme en boucle) : `index = (index + 1) % tab.length`.
+  - Conversion d'un tableau plat 1D en coordonnées de grille 2D : `colonneX = index % largeur` et `ligneY = Math.floor(index / largeur)`.
+- **Chaînes de caractères comme séquences indexées** :
+  - Une chaîne est une séquence immuable indexée (`chaine[i]`, `.length`).
+  - Les mêmes algorithmes de parcours itératif s'appliquent pour valider un format, compter des occurrences ou extraire une sous-chaîne.
+- **Passage par valeur vs référence** :
+  - Les primitifs (nombres, chaînes, booléens) sont copiés par valeur.
+  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire : modifier une propriété à l'intérieur d'une fonction affecte directement l'objet externe en mémoire.
+
+### 3.3. Structures de contrôle fondamentales
+- **Branchements conditionnels et clauses de garde** :
+  - Alternatives `if`, `else`, et enchaînements `else if`.
+  - Opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`).
+  - Algèbre de Boole : opérateurs logiques ET (`&&`), OU (`||`) et NON (`!`), évaluation en court-circuit.
+  - *Pattern des clauses de garde* : exploiter le court-circuit pour sécuriser l'accès aux données (`if (joueur !== null && joueur.hp > 0)`) et tester les cas d'invalidation en tête de fonction avec un `return` anticipé pour aplatir le code et éliminer l'imbrication excessive de conditions.
+- **Itérations bornées (boucle `for`)** :
+  - Répétition avec compteur : initialisation, condition d'arrêt, incrémentation (`i++`).
+  - Parcours d'intervalles numériques et d'indices de collections.
+- **Le parcours de grille en deux dimensions (double boucle 2D)** :
+  - Double boucle imbriquée (`for (let y = 0; y < hauteur; y++)` avec `for (let x = 0; x < largeur; x++)`).
+  - Socle immédiat pour manipuler une matrice de tuiles dans Phaser ou dessiner une grille de pixels sur Canvas 2D.
+  - C'est l'exemple le plus concret pour comprendre le coût des boucles imbriquées (largeur × hauteur opérations).
+- **La boucle à rebours (Reverse Loop)** :
+  - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
+  - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
+- **Itérations non bornées (boucle `while`) et règle des 3 phases** :
+  - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un événement).
+  - *Règle des 3 phases (anti-boucle infinie)* : 1. initialisation de la condition en amont, 2. évaluation en tête de boucle, et 3. **mise à jour impérative de l'état avant l'accolade fermante**.
+- **Ruptures de séquence** : interruption avec `break`, saut d'itération avec `continue`.
+
+### 3.4. Décomposition fonctionnelle et modularité
+- **Découpage en sous-problèmes** : transformer un problème complexe en fonctions unitaires indépendantes (« diviser pour régner »).
+- **Signature d'une fonction** : paramètres d'entrée (arguments) et valeur de retour unique (`return`).
+- **Portée des identifiants (Scope)** :
+  - Portée de bloc : variables locales invisibles à l'extérieur de leur bloc englobant `{ ... }`.
+  - Dangers des variables globales (collisions de noms et effets de bord incontrôlés).
+- **Pureté et immutabilité** :
+  - Fonctions pures : pour les mêmes entrées, renvoient toujours la même sortie, sans modifier l'état extérieur.
+  - *Règle de pureté sur les collections* : ne jamais muter un tableau ou un objet reçu en argument. Attention à la copie superficielle (Shallow Copy) : `[...tab]` crée un nouveau tableau mais conserve les références vers les objets internes. Si la collection contient des objets modifiables en profondeur, utiliser `structuredClone(tab)` pour garantir une indépendance mémoire totale.
+- **La pile d'appels (Call Stack)** :
+  - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
+
+### 3.5. Les 7 patterns algorithmiques incontournables
+Ces 7 patrons de conception élémentaires constituent le socle de tout développement web et multimédia :
+
+1. **La permutation de valeurs (Swap)** :
+   - Échanger deux états sans écraser la valeur d'origine : utilisation de la variable temporaire (`temp = a; a = b; b = temp;`) et sa transcription moderne en déstructuration (`[a, b] = [b, a]`).
+2. **L'accumulation et élément neutre** :
+   - Initialiser l'accumulateur sur son élément neutre : `0` pour une somme (`total = 0`), chaîne vide pour du texte (`chaine = ""`), mais impérativement **`1`** pour un produit ou un cumul de multiplicateurs (`total = 1`), sous peine d'obtenir un résultat bloqué à zéro.
+3. **Le comptage sélectif** :
+   - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
+4. **La recherche d'extremum (Minimum / Maximum)** :
+   - *Clause de garde obligatoire sur tableau vide* : vérifier impérativement `if (tab.length === 0) return null;` avant toute recherche. Initialiser avec `max = tab[0]` sur un tableau vide injecte `undefined`, fausse toutes les comparaisons ultérieures (`undefined < 10` renvoie `false`) et conduit à un résultat indéterminé au lieu d'une valeur de retour explicite (`null`).
+5. **La recherche séquentielle sur collections d'objets (Flag & ID)** :
+   - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`).
+   - *Le piège universel du `return` dans le `else`* : à bannir formellement (`if (...) return tab[i]; else return null;`), car cette erreur arrête la boucle dès le tout premier élément testé. L'échec d'une recherche ne se constate **qu'après** la sortie complète de la boucle : placer impérativement `return null;` (ou `return -1` pour une recherche d'indice) immédiatement après l'accolade fermante de la boucle `for`. Prépare directement `.find()` / `.findIndex()` en JS et `WHERE id = ?` en SQL.
+6. **Le filtrage et partitionnement manuel** :
+   - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
+7. **La détection géométrique d'intersection (AABB)** :
+   - Algorithme d'intersection de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && ...`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser.
+
+### 3.6. Robustesse et analyse de complexité
+- **Sensibilité à la complexité intuitive** : comparer un parcours linéaire simple en $O(n)$ et un double parcours imbriqué en $O(n^2)$ (ex. tester chaque entité contre toutes les autres).
+- **Cas limites (Edge cases)** :
+  - Traitement systématique des cas critiques : tableau vide (`.length === 0`), index hors limites (`undefined`), division par zéro.
+  - Détection et prévention du décalage d'indice (« Off-by-one » : confondre `<` et `<=`).
+
+### 3.7. Débogage, traçabilité et observation (R1.12)
+- **Organigrammes normalisés (ISO 5807)** :
+  - Ovales/rectangles arrondis : Début / Fin.
+  - Parallélogrammes : Entrées / Sorties de données.
+  - Rectangles simples : Actions ou calculs élémentaires.
+  - Rectangles à double barre latérale verticale : Processus prédéfinis / Appels de fonctions (liaison avec la décomposition fonctionnelle).
+  - Losanges de décision : Conditions binaires avec branches Vrai / Faux.
+  - Flèches de boucle remontantes : Visualisation du cycle itératif.
+- **Table de trace manuelle** :
+  - Remplir pas à pas un tableau à double entrée : numéro d'étape, ligne de code active, état de chaque variable, évaluation de la condition.
+- **Outils d'instrumentation moderne** :
+  - Utilisation stratégique de `console.log` pour inspecter l'état.
+  - Pose de points d'arrêt (`debugger`) dans les outils de développement du navigateur pour observer l'exécution instruction par instruction.
 
 Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
 
 ## 4. JavaScript
 
-- **Bases** : variables, opérateurs, conditions, boucles, fonctions (voir algorithmique)
-- **DOM** : sélectionner, créer, modifier des éléments et leurs attributs (R3.12)
-- **Événements** : clic, saisie, soumission de formulaire (R3.12)
-- **Tableaux avancés** : tris, filtres, agrégation (R3.12)
-- **Objets et classes** : conception objet, hiérarchies (R3.12)
-- **Échanges de données** : `fetch`, JSON (R2.13, R2.14)
-- **Bibliothèques** : Alpine.js (interactivité), Chart.js (graphiques), Phaser (jeux), SVG (R3.12)
-- **Validation côté client** : avant l'envoi d'un formulaire
+Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-ressources progressives selon le référentiel :
+
+### 4.1. Fondamentaux & Syntaxe moderne ES6+ (R1.12)
+- **Variables et types** : `const` par défaut, `let` pour les réassignations, types primitifs (string, number, boolean).
+- **Opérateurs et conditions** : `if`, `else`, opérateur ternaire, égalité stricte (`===`), chaînage optionnel (`?.`) et coalescence des nuls (`??`).
+- **Boucles fondamentales** : boucle `while` (tant que), boucle `for` avec compteur, parcours moderne avec `for...of`.
+- **Fonctions modernes** :
+  - Déclaration classique et fonctions fléchées (`() => {}`).
+  - Paramètres par défaut et valeur de retour (`return`).
+  - Portée de bloc (`block scope`) et conservation lexicale du `this`.
+- **Structures de données** :
+  - Tableaux : indexation, `.length`, `.push()`.
+  - Objets littéraux : paires clé-valeur.
+  - Déstructuration d'objets et de tableaux (`const { x, y } = point;`).
+  - Opérateur Spread et Rest (`...`) pour cloner et fusionner sans mutation.
+
+### 4.2. DOM moderne, Événements et Persistance (R1.12, R3.12)
+- **Sélection et manipulation du DOM** : `document.querySelector()`, `document.querySelectorAll()`, `.textContent`, `.classList` (`add`, `remove`, `toggle`), attributs `dataset`.
+- **Gestion des événements** : écouteurs `addEventListener()`, objet d'événement `e`, interception `preventDefault()`.
+- **Délégation d'événements** : propagation des événements (bubbling), détection avec `e.target` pour gérer dynamiquement des listes sans multiplier les écouteurs.
+- **Rendu dynamique propre** : utilisation de la balise `<template>` et clonage via `.cloneNode(true)` pour éviter les concaténations non sécurisées avec `innerHTML`.
+- **Modularité native sans bundler** : utilisation de `<script type="module">` avec `import` et `export` pour découper son code en modules sans Node ni Vite. *Point d'attention technique* : requiert un serveur local HTTP (Live Server, serveur Python ou bac à sable Piscine), car les navigateurs bloquent les imports sous le protocole `file:///` (règle CORS).
+- **Persistance locale sans serveur** : Web Storage (`localStorage` et `sessionStorage`), sauvegarde d'état (meilleur score de jeu, préférences de thème clair/sombre).
+- **Multimédia audio léger** : objet HTML5 `Audio` (`new Audio()`, lecture, pause, volume) pour les retours sonores d'interface et bruitages de jeux.
+- **Défilement et visibilité** : API `IntersectionObserver` (déclenchement d'animations à l'apparition, lazy-loading d'images pour portfolios et vitrines).
+
+### 4.3. Asynchronisme, Données et POO Passerelle (R2.13, R3.12)
+- **Méthodes fonctionnelles de tableau** : `.forEach()`, `.map()`, `.filter()`, `.reduce()`, `.find()`, `.sort()`.
+- **Asynchronisme moderne** : requêtes réseau avec `fetch()`, syntaxe linéaire `async / await` avec gestion propre des erreurs via `try...catch` (évite les chaînes verbeuses de `.then()`).
+- **Manipulation des données JSON** : consommation d'API REST, parsing et sérialisation (`JSON.parse()`, `JSON.stringify()`).
+- **Formulaires modernes** : objet `FormData` pour collecter automatiquement tous les champs et les envoyer proprement via `fetch` en méthode `POST`.
+- **Parallélisation** : `Promise.all()` pour charger simultanément plusieurs ressources distantes (données JSON + assets graphiques).
+- **Conception objet (POO)** : syntaxe `class`, constructeur `constructor`, méthodes et héritage (`extends`). Enseignée via des modèles concrets d'entités de jeu (`class Entite`, `class Ennemi`, coordonnées `x`, `y`, méthode `deplacer()`), servant de tremplin direct pour étendre les scènes Phaser (`class GameScene extends Phaser.Scene`) et aborder la POO en PHP (Module 7).
+
+### 4.4. Graphisme 2D avec l'API Canvas (R3.12)
+- Balise `<canvas>` et obtention du contexte 2D (`getContext("2d")`).
+- Formes géométriques : rectangles (`fillRect`, `strokeRect`), tracés vectoriels (`beginPath`, `moveTo`, `lineTo`, `arc`).
+- Couleurs, contours, typographie et dessin d'images sur le canvas.
+- Boucle d'animation fluide avec `requestAnimationFrame()` (delta time et nettoyage via `clearRect`).
+- Événements unifiés : Pointer Events (`pointerdown`, `pointermove`, `pointerup`) pour supporter souris, stylet et tactile sans distinction.
+- Détection de collisions simples (boîtes englobantes AABB) et mini-jeu d'arcade interactif.
+- *Rôle didactique clé* : cette étape permet aux étudiants de comprendre manuellement le cycle de rendu et la physique bas niveau, démystifiant totalement ce que fera le moteur Phaser sous le capot.
+
+### 4.5. Visualisation de données avec Chart.js (R3.12)
+- Rendu de graphiques dynamiques sur balise `<canvas>`.
+- Types de graphiques : barres (`bar`), courbes/lignes (`line`), camemberts et beignets (`pie`, `doughnut`).
+- Paramétrage complet : séries de données (`datasets`), axes, couleurs, légendes et tooltips.
+- Mise à jour dynamique des données en temps réel (`chart.update()`).
+- Cas d'usage MMI : dashboards de statistiques, data-visualisation interactive pour projets et SAÉ.
+
+### 4.6. Moteur de jeu 2D avec Phaser (R3.12 et projets)
+- Transition naturelle depuis Canvas 2D et la POO : réutilisation des concepts de boucle de rendu et d'héritage de classes (`class MainScene extends Phaser.Scene`).
+- Initialisation et configuration d'une instance `Phaser.Game`.
+- Architecture des scènes Phaser et cycle de vie : `preload()`, `create()`, `update()`.
+- Chargement d'assets : images, feuilles de sprites (`spritesheets`), effets sonores.
+- Physique Arcade : vélocité, gravité, rebonds, limites de monde (`collideWorldBounds`).
+- Gestion des collisions : `physics.add.collider()`, `physics.add.overlap()`.
+- Contrôles au clavier et tactile : déplacements, saut, tirs.
+- Gestion d'état de jeu : collecte d'objets, score à l'écran, vies, défaite/victoire et sauvegarde du record avec `localStorage`.
+
+### 4.7. Interactivité déclarative avec Alpine.js (R3.12)
+- Intégration ultra-légère sans outillage de build.
+- Directives d'état : `x-data`, `x-text`, `x-html`, `x-bind`.
+- Gestion des événements et interactions : `x-on:click` (`@click`), `x-show`, `x-if`.
+- Répétition déclarative de listes : `x-for`.
+- Transitions et animations : `x-transition`.
+
+### 4.8. Points de vigilance pour l'animation en classe
+
+Deux points critiques sont à anticiper par les intervenants pour garantir la fluidité des séances :
+
+1. **Le piège CORS sur les modules ES (séance 21 et `<script type="module">`)** :
+   - *Problème* : dès qu'un fichier HTML utilise `<script type="module">`, le navigateur applique la politique de sécurité Same-Origin et bloque le chargement local direct (`file:///`). Les étudiants qui ouvrent leur fichier par un double-clic obtiennent un écran blanc et une erreur bloquante en console.
+   - *Anticipation pédagogique* : expliquer le modèle client-serveur HTTP dès le début de la séance. Imposer l'utilisation d'un serveur local (extension VS Code **Live Server** ou le bac à sable de la plateforme) avant toute manipulation.
+
+2. **La gestion de la charge cognitive sur le Module 3 (séances 22 à 27)** :
+   - *Problème* : ce bloc enchaîne les méthodes fonctionnelles (`map`, `filter`, `reduce`), l'asynchronisme (`fetch`, `async / await`) et la POO (`class`, `extends`). C'est la zone où le risque de décrochage est le plus élevé si les concepts sont présentés de manière abstraite.
+   - *Solution fil conducteur* : réutiliser le jeu de données de l'inventaire manipulé au Module 1 (ex. un tableau d'objets `[ { nom, prix, stock, type } ]`). Les élèves n'ont aucune charge mentale sur la structure des données et se concentrent uniquement sur la nouvelle notion syntaxique.
+   - *Calibrage* : limiter chaque exercice de ce bloc à 5 à 10 lignes de code maximum, avec un résultat immédiatement observable, pour maintenir le rythme et la motivation avant d'aborder la gratification visuelle du Canvas 2D.
 
 C'est à cette étape que la visualisation de la logique (variables, boucles, fonctions) a le plus de sens : voir [visualisation-logique.md](visualisation-logique.md).
 
@@ -92,16 +256,126 @@ Le référentiel le place en R4 (gestion de versions). On le propose plus tôt, 
 
 Référentiel : R4.DWeb-DI.08, « création de scripts ».
 
-## 7. PHP
+## 7. PHP & Architecture Back-End
 
-- Syntaxe : variables, tableaux, conditions, boucles, fonctions
-- Générer des pages à partir de données (AC14.03)
-- Formulaires et validation des données côté serveur (R2.13)
-- Accès à une base de données avec PDO (SQLite en simulation)
-- Requêtes préparées et échappement des données, pour la sécurité
-- Sessions
-- POO et MVC (R2.13, R3.12)
-- Serveur local (R1.13) : installer un environnement PHP et MySQL en local (XAMPP, Laragon ou Docker, voir [lancer le projet](lancer-le-projet.md))
+Le module PHP couvre le développement côté serveur et le cycle de requêtes HTTP (R2.13). Il assure la transition directe depuis la POO JavaScript vers l'architecture Back-End, la manipulation des bases de données relationnelles et la conception d'API JSON. 
+
+Il est calibré pour le volume horaire du BUT MMI (~30 à 40 heures encadrées) en **20 séances de travaux pratiques complètes**, regroupées en 7 sous-modules à l'ordre chronologique rigoureux :
+
+### 7.1. Fondamentaux, Typage strict & Templating serveur (R2.13)
+- **Typage strict dès le jour 1** : instruction `declare(strict_types=1);` placée en toute première ligne pour bannir le transtypage implicite et dangereux de PHP.
+- **Balises et syntaxe moderne** : balises `<?php`, affichage avec `echo`, terminaison par point-virgule `;`.
+- **Variables et types primitifs** : préfixe `$`, typage explicite (string, int, float, bool).
+- **Opérateurs et conditions** : concaténation avec le point `.`, conditions `if`, `else`, `elseif`, opérateur ternaire, null-safe `?->` et null-coalescing `??`.
+- **Boucles et tableaux associatifs** : boucles `for`, `while`, parcours avec `foreach ($items as $key => $val)`, fonctions natives de tableaux.
+- **Fonctions personnalisées et dates** :
+  - Déclaration avec typage strict des paramètres et du retour (`function nom(int $id): string`).
+  - Fuseau horaire par défaut : `date_default_timezone_set('Europe/Paris');`.
+  - Manipulation de l'objet natif immuable `DateTimeImmutable` et formatage SQL (`->format('Y-m-d H:i:s')`).
+- **Templating serveur modulaire** : découpage d'une page HTML en composants avec `require_once` (`header.php`, `navbar.php`, `footer.php`).
+
+### 7.2. Sessions, Cookies & Authentification sécurisée (R2.13)
+*Chronologie : les sessions sont apprises ici afin d'être immédiatement disponibles pour le CSRF au module suivant.*
+- **Cookies HTTP** : fonctionnement des en-têtes `Set-Cookie`, création avec `setcookie()`, lecture avec `$_COOKIE`, drapeaux de sécurité obligatoires (`httponly`, `secure`, `samesite`).
+- **Mécanisme des sessions** : initialisation avec `session_start()`, stockage d'état côté serveur dans la superglobale `$_SESSION`, fermeture propre avec `session_destroy()`.
+- **Prévention de la fixation de session** : appel impératif de `session_regenerate_id(true);` immédiatement après la validation des identifiants de connexion pour détruire l'identifiant de pré-session.
+- **Sécurité des mots de passe** : hachage irréversible avec `password_hash($mdp, PASSWORD_DEFAULT)` et vérification avec `password_verify()`.
+- **Contrôle d'accès et espace membre** : redirection sécurisée avec `header('Location: login.php'); exit;` si l'utilisateur n'est pas authentifié.
+
+### 7.3. Formulaires sécurisés, Uploads & Pattern PRG (R2.13)
+- **Cycle HTTP** : requêtes GET (lecture/recherche) vs requêtes POST (mutation de données).
+- **Superglobales et validation** : lecture de `$_GET` et `$_POST`, nettoyage avec `trim()`, validation des formats avec `filter_var()` (email, entiers, URL).
+- **Sécurité XSS contextuelle** :
+  - Neutralisation systématique à l'affichage texte avec `htmlspecialchars($valeur, ENT_QUOTES, 'UTF-8')`.
+  - Assainissement des liens : interdiction des fausses URLs injectant du JavaScript (`javascript:alert(1)`) en exigeant une validation stricte du protocole HTTP/HTTPS via `filter_var($url, FILTER_VALIDATE_URL)`.
+- **Le pattern PRG (Post-Redirect-Get)** :
+  - Redirection après validation (`header('Location: ...'); exit;`) et transmission des alertes de succès/erreur via un message flash temporaire en session (`$_SESSION['flash']`, consommé puis supprimé avec `unset()` à l'affichage).
+  - Règle didactique : élimine définitivement le renvoi accidentel du formulaire et la duplication des données lors d'un rafraîchissement (touche F5).
+- **Protection contre le CSRF (Cross-Site Request Forgery)** :
+  - Génération d'un token aléatoire stocké en session : `$_SESSION['csrf_token'] = bin2hex(random_bytes(32));`.
+  - Champ masqué `<input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">`.
+  - Contrôle strict avec `hash_equals()` avant d'exécuter l'action en POST.
+- **Upload sécurisé de fichiers (`$_FILES`)** :
+  - Attribut de formulaire `enctype="multipart/form-data"`.
+  - Vérification de l'état d'upload via `$_FILES['image']['error'] === UPLOAD_ERR_OK` et contrôle de la taille maximale.
+  - Contrôle du type MIME réel via `mime_content_type()` (interdiction de se fier à l'extension).
+  - Renommage aléatoire unique (`uniqid() . bin2hex(random_bytes(8)) . '.jpg'`) et déplacement avec `move_uploaded_file()`.
+  - Sécurisation du stockage : neutralisation de l'exécution de scripts soit par placement du dossier hors de la racine web (`../uploads/`), soit via `.htaccess` (`php_flag engine off`) sous Apache.
+
+### 7.4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)
+*Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant d'aborder la persistance.*
+- **Classes et objets en PHP 8** : déclaration `class`, typage strict des propriétés, instanciation avec `new`.
+- **Constructeur moderne** : promotion de propriétés dans `__construct(public string $nom, private int $prix)` pour un code concis.
+- **Encapsulation et visibilité** : portée `public`, `private` et `protected`, accesseurs (getters) et mutateurs (setters).
+- **Héritage** : mot-clé `extends`, surcharge de méthodes et appel du parent avec `parent::__construct()`.
+- **Autoloading sans bundler** : configuration de `spl_autoload_register()` pour charger automatiquement les classes à la volée, éliminant définitivement les erreurs de `require_once` manqués ou dupliqués.
+
+### 7.5. Base de données avec PDO, Relations SQL & Transactions (R2.13, R2.14)
+- **Sécurisation des identifiants sans Composer** :
+  - En PHP natif sans `vlucas/phpdotenv`, les fichiers `.env` ne sont pas lus automatiquement.
+  - Méthode enseignée : un fichier `config.local.php` retournant un tableau (`return ['db_pass' => '...'];`), exclu du dépôt par `.gitignore`, accompagné d'un gabarit versionné `config.example.php`.
+- **Connexion PDO sécurisée** : instanciation de l'objet `PDO` obligatoirement enrobée dans un `try ... catch (PDOException $e)` pour empêcher l'affichage de la pile d'appels et des mots de passe en clair en cas d'erreur de connexion.
+- **Protection absolue contre les injections SQL** : interdiction totale de concaténer des variables dans le SQL. Utilisation systématique des requêtes préparées avec `prepare()` et `execute([$param])` ou `bindParam()`.
+- **Pagination SQL et piège du typage PDO** :
+  - Décompte du nombre total d'enregistrements via `SELECT COUNT(*) FROM table` pour calculer le nombre total de pages.
+  - Calcul dynamique de `LIMIT :limit OFFSET :offset` à partir de l'URL (`?page=2`).
+  - *Piège technique corrigé* : passer `:limit` dans un tableau `execute([':limit' => $limit])` injecte une chaîne (`LIMIT '10'`) provoquant une erreur de syntaxe MySQL. Obligation d'utiliser `$stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);` et `$stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);`.
+- **Relations SQL et requêtes jointes (anti-piège du N+1)** :
+  - Clés étrangères (`FOREIGN KEY`).
+  - Utilisation systématique des jointures `INNER JOIN` et `LEFT JOIN` pour récupérer les entités reliées (ex: un article et les données de son auteur) en une seule requête SQL, bannissant l'anti-pattern de la boucle `foreach` contenant une requête SQL par ligne.
+- **Transactions PDO et intégrité relationnelle** :
+  - Sécurisation des opérations multi-tables via `$pdo->beginTransaction()`, `$pdo->commit()` et `$pdo->rollBack()` dans un bloc `try / catch`. En cas d'erreur sur l'une des requêtes, la base annule toutes les modifications.
+- **Opérations CRUD complètes** : insertion, sélection avec jointure et pagination, modification et suppression contrôlée.
+
+### 7.6. Architecture MVC & Routage (R2.13, SAÉ)
+- **Séparation des responsabilités (MVC)** :
+  - **Modèle** : classes métiers et repositories instanciant PDO pour interroger la base de données.
+  - **Vue** : templates HTML/PHP purs avec variables injectées, sans requêtes SQL ni logique métier.
+  - **Contrôleur** : réception de la requête, interrogation du modèle, sélection et transmission des données à la vue.
+- **Routage et fallback 404** :
+  - Point d'entrée unique `index.php` avec aiguillage par action ou route.
+  - *Gestion obligatoire du 404* : si l'action ou la page demandée n'existe pas, envoi impératif de `http_response_code(404);` et affichage d'une vue 404 dédiée pour éviter les erreurs non gérées.
+
+### 7.7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)
+- **En-têtes de réponse HTTP** : déclaration de `header('Content-Type: application/json; charset=utf-8');`.
+- **Sérialisation JSON** : transformation de structures PHP en JSON avec `json_encode()`.
+- **Le piège de la réception JSON (`php://input`)** :
+  - Lorsque le client JavaScript envoie un payload JSON via `fetch('/api', { method: 'POST', body: JSON.stringify(data) })`, la superglobale `$_POST` est totalement vide.
+  - En PHP natif, il faut impérativement lire le flux d'entrée brut : `$json = file_get_contents('php://input');` puis décoder avec `$data = json_decode($json, true);`.
+- **Codes de statut HTTP réels** : utilisation impérative de `http_response_code(400)` (Bad Request), `401` (Unauthorized) ou `404` (Not Found) afin que la propriété `response.ok` du `fetch()` JS détecte immédiatement les erreurs sans passer par un statut 200 trompeur.
+- **Gestion complète du CORS et des requêtes Preflight OPTIONS** :
+  - Lorsque JS envoie un `POST` avec l'en-tête `Content-Type: application/json`, le navigateur émet d'abord une requête HTTP `OPTIONS`.
+  - Gestion obligatoire en début de script :
+    ```php
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers: Content-Type');
+        http_response_code(200);
+        exit;
+    }
+    header('Access-Control-Allow-Origin: *');
+    ```
+
+### 7.8. Points de vigilance pour l'animation en classe PHP
+
+Quatre points critiques doivent être anticipés lors des séances PHP :
+
+1. **La sécurité réflexe dès le premier jour** :
+   - *Strict types* : exiger `declare(strict_types=1);` dès le début.
+   - *XSS* : neutraliser immédiatement toute écriture brute avec `htmlspecialchars()`, et valider les protocoles d'URL contre les failles `javascript:`.
+   - *Injections SQL* : imposer les requêtes préparées `prepare()` dès la première démonstration.
+   - *CSRF et PRG* : exiger le token CSRF et la redirection Post-Redirect-Get sur toute mutation de données.
+   - *Credentials PDO* : enrober la connexion dans un `try / catch` et vérifier le `.gitignore`.
+   - *Dossier d'upload* : interdire l'exécution PHP dans les répertoires d'upload via `.htaccess`.
+
+2. **L'obligation du protocole HTTP local** :
+   - Rappeler qu'un fichier PHP ne s'ouvre jamais via le protocole `file:///`. Un serveur HTTP local (Laragon, serveur interne `php -S`, Docker ou le bac à sable php-wasm de la plateforme) doit être démarré.
+
+3. **Le piège SQL de la pagination PDO** :
+   - Rappeler que `LIMIT` et `OFFSET` exigent `$stmt->bindValue(..., PDO::PARAM_INT)` sous peine d'erreur de syntaxe SQL avec MySQL.
+
+4. **Le piège CORS Preflight et réception JSON (`php://input`) lors des TP couplés JS/PHP** :
+   - Vérifier la gestion de la méthode `OPTIONS` et la lecture de `php://input` dès que les étudiants font communiquer leur front JS et leur back PHP.
 
 WordPress est reporté (README).
 
