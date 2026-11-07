@@ -11,9 +11,11 @@ import { glissable } from "./redimensionner.js";
 import {
   marquerReussi,
   estReussi,
+  lireProgression,
   chargerListeExos,
   exoSuivant,
 } from "./progression.js";
+import { creerMenuNavigation } from "./navigation.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -56,6 +58,7 @@ function arreterApercu() {
 function validerExo() {
   marquerReussi(EXO);
   afficherSuivant();
+  if (menuNavigation) menuNavigation.mettreAJour();
 }
 
 // Affiche index.html dans l'iframe
@@ -125,14 +128,24 @@ boutonPhp.textContent = "Exécuter PHP";
 boutonPhp.addEventListener("click", lancerPhp);
 onglets.append(boutonPhp);
 
+// Navigation et liste des exercices
+const listeExos = await chargerListeExos();
+const suivant = exoSuivant(EXO, listeExos);
+
+const menuNavigation = creerMenuNavigation({
+  conteneur: document.getElementById("navigation-exos"),
+  exoCourant: EXO,
+  listeExos,
+  lireProgressionFn: lireProgression,
+  estAuteur: new URLSearchParams(location.search).has("auteur"),
+});
+
 // bouton "suivant"
 
 const boutonSuivant = document.createElement("button");
 boutonSuivant.textContent = "Exo suivant →";
 boutonSuivant.classList.add("cache");
 onglets.append(boutonSuivant);
-
-const suivant = exoSuivant(EXO, await chargerListeExos());
 
 function afficherSuivant() {
   boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));

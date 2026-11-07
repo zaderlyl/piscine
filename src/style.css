@@ -143,3 +143,153 @@ font-family: sans-serif;
   background: #fffbe6;
   font-weight: bold;
 }
+
+
+/* Navigation et sélecteur d'exercices */
+#navigation-exos {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 12px;
+  position: relative;
+  font-family: sans-serif;
+}
+
+.groupe-menu-exos {
+  position: relative;
+}
+
+.declencheur-menu-exos {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #333;
+}
+
+.declencheur-menu-exos:hover {
+  background: #fdfdfd;
+  border-color: #aaa;
+}
+
+.declencheur-menu-exos.ouvert {
+  border-color: #1565c0;
+}
+
+.chevron-menu {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+  margin-top: -2px;
+}
+
+.declencheur-menu-exos.ouvert .chevron-menu {
+  transform: rotate(-135deg);
+  margin-top: 2px;
+}
+
+.panneau-menu-exos {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  min-width: 250px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.en-tete-menu-exos {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #777;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.liste-menu-exos {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.item-menu-exo {
+  margin: 0;
+}
+
+.btn-choix-exo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: sans-serif;
+  color: #222;
+}
+
+.btn-choix-exo:hover:not(:disabled) {
+  background: #f0f4f8;
+}
+
+.btn-choix-exo.actif {
+  background: #e3f2fd;
+  font-weight: bold;
+}
+
+.btn-choix-exo:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.badge-etat-exo {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.badge-etat-exo.etat-valide {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.badge-etat-exo.etat-courant {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-color: #bbdefb;
+}
+
+.badge-etat-exo.etat-accessible {
+  background: #fff8e1;
+  color: #f57f17;
+  border-color: #ffe082;
+}
+
+.badge-etat-exo.etat-verrouille {
+  background: #f5f5f5;
+  color: #888;
+  border-color: #e0e0e0;
+}
