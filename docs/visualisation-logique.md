@@ -36,3 +36,23 @@ Le même panneau peut servir aux deux sujets. Un exo JS peut être versionné : 
 ## Références
 
 - Référentiel MMI : [referentiel-mmi.md](referentiel-mmi.md) (R1.12 pour l'algorithmique, R4.DWeb-DI.08 pour Git).
+
+
+## Bilan du prototype pas à pas (Issue #41)
+
+Un prototype isolé a été réalisé dans `src/logique-test.html` pour tester la faisabilité d'une exécution pas à pas dans le navigateur (sur un code très court avec une variable et une boucle `for`).
+
+### Ce qui fonctionne
+- L'utilisation des fonctions génératrices (`function*` et `yield`) permet de dérouler l'exécution ligne par ligne sans bloquer l'interface.
+- L'affichage montre clairement les différentes phases d'une boucle : initialisation, évaluation de condition, exécution du corps, et incrémentation.
+- La surbrillance visuelle des variables lors de leur modification donne un retour immédiat.
+
+### Ce qui est trop difficile pour du code élève libre
+- **Transformation automatique de l'AST** : instrumenter du code libre tapé par l'élève pour insérer des points d'arrêt à chaque expression ou sous-condition nécessite un transformateur lourd (Babel) ou un interpréteur JS en JS (type `JS-Interpreter`).
+- **Gestion des boucles infinies** : si un élève commet une erreur d'incrémentation, l'interpréteur ou le générateur boucle indéfiniment.
+- **Portée et pile d'appels** : gérer les fonctions imbriquées, les arguments, la portée lexicale et les retours demande un moteur de débogage complet.
+- **Asynchronisme et DOM** : le pas à pas est incompatible de façon prévisible avec des gestionnaires d'événements (`addEventListener`) ou des promesses.
+
+### Décision et recommandation
+1. **Ne pas embarquer de moteur pas à pas complexe pour les exercices classiques** : le visualiseur actuel (`src/visualiseur-variables.js`), basé sur Acorn et affichant l'état final des variables globales, est robuste, léger et suffisant pour les débutants.
+2. **Usage réservé aux démonstrations guidées** : le pas à pas peut être utilisé ponctuellement sous forme d'animations pré-enregistrées ou de cours interactifs, mais pas sur du code élève libre.
