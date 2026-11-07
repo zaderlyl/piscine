@@ -457,6 +457,11 @@
 
     .table-scroll {
       max-height: 270px;
+      overflow-y: auto;
+      border: 1px solid #f1f5f9;
+      border-radius: 4px;
+    }
+
     /* Zone de visualisation de tableau (Section 3.5 - Recherche & Collections) */
     .zone-tableau {
       background: #ffffff;
@@ -613,10 +618,7 @@
       }
     }
 
-      overflow-y: auto;
-      border: 1px solid #f1f5f9;
-      border-radius: 4px;
-    }
+
 
     .table-trace {
       width: 100%;
@@ -2550,7 +2552,7 @@
             vars: { [prefix + 'tab']: [...tab], [prefix + 'max']: max, [prefix + 'tab (local)']: [...tabLoc], [prefix + 'max (local)']: maxLoc, [prefix + 'i (local)']: iLoc },
             porteeLocale: { [prefix + 'tab']: [...tabLoc], [prefix + 'max']: maxLoc, [prefix + 'i']: iLoc },
             cond: "—", sortie: "null",
-            act: "Instruction 'return null;' : arrêt immédiat, accès illégal à tab[0] évité ! La fonction renvoie null.",
+            act: `Instruction 'return null;' : arrêt immédiat, évite d'initialiser ${prefix}max avec undefined ! La fonction renvoie null.`,
             pileAppels: ["Programme principal", `trouverMax(${prefix}tab)`]
           };
 
