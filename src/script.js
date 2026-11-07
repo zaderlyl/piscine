@@ -4,6 +4,7 @@ import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
+import { debloquerEmmet } from "./emmet.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -59,8 +60,8 @@ function validerExo() {
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
-  const { code, analyse } = assemblerPage(lireContenus(), testsExo);
-  afficherVariables(analyse);
+  const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
+  afficherVariables(analyse, balisePresente);
   afficherDansApercu(apercu, code);
   clearTimeout(minuteurTests);
   minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
@@ -158,29 +159,25 @@ if (localStorage.getItem(CLE_SUSPENDU)) {
 ecouterValeurs(apercu);
 
 // Barres pour agrandir ou réduire les colonnes et les panneaux de droite
-glissable(
-  document.getElementById("separateur-v"),
-  document.getElementById("editeur"),
-  {
-    axe: "x",
-    variable: "--largeur-gauche",
-    min: 200,
-  },
-);
+// Les limites hautes laissent toujours de la place au résultat des tests (environ 10 % de la hauteur)
+glissable(document.getElementById("separateur-v"), document.getElementById("editeur"), {
+  axe: "x",
+  variable: "--largeur-gauche",
+  min: 200,
+  max: () => window.innerWidth - 200,
+});
 glissable(document.getElementById("separateur-a"), apercu, {
   axe: "y",
   variable: "--h-apercu",
   min: 80,
+  max: () => window.innerHeight * 0.6,
 });
-glissable(
-  document.getElementById("separateur-b"),
-  document.getElementById("variables"),
-  {
-    axe: "y",
-    variable: "--h-variables",
-    min: 60,
-  },
-);
+glissable(document.getElementById("separateur-b"), document.getElementById("variables"), {
+  axe: "y",
+  variable: "--h-variables",
+  min: 60,
+  max: () => window.innerHeight * 0.3,
+});
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
@@ -191,6 +188,7 @@ window.addEventListener("message", (e) => {
     ? echecs.map((r) => "❌ " + r.message).join("\n")
     : "✅ Tous les tests passent";
   if (!echecs.length && e.data.resultats.length) {
+    if (testsExo && exo.emmetDebloque) debloquerEmmet(exo.emmetDebloque);
     validerExo();
   }
 });
