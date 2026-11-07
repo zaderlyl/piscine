@@ -123,10 +123,10 @@ Ces 7 patrons de conception élémentaires constituent le socle de tout dévelop
 3. **Le comptage sélectif** :
    - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
 4. **La recherche d'extremum (Minimum / Maximum)** :
-   - *Clause de garde obligatoire sur tableau vide* : vérifier impérativement `if (tab.length === 0)` avant toute recherche. Initialiser avec `max = tab[0]` sur un tableau vide injecte `undefined` et fausse toutes les comparaisons ultérieures (`undefined < 10` renvoie `false`).
+   - *Clause de garde obligatoire sur tableau vide* : vérifier impérativement `if (tab.length === 0) return null;` avant toute recherche. Initialiser avec `max = tab[0]` sur un tableau vide injecte `undefined`, fausse toutes les comparaisons ultérieures (`undefined < 10` renvoie `false`) et conduit à un résultat indéterminé au lieu d'une valeur de retour explicite (`null`).
 5. **La recherche séquentielle sur collections d'objets (Flag & ID)** :
    - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`).
-   - *Le piège universel du `return` dans le `else`* : à bannir formellement (`if (...) return tab[i]; else return null;`), car cette erreur arrête la boucle dès le tout premier élément testé. L'échec d'une recherche ne se constate **qu'après** la sortie complète de la boucle. Prépare directement `.find()` en JS et `WHERE id = ?` en SQL.
+   - *Le piège universel du `return` dans le `else`* : à bannir formellement (`if (...) return tab[i]; else return null;`), car cette erreur arrête la boucle dès le tout premier élément testé. L'échec d'une recherche ne se constate **qu'après** la sortie complète de la boucle : placer impérativement `return null;` (ou `return -1` pour une recherche d'indice) immédiatement après l'accolade fermante de la boucle `for`. Prépare directement `.find()` / `.findIndex()` en JS et `WHERE id = ?` en SQL.
 6. **Le filtrage et partitionnement manuel** :
    - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
 7. **La détection géométrique d'intersection (AABB)** :
