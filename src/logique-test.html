@@ -456,7 +456,163 @@
     }
 
     .table-scroll {
-      max-height: 170px;
+      max-height: 270px;
+    /* Zone de visualisation de tableau (Section 3.5 - Recherche & Collections) */
+    .zone-tableau {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .entete-tableau {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .cases-tableau {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 2px;
+      align-items: center;
+    }
+
+    .cellule-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      min-width: 54px;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+
+    .cellule-tab.active {
+      border-color: #0284c7;
+      background: #e0f2fe;
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+      transform: scale(1.05);
+    }
+
+    .cellule-tab.trouvee {
+      border-color: #16a34a;
+      background: #dcfce7;
+      box-shadow: 0 0 8px rgba(22, 163, 74, 0.45);
+      transform: scale(1.05);
+    }
+
+    .cellule-tab .val-tab {
+      font-family: Consolas, Monaco, monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: #0f172a;
+      padding: 6px 8px;
+    }
+
+    .cellule-tab .idx-tab {
+      font-size: 11px;
+      color: #64748b;
+      background: #e2e8f0;
+      width: 100%;
+      text-align: center;
+      padding: 2px 0;
+      font-family: monospace;
+      font-weight: 600;
+      border-top: 1px solid #cbd5e1;
+    }
+
+    /* Cadres de portée pour la pile d'appels (Call Stack) */
+    .cadre-portee {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .cadre-portee.locale {
+      border-color: #7c3aed;
+      background: #faf5ff;
+      animation: apparaitPortee 0.25s ease;
+    }
+
+    @keyframes apparaitPortee {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .titre-portee {
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cadre-portee.locale .titre-portee {
+      color: #7c3aed;
+    }
+
+    .vars-portee {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Colonnes dédiées par variable dans la table de trace (R1.12) */
+    .table-trace th.th-variable {
+      background: #e2e8f0;
+      color: #0f172a;
+      font-family: monospace;
+      text-align: center;
+      min-width: 55px;
+    }
+
+    .table-trace td.td-valeur-var {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .table-trace td.var-modifiee {
+      background: #fef08a;
+      color: #854d0e;
+      font-weight: bold;
+    }
+
+    .table-trace td.var-vide {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    /* Accessibilité et Responsive */
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column !important;
+      }
+      #editeur, #droite {
+        height: auto !important;
+        overflow: visible !important;
+      }
+      #separateur-v {
+        display: none !important;
+      }
+    }
+
       overflow-y: auto;
       border: 1px solid #f1f5f9;
       border-radius: 4px;
@@ -531,12 +687,18 @@
       <button type="button" class="tab-exemple" data-id="fonction">8. Fonction (ISO 5807)</button>
     </nav>
 
-    <!-- Contrôles pas à pas -->
+    <!-- Contrôles pas à pas (avec pas précédent et vitesse) -->
     <div id="commandes-pas">
-      <span style="font-weight: bold; font-size: 12px; color: #475569;">Contrôle pas à pas :</span>
-      <button type="button" id="btn-suivant" class="btn-controle primaire">Ligne suivante &rarr;</button>
+      <span style="font-weight: bold; font-size: 12px; color: #475569;">Contrôle :</span>
+      <button type="button" id="btn-precedent" class="btn-controle" disabled title="Revenir en arrière d'une ligne">&larr; Pas précédent</button>
+      <button type="button" id="btn-suivant" class="btn-controle primaire" title="Exécuter la ligne suivante">Ligne suivante &rarr;</button>
       <button type="button" id="btn-auto" class="btn-controle">Lecture auto</button>
       <button type="button" id="btn-reset" class="btn-controle">Réinitialiser</button>
+      <div style="display: flex; align-items: center; gap: 6px; margin-left: 8px; font-size: 12px; color: #475569;">
+        <span>Vitesse :</span>
+        <input type="range" id="curseur-vitesse" min="200" max="2000" step="100" value="800" style="width: 75px; cursor: pointer;">
+        <span id="label-vitesse" style="font-family: monospace; font-weight: bold; min-width: 45px;">800ms</span>
+      </div>
     </div>
 
     <div id="zones"></div>
@@ -548,17 +710,29 @@
   <!-- Colonne droite : Organigramme interactif & Table de trace -->
   <div id="droite">
 
-    <!-- En-tête -->
+    <!-- En-tête avec bouton repliable d'organigramme -->
     <div class="entete-flux">
-      <h2 class="titre-flux" id="titre-organigramme">Organigramme</h2>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <h2 class="titre-flux" id="titre-organigramme">Organigramme</h2>
+        <button type="button" id="btn-toggle-org" class="btn-controle" style="padding: 3px 8px; font-size: 11px;">Masquer l'organigramme</button>
+      </div>
       <span id="badge-statut" class="badge-etape">Prêt</span>
+    </div>
+
+    <!-- Zone de visualisation de tableau en mémoire (Recherche) -->
+    <div id="zone-tableau" class="zone-tableau" style="display: none;">
+      <div class="entete-tableau">
+        <span>Tableau en mémoire : <code id="nom-tableau" style="font-weight: bold; color: #0284c7;">tab</code></span>
+        <span id="info-tableau">3 éléments</span>
+      </div>
+      <div class="cases-tableau" id="cases-tableau"></div>
     </div>
 
     <!-- Mini-panneau des variables dynamique (Section 3.2) -->
     <div class="barre-variables" id="barre-variables"></div>
 
     <!-- Message d'action de l'étape courante -->
-    <div class="message-action" id="message-action">
+    <div class="message-action" id="message-action" aria-live="polite">
       Clique sur le bouton bleu « Ligne suivante » pour démarrer l'exécution.
     </div>
 
@@ -635,10 +809,10 @@
           <li><strong>Swap (Permutation) :</strong> Échanger deux valeurs via variable temporaire (<code>temp = a; a = b; b = temp;</code> / <code>$temp = $a; $a = $b; $b = $temp;</code>).</li>
           <li><strong>Accumulation & élément neutre :</strong> <code>0</code> pour une somme, chaîne vide pour du texte, mais <strong><code>1</code></strong> pour un produit sous peine de blocage à zéro.</li>
           <li><strong>Comptage sélectif :</strong> Incrémenter un compteur selon un prédicat.</li>
-          <li><strong>Extremum (Min/Max) :</strong> Clause de garde sur tableau vide obligatoire (<code>return null;</code>).</li>
-          <li><strong>Recherche séquentielle :</strong> L'échec se constate <em>après</em> la sortie de boucle (<code>return null;</code> après l'accolade fermante, jamais dans le <code>else</code>).</li>
-          <li><strong>Filtrage manuel :</strong> Construire un tableau cible filtré (socle de <code>.filter()</code> en JS, <code>array_filter()</code> en PHP, et <code>WHERE</code> en SQL).</li>
-          <li><strong>Intersection AABB :</strong> Boîtes alignées sur les axes pour Canvas 2D et Phaser.</li>
+          <li><strong>Extremum (Min/Max) :</strong> Clause de garde sur tableau vide (<code>if (tab.length === 0) return null;</code>) puis initialisation sur <code>tab[0]</code>.</li>
+          <li><strong>Recherche séquentielle (Flag & ID) :</strong> L'échec se constate <em>après</em> la sortie de boucle (<code>return null;</code> après l'accolade fermante, jamais dans le <code>else</code> !).</li>
+          <li><strong>Filtrage et partitionnement :</strong> Construire un tableau cible filtré (socle de <code>.filter()</code> en JS et <code>WHERE</code> en SQL).</li>
+          <li><strong>Validation globale par drapeau (Flag) :</strong> Vérifier si tous ou au moins un élément respecte un critère (socle de <code>.every()</code> / <code>.some()</code>). *Application multimédia : intersection géométrique AABB pour Canvas 2D / Phaser.*</li>
         </ol>
       `,
       bilan: `
@@ -1464,7 +1638,8 @@
             <path id="ligne-boucle" class="ligne-flux" d="M 75 392 V 420 H 15 V 190 H 122" marker-end="url(#fleche)" />
 
             <path id="ligne-trouve-break" class="ligne-flux" d="M 325 392 V 445 H 200" marker-end="url(#fleche)" />
-            <line id="ligne-cond-sortie" class="ligne-flux" x1="200" y1="225" x2="200" y2="225" />
+            <path id="ligne-cond-sortie" class="ligne-flux" d="M 275 190 H 380 V 445 H 235" marker-end="url(#fleche)" />
+            <text id="label-for-faux" class="etiquette-branche" x="290" y="182">Non (fin)</text>
 
             <g id="noeud-sortie" class="noeud">
               <polygon class="forme-noeud" points="145,430 255,430 235,470 125,470" />
@@ -1484,27 +1659,27 @@
           const lOffset = lang === "php" ? 1 : 0;
           const prefix = lang === "php" ? "$" : "";
 
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, act: "Début de la recherche séquentielle." };
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: "Début de la recherche séquentielle.", indexActif: null };
 
           cible = 45; trouve = false;
-          yield { noeud: "noeud-init", ligneSvg: "ligne-debut-init", ligne: 1 + lOffset, statut: "Initialisation", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'trouve', cond: "—", act: `${prefix}tab = [12, 45, 78], ${prefix}cible = 45, ${prefix}trouve = false.` };
+          yield { noeud: "noeud-init", ligneSvg: "ligne-debut-init", ligne: 1 + lOffset, statut: "Initialisation", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'trouve', cond: "—", act: `${prefix}tab = [12, 45, 78], ${prefix}cible = 45, ${prefix}trouve = false.`, indexActif: null };
 
           i = 0;
           // Tour 1 : i = 0, tab[0] = 12
-          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 1", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "0 < 3 (Vrai)", act: "0 < 3 est VRAI -> test premier élément." };
-          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test élément 0", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "12 === 45 (Faux)", act: "tab[0] (12) === 45 est FAUX ! Règle d'or : pas de return false dans le else !" };
+          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 1", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "0 < 3 (Vrai)", act: "0 < 3 est VRAI -> inspection de tab[0].", indexActif: 0 };
+          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test élément 0", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "12 === 45 (Faux)", act: "tab[0] (12) === 45 est FAUX ! Règle d'or : pas de return false dans le else !", indexActif: 0 };
           i++;
-          yield { noeud: "noeud-incr", ligneSvg: "ligne-test-faux", ligne: 4 + lOffset, statut: "Incrément", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'i', cond: "—", act: `On continue : ${prefix}i passe à 1.` };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: "Remontée vers le test." };
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-test-faux", ligne: 4 + lOffset, statut: "Incrément", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'i', cond: "—", act: `On continue : ${prefix}i passe à 1.`, indexActif: null };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4 + lOffset, statut: "Bouclage", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: "Remontée vers le test de boucle.", indexActif: null };
 
           // Tour 2 : i = 1, tab[1] = 45
-          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 2", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> test deuxième élément." };
-          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test élément 1", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "45 === 45 (VRAI)", act: "tab[1] (45) === 45 est VRAI ! Élément trouvé !" };
+          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4 + lOffset, statut: "Tour 2", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> inspection de tab[1].", indexActif: 1 };
+          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5 + lOffset, statut: "Test élément 1", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "45 === 45 (VRAI)", act: "tab[1] (45) === 45 est VRAI ! Élément trouvé !", indexActif: 1, indexTrouve: 1 };
           trouve = true;
-          yield { noeud: "noeud-trouve-vrai", ligneSvg: "ligne-test-trouve", ligne: 6 + lOffset, statut: "Succès & Break", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'trouve', cond: "—", act: `${prefix}trouve = true. Instruction break : sortie immédiate de la boucle.` };
+          yield { noeud: "noeud-trouve-vrai", ligneSvg: "ligne-test-trouve", ligne: 6 + lOffset, statut: "Succès & Break", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, mod: prefix + 'trouve', cond: "—", act: `${prefix}trouve = true. Instruction break : sortie immédiate de la boucle.`, indexActif: 1, indexTrouve: 1 };
 
-          yield { noeud: "noeud-sortie", ligneSvg: "ligne-trouve-break", ligne: 10 + lOffset, statut: "Sortie E/S", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: (lang === "php" ? "Affichage final : echo 'Trouvé'." : "Affichage final : console.log(true).") };
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 10 + lOffset, statut: "Terminé", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: "Fin de la recherche.", termine: true };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-trouve-break", ligne: 10 + lOffset, statut: "Sortie E/S", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", sortie: (lang === "php" ? "Résultat : Trouvé" : "Résultat : true"), act: (lang === "php" ? 'Affichage : echo "Résultat : Trouvé".' : "Affichage : console.log('Résultat :', true)."), indexActif: null, indexTrouve: 1 };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 10 + lOffset, statut: "Terminé", vars: { [prefix + 'cible']: cible, [prefix + 'trouve']: trouve, [prefix + 'i']: i }, cond: "—", act: "Fin de la recherche séquentielle.", termine: true, indexActif: null, indexTrouve: 1 };
         }
       },
 
@@ -1684,8 +1859,8 @@
           ]
         },
         variables: {
-          js: ["x", "n", "res", "y"],
-          php: ["$x", "$n", "$res", "$y"]
+          js: ["x", "y", "n (local)", "res (local)"],
+          php: ["$x", "$y", "$n (local)", "$res (local)"]
         },
         noeuds: ["noeud-debut", "noeud-init-x", "noeud-appel", "noeud-fn-entree", "noeud-fn-calc", "noeud-fn-ret", "noeud-aff-y", "noeud-sortie", "noeud-fin"],
         lignes: ["ligne-debut-x", "ligne-x-appel", "ligne-saut-fn", "ligne-fn-entree-calc", "ligne-fn-calc-ret", "ligne-retour-fn", "ligne-y-sortie", "ligne-sortie-fin"],
@@ -1780,7 +1955,7 @@
           </svg>
         `},
         generateur: function* (lang) {
-          let x = undefined, n = undefined, res = undefined, y = undefined;
+          let x = undefined, y = undefined;
           const prefix = lang === "php" ? "$" : "";
           const lInit = lang === "php" ? 9 : 6;
           const lAppel = lang === "php" ? 10 : 7;
@@ -1789,32 +1964,32 @@
           const lFnRet = lang === "php" ? 6 : 3;
           const lSortie = lang === "php" ? 11 : 8;
 
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, act: "Début du programme principal." };
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, cond: "—", act: "Début du programme principal. Portée globale active.", pileAppels: ["Programme principal"] };
 
           x = 5;
-          yield { noeud: "noeud-init-x", ligneSvg: "ligne-debut-x", ligne: lInit, statut: "Affectation", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, mod: prefix + 'x', cond: "—", act: `Programme principal : ${prefix}x = 5.` };
+          yield { noeud: "noeud-init-x", ligneSvg: "ligne-debut-x", ligne: lInit, statut: "Affectation", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, mod: prefix + 'x', cond: "—", act: `Programme principal : ${prefix}x = 5.`, pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-appel", ligneSvg: "ligne-x-appel", ligne: lAppel, statut: "Appel fonction", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, cond: "—", act: `Appel doubler(${prefix}x). Symbole double barre ISO 5807.` };
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-x-appel", ligne: lAppel, statut: "Appel fonction", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, cond: "—", act: `Appel doubler(${prefix}x). Empilement d'un nouveau cadre local sur la pile d'appels !`, pileAppels: ["Programme principal", `doubler(${prefix}n=5)`] };
 
-          n = 5;
-          yield { noeud: "noeud-fn-entree", ligneSvg: "ligne-saut-fn", ligne: lFnEntree, statut: "Entrée fonction", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, mod: prefix + 'n', cond: "—", act: `Entrée dans doubler : le paramètre ${prefix}n reçoit 5.` };
+          let n = 5;
+          yield { noeud: "noeud-fn-entree", ligneSvg: "ligne-saut-fn", ligne: lFnEntree, statut: "Cadre local", vars: { [prefix + 'x']: x, [prefix + 'y']: y, [prefix + 'n (local)']: n }, mod: prefix + 'n (local)', cond: "—", act: `Entrée dans doubler() : paramètre local ${prefix}n initialisé à 5.`, porteeLocale: { [prefix + 'n']: n }, pileAppels: ["Programme principal", `doubler(${prefix}n=5)`] };
 
-          res = n * 2;
-          yield { noeud: "noeud-fn-calc", ligneSvg: "ligne-fn-entree-calc", ligne: lFnCalc, statut: "Calcul fonction", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, mod: prefix + 'res', cond: "—", act: `Calcul : ${prefix}res = 5 * 2 = 10.` };
+          let res = n * 2;
+          yield { noeud: "noeud-fn-calc", ligneSvg: "ligne-fn-entree-calc", ligne: lFnCalc, statut: "Calcul local", vars: { [prefix + 'x']: x, [prefix + 'y']: y, [prefix + 'n (local)']: n, [prefix + 'res (local)']: res }, mod: prefix + 'res (local)', cond: "—", act: `Calcul dans la fonction : variable locale ${prefix}res = 10.`, porteeLocale: { [prefix + 'n']: n, [prefix + 'res']: res }, pileAppels: ["Programme principal", `doubler(${prefix}n=5)`] };
 
-          yield { noeud: "noeud-fn-ret", ligneSvg: "ligne-fn-calc-ret", ligne: lFnRet, statut: "Return", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, cond: "—", act: `return ${prefix}res (10) renvoyé au programme appelant.` };
+          yield { noeud: "noeud-fn-ret", ligneSvg: "ligne-fn-calc-ret", ligne: lFnRet, statut: "Return", vars: { [prefix + 'x']: x, [prefix + 'y']: y, [prefix + 'n (local)']: n, [prefix + 'res (local)']: res }, cond: "—", act: `Instruction return : la valeur 10 est renvoyée au programme appelant.`, sortie: "10", porteeLocale: { [prefix + 'n']: n, [prefix + 'res']: res }, pileAppels: ["Programme principal", `doubler(${prefix}n=5)`] };
 
           y = res;
-          yield { noeud: "noeud-aff-y", ligneSvg: "ligne-retour-fn", ligne: lAppel, statut: "Retour appelant", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, mod: prefix + 'y', cond: "—", act: `${prefix}y reçoit la valeur de retour (10).` };
+          yield { noeud: "noeud-aff-y", ligneSvg: "ligne-retour-fn", ligne: lAppel, statut: "Retour appelant", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, mod: prefix + 'y', cond: "—", act: `Cadre local dépilé et détruit ! ${prefix}n et ${prefix}res n'existent plus. ${prefix}y reçoit 10.`, pileAppels: ["Programme principal"] };
 
-          yield { noeud: "noeud-sortie", ligneSvg: "ligne-y-sortie", ligne: lSortie, statut: "Sortie E/S", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, cond: "—", act: `Parallélogramme E/S : ${lang === "php" ? "echo" : "console.log"} affiche 10.` };
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: lSortie, statut: "Terminé", vars: { [prefix + 'x']: x, [prefix + 'n']: n, [prefix + 'res']: res, [prefix + 'y']: y }, cond: "—", act: "Fin de l'exécution.", termine: true };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-y-sortie", ligne: lSortie, statut: "Sortie E/S", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, cond: "—", sortie: "Résultat : 10", act: `Parallélogramme E/S : ${lang === "php" ? 'echo "Résultat : $y"' : 'console.log("Résultat :", y)'} affiche 10.`, pileAppels: ["Programme principal"] };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: lSortie, statut: "Terminé", vars: { [prefix + 'x']: x, [prefix + 'y']: y }, cond: "—", act: "Fin de l'exécution du programme.", termine: true, pileAppels: ["Programme principal"] };
         }
       }
     };
 
     // -------------------------------------------------------------
-    // CONTRÔLEUR D'INTERFACE ET GESTION DES CYCLES DE VIE
+    // CONTRÔLEUR D'INTERFACE ET GESTION DES CYCLES DE VIE (JS & PHP 8+)
     // -------------------------------------------------------------
     const tabsExemples = document.querySelectorAll(".tab-exemple");
     const btnsLang = document.querySelectorAll(".btn-lang");
@@ -1825,29 +2000,91 @@
     const badgeStatut = document.getElementById("badge-statut");
     const messageAction = document.getElementById("message-action");
     const corpsTableTrace = document.getElementById("corps-table-trace");
+    const theadTableTrace = document.querySelector(".table-trace thead");
 
+    // Contrôles
+    const btnPrecedent = document.getElementById("btn-precedent");
     const btnSuivant = document.getElementById("btn-suivant");
     const btnAuto = document.getElementById("btn-auto");
     const btnReset = document.getElementById("btn-reset");
+    const curseurVitesse = document.getElementById("curseur-vitesse");
+    const labelVitesse = document.getElementById("label-vitesse");
+    const btnToggleOrg = document.getElementById("btn-toggle-org");
 
-    function determinerType(val) {
-      if (val === undefined) return "undefined";
-      if (val === null) return "null";
-      if (typeof val === "boolean") return "boolean";
-      if (typeof val === "number") return "int / float";
-      if (typeof val === "string") return "string";
-      if (Array.isArray(val)) return "array";
-      return typeof val;
+    // Zone Tableau
+    const zoneTableau = document.getElementById("zone-tableau");
+    const casesTableau = document.getElementById("cases-tableau");
+    const nomTableau = document.getElementById("nom-tableau");
+    const infoTableau = document.getElementById("info-tableau");
+
+    let organiseurMasque = false;
+
+    // Détermination stricte du type selon le langage
+    function determinerType(val, lang = "js") {
+      if (lang === "js") {
+        if (val === undefined) return "undefined";
+        if (val === null) return "null";
+        if (typeof val === "boolean") return "boolean";
+        if (typeof val === "number") return "number";
+        if (typeof val === "string") return "string";
+        if (Array.isArray(val)) return "Array";
+        return typeof val;
+      } else {
+        // En PHP 8+ : pas d'undefined (soit non initialisée, soit null), et int/float distincts
+        if (val === undefined) return "non initialisée";
+        if (val === null) return "null";
+        if (typeof val === "boolean") return "bool";
+        if (typeof val === "number") return Number.isInteger(val) ? "int" : "float";
+        if (typeof val === "string") return "string";
+        if (Array.isArray(val)) return "array";
+        return typeof val;
+      }
     }
 
-    function formaterValeur(val) {
-      if (val === undefined) return "undefined";
+    // Formatage strict de la valeur selon le langage
+    function formaterValeur(val, lang = "js") {
+      if (val === undefined) return lang === "php" ? "non init." : "undefined";
       if (val === null) return "null";
+      if (typeof val === "boolean") {
+        if (lang === "php") return val ? "true (echo: 1)" : 'false (echo: "")';
+        return String(val);
+      }
       if (typeof val === "string") return `"${val}"`;
+      if (Array.isArray(val)) return `[${val.join(", ")}]`;
       return String(val);
     }
 
-    function chargerExemple(id, lang = langueActive) {
+    // Basculer l'affichage de l'organigramme (mode repliable)
+    if (btnToggleOrg) {
+      btnToggleOrg.addEventListener("click", () => {
+        organiseurMasque = !organiseurMasque;
+        conteneurSvg.style.display = organiseurMasque ? "none" : "flex";
+        btnToggleOrg.textContent = organiseurMasque ? "Afficher l'organigramme" : "Masquer l'organigramme";
+      });
+    }
+
+    // Gestion de la vitesse dynamique
+    if (curseurVitesse && labelVitesse) {
+      curseurVitesse.addEventListener("input", () => {
+        labelVitesse.textContent = curseurVitesse.value + "ms";
+        if (minuteurAuto) {
+          clearInterval(minuteurAuto);
+          minuteurAuto = setInterval(executerProchaineLigneAuto, parseInt(curseurVitesse.value, 10));
+        }
+      });
+    }
+
+    function executerProchaineLigneAuto() {
+      if (btnSuivant.disabled) {
+        clearInterval(minuteurAuto);
+        minuteurAuto = null;
+        btnAuto.textContent = "Lecture auto";
+      } else {
+        executerEtape();
+      }
+    }
+
+    function chargerExemple(id, lang = langueActive, etapeCible = 0) {
       if (minuteurAuto) {
         clearInterval(minuteurAuto);
         minuteurAuto = null;
@@ -1871,54 +2108,171 @@
       // 3. Titre
       titreOrg.textContent = typeof ex.titre === "object" ? ex.titre[lang] : ex.titre;
 
-      // 4. Charger le code dans l'éditeur
+      // 4. Charger le code dans l'éditeur (avec textContent pour ne pas avaler <?php !)
       const lignesCode = ex.code[lang];
       zonesCode.innerHTML = "";
       lignesCode.forEach((ligne, idx) => {
         const div = document.createElement("div");
         div.className = "ligne-code";
         div.dataset.ligne = String(idx + 1);
-        div.innerHTML = `<span class="num-ligne">${idx + 1}</span><span class="texte-code">${ligne}</span>`;
+
+        const spanNum = document.createElement("span");
+        spanNum.className = "num-ligne";
+        spanNum.textContent = String(idx + 1);
+
+        const spanTexte = document.createElement("span");
+        spanTexte.className = "texte-code";
+        spanTexte.textContent = ligne;
+
+        div.appendChild(spanNum);
+        div.appendChild(spanTexte);
         zonesCode.appendChild(div);
       });
 
       // 5. Charger l'organigramme SVG adapté au langage
       conteneurSvg.innerHTML = ex.svg(lang);
 
-      // 6. Charger la barre des variables (avec prefix $ si PHP)
+      // 6. Tableau en mémoire (Recherche ou Accumulation)
+      if (ex.tableau && zoneTableau && casesTableau) {
+        zoneTableau.style.display = "flex";
+        nomTableau.textContent = typeof ex.nomTableau === "object" ? ex.nomTableau[lang] : (lang === "php" ? "$tab" : "tab");
+        infoTableau.textContent = ex.tableau.length + " éléments";
+        casesTableau.innerHTML = "";
+        ex.tableau.forEach((val, idx) => {
+          const c = document.createElement("div");
+          c.className = "cellule-tab";
+          c.id = `cell-tab-${idx}`;
+          c.innerHTML = `
+            <span class="val-tab">${val}</span>
+            <span class="idx-tab">[${idx}]</span>
+          `;
+          casesTableau.appendChild(c);
+        });
+      } else if (zoneTableau) {
+        zoneTableau.style.display = "none";
+      }
+
+      // 7. Charger l'inspecteur de variables (avec distinction de portée / pile d'appels)
       barreVars.innerHTML = "";
       const listeVars = ex.variables[lang];
-      listeVars.forEach(v => {
-        const box = document.createElement("div");
-        box.className = "case-variable";
-        box.id = `case-var-${v}`;
-        box.innerHTML = `
-          <div class="entete-var">
-            <span class="nom-var">${v}</span>
-            <span class="type-var" id="type-var-${v}">undefined</span>
-          </div>
-          <span class="valeur-var val-undefined" id="val-var-${v}">undefined</span>
-        `;
-        barreVars.appendChild(box);
-      });
 
-      // 7. Vider la table de trace
+      if (id === "fonction") {
+        // Cadre global
+        const cadreGlobal = document.createElement("div");
+        cadreGlobal.className = "cadre-portee";
+        cadreGlobal.id = "cadre-global";
+        cadreGlobal.innerHTML = `
+          <div class="titre-portee">
+            <span>Portée globale (Programme principal)</span>
+            <span style="font-size: 10px; color: #64748b;">Pile : #1</span>
+          </div>
+          <div class="vars-portee" id="vars-globales"></div>
+        `;
+        barreVars.appendChild(cadreGlobal);
+
+        // Cadre local (doubler)
+        const cadreLocal = document.createElement("div");
+        cadreLocal.className = "cadre-portee locale";
+        cadreLocal.id = "cadre-local-doubler";
+        cadreLocal.style.display = "none";
+        cadreLocal.innerHTML = `
+          <div class="titre-portee">
+            <span>Pile d'appels : Cadre local doubler()</span>
+            <span style="font-size: 10px; color: #7c3aed; font-weight: bold;">Pile : #2</span>
+          </div>
+          <div class="vars-portee" id="vars-locales"></div>
+        `;
+        barreVars.appendChild(cadreLocal);
+
+        const zoneG = cadreGlobal.querySelector("#vars-globales");
+        const zoneL = cadreLocal.querySelector("#vars-locales");
+
+        listeVars.forEach(v => {
+          const box = document.createElement("div");
+          box.className = "case-variable";
+          box.id = `case-var-${v}`;
+          box.innerHTML = `
+            <div class="entete-var">
+              <span class="nom-var">${v}</span>
+              <span class="type-var" id="type-var-${v}">${lang === "php" ? "non initialisée" : "undefined"}</span>
+            </div>
+            <span class="valeur-var val-undefined" id="val-var-${v}">${lang === "php" ? "non init." : "undefined"}</span>
+          `;
+          if (v.includes("local")) {
+            zoneL.appendChild(box);
+          } else {
+            zoneG.appendChild(box);
+          }
+        });
+      } else {
+        listeVars.forEach(v => {
+          const box = document.createElement("div");
+          box.className = "case-variable";
+          box.id = `case-var-${v}`;
+          box.innerHTML = `
+            <div class="entete-var">
+              <span class="nom-var">${v}</span>
+              <span class="type-var" id="type-var-${v}">${lang === "php" ? "non initialisée" : "undefined"}</span>
+            </div>
+            <span class="valeur-var val-undefined" id="val-var-${v}">${lang === "php" ? "non init." : "undefined"}</span>
+          `;
+          barreVars.appendChild(box);
+        });
+      }
+
+      // 8. Générer les colonnes dédiées de la Table de trace (Format universitaire R1.12)
+      if (theadTableTrace) {
+        let theadHtml = `
+          <tr>
+            <th style="width: 45px;">Étape</th>
+            <th style="width: 45px;">Ligne</th>
+            <th style="width: 85px;">Nœud ISO</th>
+            <th style="min-width: 90px;">Condition</th>
+        `;
+        listeVars.forEach(v => {
+          theadHtml += `<th class="th-variable">${v}</th>`;
+        });
+        theadHtml += `
+            <th style="min-width: 80px;">Sortie</th>
+            <th>Action / Effet</th>
+          </tr>
+        `;
+        theadTableTrace.innerHTML = theadHtml;
+      }
+
+      // 9. Vider le corps de la table de trace
       corpsTableTrace.innerHTML = "";
 
-      // 8. Générateur
+      // 10. Initialiser le générateur
       generateur = ex.generateur(lang);
       etapeNum = 0;
 
       badgeStatut.textContent = "Prêt (" + lang.toUpperCase() + ")";
       badgeStatut.classList.remove("actif", "termine");
-      messageAction.textContent = "Clique sur « Ligne suivante » pour démarrer l'exécution.";
+      messageAction.textContent = "Clique sur « Ligne suivante » ou « Lecture auto » pour exécuter le programme.";
 
+      btnPrecedent.disabled = true;
       btnSuivant.disabled = false;
       btnAuto.disabled = false;
+
+      // Si on a demandé de rejouer jusqu'à une étape précise (ex: changement de langue en cours)
+      if (etapeCible > 0) {
+        for (let s = 0; s < etapeCible; s++) {
+          if (!btnSuivant.disabled) {
+            executerEtape();
+          }
+        }
+      }
     }
 
     function reinitialiser() {
-      chargerExemple(exempleActifId, langueActive);
+      chargerExemple(exempleActifId, langueActive, 0);
+    }
+
+    // Aller en arrière d'une étape (Pas précédent)
+    function allerAEtape(target) {
+      if (target < 0) target = 0;
+      chargerExemple(exempleActifId, langueActive, target);
     }
 
     function executerEtape() {
@@ -1937,6 +2291,7 @@
       }
 
       etapeNum++;
+      btnPrecedent.disabled = (etapeNum <= 1);
 
       // 1. Surlignage de la ligne de code active
       const lignesEl = zonesCode.querySelectorAll(".ligne-code");
@@ -1980,7 +2335,7 @@
           if (l) l.classList.remove("actif");
         });
         if (etape.ligneSvg === "ligne-cond-sortie" || etape.ligneSvg === "ligne-cond-fin") {
-          const lf = document.getElementById("label-faux") || document.getElementById("label-faux1");
+          const lf = document.getElementById("label-faux") || document.getElementById("label-faux1") || document.getElementById("label-for-faux");
           if (lf) lf.classList.add("actif");
         }
         if (etape.ligneSvg === "ligne-cond-corps" || etape.ligneSvg === "ligne-cond-vrai" || etape.ligneSvg === "ligne-test-trouve") {
@@ -1989,19 +2344,45 @@
         }
       }
 
-      // 4. Variables
-      let resumeVariables = [];
+      // 4. Surbrillance dans le tableau en mémoire
+      if (ex.tableau && casesTableau) {
+        const cells = casesTableau.querySelectorAll(".cellule-tab");
+        cells.forEach((c, idx) => {
+          c.classList.remove("active");
+          if (etape.indexActif !== undefined && etape.indexActif === idx) {
+            c.classList.add("active");
+          }
+          if (etape.indexTrouve !== undefined && etape.indexTrouve === idx) {
+            c.classList.add("trouvee");
+          }
+        });
+      }
+
+      // 5. Cadre local de la fonction (Call Stack)
+      const cadreLocal = document.getElementById("cadre-local-doubler");
+      if (cadreLocal) {
+        if (etape.porteeLocale) {
+          cadreLocal.style.display = "flex";
+        } else if (etapeNum > 6) {
+          // Si on est revenu dans l'appelant après le return
+          cadreLocal.style.display = "none";
+        }
+      }
+
+      // 6. Variables dynamiques
+      const listeVars = ex.variables[langueActive];
       if (etape.vars) {
-        Object.entries(etape.vars).forEach(([cle, val]) => {
+        listeVars.forEach(cle => {
+          const val = etape.vars[cle];
           const valEl = document.getElementById(`val-var-${cle}`);
           const typeEl = document.getElementById(`type-var-${cle}`);
           const boxEl = document.getElementById(`case-var-${cle}`);
 
-          const t = determinerType(val);
+          const t = determinerType(val, langueActive);
           if (typeEl) typeEl.textContent = t;
 
           if (valEl) {
-            valEl.textContent = formaterValeur(val);
+            valEl.textContent = formaterValeur(val, langueActive);
             valEl.className = "valeur-var";
             if (val === null) valEl.classList.add("val-null");
             else if (val === undefined) valEl.classList.add("val-undefined");
@@ -2010,35 +2391,49 @@
           if (boxEl) {
             boxEl.classList.toggle("modifiee", etape.mod === cle);
           }
-
-          if (val !== undefined) {
-            resumeVariables.push(`${cle}=${formaterValeur(val)}`);
-          }
         });
       }
 
-      // 5. Statut et action
+      // 7. Statut et action
       badgeStatut.textContent = `${etape.statut} (${etapeNum})`;
       badgeStatut.classList.add("actif");
       messageAction.textContent = etape.act;
 
-      // 6. Ajout dans la Table de trace manuelle (Norme R1.12)
+      // 8. Ajout d'une ligne dans la Table de trace manuelle (Format R1.12 en colonnes)
       const tr = document.createElement("tr");
       tr.className = "active";
       corpsTableTrace.querySelectorAll("tr").forEach(r => r.classList.remove("active"));
 
       const noeudTexte = etape.noeud ? etape.noeud.replace("noeud-", "") : "flux";
       const condTexte = etape.cond || "—";
-      const varsTexte = resumeVariables.length ? resumeVariables.join(", ") : "—";
+      const sortieTexte = etape.sortie || "—";
 
-      tr.innerHTML = `
+      let trHtml = `
         <td><strong>#${etapeNum}</strong></td>
         <td>${etape.ligne !== null ? 'L' + etape.ligne : '—'}</td>
         <td><code>${noeudTexte}</code></td>
         <td>${condTexte}</td>
-        <td>${varsTexte}</td>
+      `;
+
+      // Cellule dédiée pour chaque variable
+      listeVars.forEach(v => {
+        if (etape.vars && v in etape.vars && etape.vars[v] !== undefined) {
+          const estMod = etape.mod === v;
+          trHtml += `<td class="td-valeur-var ${estMod ? 'var-modifiee' : ''}">${formaterValeur(etape.vars[v], langueActive)}</td>`;
+        } else if (etape.vars && v in etape.vars && etape.vars[v] === undefined) {
+          trHtml += `<td class="td-valeur-var var-vide">${langueActive === "php" ? "non init." : "undefined"}</td>`;
+        } else {
+          // Variable non déclarée / hors de portée (ex: locale après retour de fonction)
+          trHtml += `<td class="td-valeur-var var-vide">—</td>`;
+        }
+      });
+
+      trHtml += `
+        <td>${sortieTexte}</td>
         <td>${etape.act}</td>
       `;
+
+      tr.innerHTML = trHtml;
       corpsTableTrace.appendChild(tr);
 
       const scrollParent = corpsTableTrace.closest(".table-scroll");
@@ -2063,14 +2458,21 @@
     // Événements
     tabsExemples.forEach(tab => {
       tab.addEventListener("click", () => {
-        chargerExemple(tab.dataset.id, langueActive);
+        chargerExemple(tab.dataset.id, langueActive, 0);
       });
     });
 
+    // Basculer la langue en conservant la progression
     btnsLang.forEach(btn => {
       btn.addEventListener("click", () => {
-        chargerExemple(exempleActifId, btn.dataset.lang);
+        if (btn.dataset.lang !== langueActive) {
+          chargerExemple(exempleActifId, btn.dataset.lang, etapeNum);
+        }
       });
+    });
+
+    btnPrecedent.addEventListener("click", () => {
+      allerAEtape(etapeNum - 1);
     });
 
     btnSuivant.addEventListener("click", executerEtape);
@@ -2082,22 +2484,15 @@
         btnAuto.textContent = "Lecture auto";
       } else {
         btnAuto.textContent = "Pause";
-        minuteurAuto = setInterval(() => {
-          if (btnSuivant.disabled) {
-            clearInterval(minuteurAuto);
-            minuteurAuto = null;
-            btnAuto.textContent = "Lecture auto";
-          } else {
-            executerEtape();
-          }
-        }, 850);
+        const v = curseurVitesse ? parseInt(curseurVitesse.value, 10) : 800;
+        minuteurAuto = setInterval(executerProchaineLigneAuto, v);
       }
     });
 
     btnReset.addEventListener("click", reinitialiser);
 
     // Initialisation : premier exemple en JS
-    chargerExemple("for", "js");
+    chargerExemple("for", "js", 0);
   </script>
 </body>
 </html>
