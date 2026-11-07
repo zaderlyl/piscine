@@ -52,26 +52,72 @@ Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire
 
 Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directement en JS.
 
-- Variables et types (texte, nombre, booléen)
-- Conditions : `if` et `else`
-- Boucles : `for` et `while`
-- Fonctions : paramètres, retour, portée des variables
-- Tableaux : parcours, ajout, accès par index (tris, filtres et agrégation : voir JS)
-- Objets : clés et valeurs
-- Débogage : poser un point d'arrêt, afficher des valeurs dans la console
+- **Variables et types** : nombres, chaînes de caractères, booléens (`let`, `const`)
+- **Conditions et branchements** : `if`, `else`, `else if`, opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`) et logiques (`&&`, `||`, `!`)
+- **Boucles fondamentales** : boucle `while` (tant que) et boucle `for` (itérations avec compteur)
+- **Fonctions** :
+  - Déclaration et syntaxe
+  - Paramètres d'entrée et arguments
+  - Valeur de retour (`return`)
+  - Portée des variables (portée de bloc, variables locales vs globales)
+  - Fonctions pures et effets de bord
+- **Structures de données fondamentales** :
+  - Tableaux : création, indexation `[0]`, `.length`, ajout `.push()`
+  - Parcours de tableau : boucles, accumulation de valeurs
+  - Objets : paires clé-valeur, lecture et assignation de propriétés
+- **Débogage et observation** :
+  - Organigrammes algorithmiques (norme ISO : début, action, losange de condition, bouclage)
+  - Tables de trace manuelle (valeurs des variables à chaque tour)
+  - Points d'arrêt et `console.log`
 
 Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
 
 ## 4. JavaScript
 
-- **Bases** : variables, opérateurs, conditions, boucles, fonctions (voir algorithmique)
-- **DOM** : sélectionner, créer, modifier des éléments et leurs attributs (R3.12)
-- **Événements** : clic, saisie, soumission de formulaire (R3.12)
-- **Tableaux avancés** : tris, filtres, agrégation (R3.12)
-- **Objets et classes** : conception objet, hiérarchies (R3.12)
-- **Échanges de données** : `fetch`, JSON (R2.13, R2.14)
-- **Bibliothèques** : Alpine.js (interactivité), Chart.js (graphiques), Phaser (jeux), SVG (R3.12)
-- **Validation côté client** : avant l'envoi d'un formulaire
+Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-ressources progressives selon le référentiel :
+
+### 4.1. JS Vanilla — DOM et Événements (R3.12)
+- **Sélection d'éléments** : `document.querySelector()`, `document.querySelectorAll()`
+- **Modification du DOM** : `.textContent`, `.innerHTML`, `.setAttribute()`, attributs de style
+- **Classes CSS dynamiques** : `.classList.add()`, `.classList.remove()`, `.classList.toggle()`
+- **Écouteurs d'événements** : `addEventListener()`, gestion des clics, saisies (`input`), survols (`mouseover`)
+- **Gestion des formulaires** : validation avant envoi, interception de l'événement `submit`, `preventDefault()`
+
+### 4.2. JS Vanilla — Programmation fonctionnelle, Objets et Asynchronisme (R2.13, R3.12)
+- **Méthodes avancées de tableaux** : `.forEach()`, `.map()`, `.filter()`, `.reduce()`, `.find()`, `.sort()`
+- **Fonctions modernes** : fonctions fléchées (`=>`), paramètres par défaut, déstructuration d'objets et de tableaux
+- **Conception objet et classes** : syntaxe `class`, constructeur `constructor`, méthodes, héritage avec `extends`
+- **Asynchronisme et API** : promesses, syntaxe `async / await`, requêtes réseau avec `fetch()`, manipulation du format JSON
+
+### 4.3. Graphisme 2D avec l'API Canvas (R3.12)
+- Balise `<canvas>` et obtention du contexte 2D (`getContext("2d")`)
+- Formes géométriques de base : rectangles (`fillRect`, `strokeRect`), tracés vectoriels (`beginPath`, `moveTo`, `lineTo`, `arc`)
+- Couleurs, contours, opacité et dégradés
+- Textes et affichage d'images dans le canvas
+- Boucle d'animation fluide avec `requestAnimationFrame()` (gestion du delta time et effacement avec `clearRect`)
+- Détection de collisions simples (boîtes englobantes AABB) et interactions souris/clavier sur canvas
+
+### 4.4. Moteur de jeu 2D avec Phaser (R3.12 et projets)
+- Initialisation et configuration d'une instance `Phaser.Game`
+- Architecture des scènes Phaser et cycle de vie : `preload()`, `create()`, `update()`
+- Chargement d'assets : images, feuilles de sprites (`spritesheets`), sons
+- Physique Arcade : vélocité, gravité, rebonds, limites de monde (`collideWorldBounds`)
+- Gestion des collisions : `physics.add.collider()`, `physics.add.overlap()`
+- Contrôles au clavier : gestion des flèches et de la touche saut
+- Gestion d'état de jeu : collecte d'objets, score à l'écran, vies, défaite/victoire
+
+### 4.5. Interactivité déclarative avec Alpine.js (R3.12)
+- Intégration légère sans bundler
+- Directives d'état : `x-data`, `x-text`, `x-html`, `x-bind`
+- Gestion des événements et interactions : `x-on:click` (`@click`), `x-show`, `x-if`
+- Répétition déclarative de listes : `x-for`
+- Transitions et animations : `x-transition`
+
+### 4.6. Visualisation de données avec Chart.js (R3.12)
+- Rendu de graphiques sur Canvas
+- Types de graphiques : barres (`bar`), lignes (`line`), camemberts (`pie`, `doughnut`)
+- Paramétrage des séries de données (`datasets`), axes, légendes et tooltips
+- Mise à jour dynamique des données en temps réel
 
 C'est à cette étape que la visualisation de la logique (variables, boucles, fonctions) a le plus de sens : voir [visualisation-logique.md](visualisation-logique.md).
 

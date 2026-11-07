@@ -331,6 +331,7 @@
       <button type="button" class="tab-exemple" data-id="while">2. Boucle while</button>
       <button type="button" class="tab-exemple" data-id="ifelse">3. Condition if / else</button>
       <button type="button" class="tab-exemple" data-id="syracuse">4. Syracuse (while + if)</button>
+      <button type="button" class="tab-exemple" data-id="fonction">5. Fonction (appel & return)</button>
     </nav>
 
     <div id="commandes-pas">
@@ -851,6 +852,125 @@
           // Tour 3 : n = 1 -> FIN
           yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Test 1 vaut 1 ?", vars: { n }, act: "Test : n vaut 1 ? OUI ! On bifurque vers Fin." };
           yield { noeud: "noeud-fin", ligneSvg: "ligne-cond1-fin", ligne: 9, statut: "Terminé", vars: { n }, act: "Objectif atteint : n = 1. Algorithme terminé !", termine: true };
+        }
+      },
+
+      // EXEMPLE 5 : FONCTION (APPEL ET RETURN)
+      fonction: {
+        titre: "Organigramme : Fonction (appel & return)",
+        code: [
+          "function doubler(n) {",
+          "  let res = n * 2;",
+          "  return res;",
+          "}",
+          "",
+          "let x = 5;",
+          "let y = doubler(x);",
+          "console.log(y);"
+        ],
+        variables: ["x", "n", "res", "y"],
+        noeuds: ["noeud-debut", "noeud-init-x", "noeud-appel", "noeud-fn-entree", "noeud-fn-calc", "noeud-fn-ret", "noeud-aff-y", "noeud-fin"],
+        lignes: ["ligne-debut-x", "ligne-x-appel", "ligne-saut-fn", "ligne-fn-entree-calc", "ligne-fn-calc-ret", "ligne-retour-fn", "ligne-y-fin"],
+        labels: [],
+        svg: `
+          <svg class="organigramme" viewBox="0 0 380 520">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
+              </marker>
+            </defs>
+
+            <!-- CADRE DU SOUS-PROGRAMME (FONCTION DOUBLER) -->
+            <rect x="200" y="140" width="170" height="230" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="4,4" stroke-width="1.5" />
+            <text x="285" y="160" font-family="sans-serif" font-size="11px" font-weight="bold" fill="#64748b" text-anchor="middle">Fonction doubler(n)</text>
+
+            <!-- PROGRAMME PRINCIPAL (A GAUCHE) -->
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="35" y="15" width="110" height="38" rx="8" />
+              <text class="texte-noeud" x="90" y="34">Début</text>
+            </g>
+
+            <line id="ligne-debut-x" class="ligne-flux" x1="90" y1="53" x2="90" y2="85" marker-end="url(#fleche)" />
+
+            <g id="noeud-init-x" class="noeud">
+              <rect class="forme-noeud" x="25" y="85" width="130" height="38" rx="3" />
+              <text class="texte-noeud" x="90" y="104">x &larr; 5</text>
+            </g>
+
+            <line id="ligne-x-appel" class="ligne-flux" x1="90" y1="123" x2="90" y2="160" marker-end="url(#fleche)" />
+
+            <!-- Nœud d'appel de fonction (double barre latérale standard ISO) -->
+            <g id="noeud-appel" class="noeud">
+              <rect class="forme-noeud" x="15" y="160" width="150" height="42" rx="3" />
+              <line x1="27" y1="160" x2="27" y2="202" stroke="#222" stroke-width="1.5" />
+              <line x1="153" y1="160" x2="153" y2="202" stroke="#222" stroke-width="1.5" />
+              <text class="texte-noeud" x="90" y="181">doubler(x)</text>
+            </g>
+
+            <!-- Flèche de saut vers la fonction -->
+            <path id="ligne-saut-fn" class="ligne-flux" stroke-dasharray="3,3" d="M 165 181 H 215" marker-end="url(#fleche)" />
+
+            <!-- SOUS-PROGRAMME DOUBLER -->
+            <g id="noeud-fn-entree" class="noeud">
+              <rect class="forme-noeud" x="215" y="180" width="140" height="38" rx="8" />
+              <text class="texte-noeud" x="285" y="199">n &larr; x (5)</text>
+            </g>
+
+            <line id="ligne-fn-entree-calc" class="ligne-flux" x1="285" y1="218" x2="285" y2="250" marker-end="url(#fleche)" />
+
+            <g id="noeud-fn-calc" class="noeud">
+              <rect class="forme-noeud" x="215" y="250" width="140" height="40" rx="3" />
+              <text class="texte-noeud" x="285" y="270">res &larr; n * 2</text>
+            </g>
+
+            <line id="ligne-fn-calc-ret" class="ligne-flux" x1="285" y1="290" x2="285" y2="320" marker-end="url(#fleche)" />
+
+            <g id="noeud-fn-ret" class="noeud">
+              <rect class="forme-noeud" x="215" y="320" width="140" height="38" rx="8" />
+              <text class="texte-noeud" x="285" y="339">return res</text>
+            </g>
+
+            <!-- Flèche de retour du sous-programme vers le programme principal -->
+            <path id="ligne-retour-fn" class="ligne-flux" stroke-dasharray="3,3" d="M 215 339 H 90 V 380" marker-end="url(#fleche)" />
+
+            <!-- RETOUR DANS LE PROGRAMME PRINCIPAL -->
+            <g id="noeud-aff-y" class="noeud">
+              <rect class="forme-noeud" x="20" y="380" width="140" height="42" rx="3" />
+              <text class="texte-noeud" x="90" y="401">y &larr; retour (10)</text>
+            </g>
+
+            <line id="ligne-y-fin" class="ligne-flux" x1="90" y1="422" x2="90" y2="460" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="35" y="460" width="110" height="38" rx="8" />
+              <text class="texte-noeud" x="90" y="479">Fin</text>
+            </g>
+          </svg>
+        `,
+        generateur: function* () {
+          let x = undefined, n = undefined, res = undefined, y = undefined;
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { x, n, res, y }, act: "Début du programme principal." };
+
+          x = 5;
+          yield { noeud: "noeud-init-x", ligneSvg: "ligne-debut-x", ligne: 6, statut: "Ligne 6", vars: { x, n, res, y }, mod: "x", act: "Affectation dans le programme principal : x = 5." };
+
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-x-appel", ligne: 7, statut: "Appel doubler(x)", vars: { x, n, res, y }, act: "Ligne 7 : Appel de la fonction doubler(x). Passage de l'argument x = 5." };
+
+          n = 5;
+          yield { noeud: "noeud-fn-entree", ligneSvg: "ligne-saut-fn", ligne: 1, statut: "Entrée fonction", vars: { x, n, res, y }, mod: "n", act: "Entrée dans la fonction doubler : le paramètre n reçoit la valeur 5." };
+
+          res = n * 2;
+          yield { noeud: "noeud-fn-calc", ligneSvg: "ligne-fn-entree-calc", ligne: 2, statut: "Calcul fonction", vars: { x, n, res, y }, mod: "res", act: "Corps de la fonction : let res = 5 * 2 = 10." };
+
+          yield { noeud: "noeud-fn-ret", ligneSvg: "ligne-fn-calc-ret", ligne: 3, statut: "Return", vars: { x, n, res, y }, act: "Ligne 3 : return res. La fonction renvoie la valeur 10 au programme appelant." };
+
+          y = res;
+          yield { noeud: "noeud-aff-y", ligneSvg: "ligne-retour-fn", ligne: 7, statut: "Retour", vars: { x, n, res, y }, mod: "y", act: "Retour dans le programme principal : la variable y reçoit la valeur de retour (10)." };
+
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-y-fin", ligne: 8, statut: "Terminé", vars: { x, n, res, y }, act: "Ligne 8 : console.log(y). Fin de l'exécution.", termine: true };
         }
       }
     };
