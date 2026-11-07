@@ -48,27 +48,110 @@ Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire
 - Accessibilité : contraste, focus visible, WCAG (R1.11, R3.12)
 - Framework : Bootstrap (README)
 
-## 3. Algorithmique
+## 3. Algorithmique & Résolution de problèmes
 
-Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directement en JS.
+L'algorithmique est abordée immédiatement avant JavaScript, le premier langage qui calcule et prend des décisions. Elle pose les schémas de pensée universels indispensables pour tout le reste du cursus (JS, Canvas 2D, Phaser, PHP et SQL).
 
-- **Variables et types** : nombres, chaînes de caractères, booléens (`let`, `const`)
-- **Conditions et branchements** : `if`, `else`, `else if`, opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`) et logiques (`&&`, `||`, `!`)
-- **Boucles fondamentales** : boucle `while` (tant que) et boucle `for` (itérations avec compteur)
-- **Fonctions** :
-  - Déclaration et syntaxe
-  - Paramètres d'entrée et arguments
-  - Valeur de retour (`return`)
-  - Portée des variables (portée de bloc, variables locales vs globales)
-  - Fonctions pures et effets de bord
-- **Structures de données fondamentales** :
-  - Tableaux : création, indexation `[0]`, `.length`, ajout `.push()`
-  - Parcours de tableau : boucles, accumulation de valeurs
-  - Objets : paires clé-valeur, lecture et assignation de propriétés
-- **Débogage et observation** :
-  - Organigrammes algorithmiques (norme ISO : début, action, losange de condition, bouclage)
-  - Tables de trace manuelle (valeurs des variables à chaque tour)
-  - Points d'arrêt et `console.log`
+Elle s'appuie sur le panneau de visualisation interactive ([visualisation-logique.md](visualisation-logique.md)) pour matérialiser l'exécution pas à pas.
+
+### 3.1. Rôle et approche pédagogique (R1.12)
+- **Choix du formalisme** : éviter la surcharge d'un pseudo-code universitaire artificiel ; les notions sont formalisées avec une syntaxe directe (compatible JavaScript épuré) ou en organigrammes visuels.
+- **Visualisation et trace** : chaque algorithme est couplé à sa représentation graphique (organigramme normalisé ISO 5807) et à sa table de trace (état des variables ligne par ligne).
+
+### 3.2. Types de données, séquences et modèle mémoire
+- **Variables, affectation et interdiction de l'égalité lâche (`==`)** :
+  - Distinction fondamentale entre nom de variable, emplacement mémoire et valeur.
+  - Constantes (`const` par défaut) et variables réassignables (`let`).
+  - Distinction entre l'affectation (`=`) et le test d'égalité.
+  - *Interdiction formelle de l'égalité lâche (`==`)* : la coercition implicite de type de l'opérateur `==` produit des aberrations imprévisibles (`"" == 0` renvoie `true`, `false == "0"` renvoie `true`). L'égalité stricte (`===`) et l'inégalité stricte (`!==`) sont posées dès le premier jour comme les seules syntaxes autorisées.
+- **Distinction entre `null` et `undefined`** :
+  - `null` représente l'absence intentionnelle et explicite de valeur (ex: joueur sans bouclier équipé).
+  - `undefined` signale une variable déclarée sans valeur ou un accès à un index hors limites dans un tableau (`tab[10]` sur un tableau de 3 éléments).
+- **Le piège universel des flottants (norme IEEE 754)** :
+  - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
+  - Règle d'or pour le web (paniers d'achat, TVA, remises) : manipuler les montants en centimes entiers (`10 + 20 === 30`) ou utiliser un arrondi contrôlé (`Math.round()` ou tolérance `Number.EPSILON`).
+- **L'opérateur Modulo (%) et l'arithmétique cyclique** :
+  - Reste de la division entière, indispensable pour tester l'alternance et la parité (`n % 2 === 0`).
+  - Navigation cyclique sans débordement d'indice (ex. carrousel d'images, sélection d'arme en boucle) : `index = (index + 1) % tab.length`.
+  - Conversion d'un tableau plat 1D en coordonnées de grille 2D : `colonneX = index % largeur` et `ligneY = Math.floor(index / largeur)`.
+- **Chaînes de caractères comme séquences indexées** :
+  - Une chaîne est une séquence immuable indexée (`chaine[i]`, `.length`).
+  - Les mêmes algorithmes de parcours itératif s'appliquent pour valider un format, compter des occurrences ou extraire une sous-chaîne.
+- **Passage par valeur vs référence** :
+  - Les primitifs (nombres, chaînes, booléens) sont copiés par valeur.
+  - Les structures complexes (tableaux, objets) sont manipulées par référence en mémoire : modifier une propriété à l'intérieur d'une fonction affecte directement l'objet externe en mémoire.
+
+### 3.3. Structures de contrôle fondamentales
+- **Branchements conditionnels et clauses de garde** :
+  - Alternatives `if`, `else`, et enchaînements `else if`.
+  - Opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`).
+  - Algèbre de Boole : opérateurs logiques ET (`&&`), OU (`||`) et NON (`!`), évaluation en court-circuit.
+  - *Pattern des clauses de garde* : exploiter le court-circuit pour sécuriser l'accès aux données (`if (joueur !== null && joueur.hp > 0)`) et tester les cas d'invalidation en tête de fonction avec un `return` anticipé pour aplatir le code et éliminer l'imbrication excessive de conditions.
+- **Itérations bornées (boucle `for`)** :
+  - Répétition avec compteur : initialisation, condition d'arrêt, incrémentation (`i++`).
+  - Parcours d'intervalles numériques et d'indices de collections.
+- **Le parcours de grille en deux dimensions (double boucle 2D)** :
+  - Double boucle imbriquée (`for (let y = 0; y < hauteur; y++)` avec `for (let x = 0; x < largeur; x++)`).
+  - Socle immédiat pour manipuler une matrice de tuiles dans Phaser ou dessiner une grille de pixels sur Canvas 2D.
+  - C'est l'exemple le plus concret pour comprendre le coût des boucles imbriquées (largeur × hauteur opérations).
+- **La boucle à rebours (Reverse Loop)** :
+  - Syntaxe décrémentale : `for (let i = tab.length - 1; i >= 0; i--)`.
+  - *Règle critique multimédia (Canvas / Phaser)* : lors de la suppression d'éléments en cours de parcours (ex: projectile touchant une cible), le parcours classique de gauche à droite décale les indices et saute l'élément suivant. La boucle inversée garantit que les suppressions n'altèrent jamais les indices restants à traiter.
+- **Itérations non bornées (boucle `while`) et règle des 3 phases** :
+  - Répétition tant qu'une condition reste vraie (ex: suite de Syracuse, attente d'un événement).
+  - *Règle des 3 phases (anti-boucle infinie)* : 1. initialisation de la condition en amont, 2. évaluation en tête de boucle, et 3. **mise à jour impérative de l'état avant l'accolade fermante**.
+- **Ruptures de séquence** : interruption avec `break`, saut d'itération avec `continue`.
+
+### 3.4. Décomposition fonctionnelle et modularité
+- **Découpage en sous-problèmes** : transformer un problème complexe en fonctions unitaires indépendantes (« diviser pour régner »).
+- **Signature d'une fonction** : paramètres d'entrée (arguments) et valeur de retour unique (`return`).
+- **Portée des identifiants (Scope)** :
+  - Portée de bloc : variables locales invisibles à l'extérieur de leur bloc englobant `{ ... }`.
+  - Dangers des variables globales (collisions de noms et effets de bord incontrôlés).
+- **Pureté et immutabilité** :
+  - Fonctions pures : pour les mêmes entrées, renvoient toujours la même sortie, sans modifier l'état extérieur.
+  - *Règle de pureté sur les collections* : ne jamais muter un tableau ou un objet reçu en argument. Attention à la copie superficielle (Shallow Copy) : `[...tab]` crée un nouveau tableau mais conserve les références vers les objets internes. Si la collection contient des objets modifiables en profondeur, utiliser `structuredClone(tab)` pour garantir une indépendance mémoire totale.
+- **La pile d'appels (Call Stack)** :
+  - Comprendre comment la mémoire empile les appels de fonctions et dépile lors du `return`.
+
+### 3.5. Les 7 patterns algorithmiques incontournables
+Ces 7 patrons de conception élémentaires constituent le socle de tout développement web et multimédia :
+
+1. **La permutation de valeurs (Swap)** :
+   - Échanger deux états sans écraser la valeur d'origine : utilisation de la variable temporaire (`temp = a; a = b; b = temp;`) et sa transcription moderne en déstructuration (`[a, b] = [b, a]`).
+2. **L'accumulation et élément neutre** :
+   - Initialiser l'accumulateur sur son élément neutre : `0` pour une somme (`total = 0`), chaîne vide pour du texte (`chaine = ""`), mais impérativement **`1`** pour un produit ou un cumul de multiplicateurs (`total = 1`), sous peine d'obtenir un résultat bloqué à zéro.
+3. **Le comptage sélectif** :
+   - Calculer le nombre d'éléments répondant à un prédicat précis (ex: compter les articles en rupture de stock).
+4. **La recherche d'extremum (Minimum / Maximum)** :
+   - *Clause de garde obligatoire sur tableau vide* : vérifier impérativement `if (tab.length === 0) return null;` avant toute recherche. Initialiser avec `max = tab[0]` sur un tableau vide injecte `undefined`, fausse toutes les comparaisons ultérieures (`undefined < 10` renvoie `false`) et conduit à un résultat indéterminé au lieu d'une valeur de retour explicite (`null`).
+5. **La recherche séquentielle sur collections d'objets (Flag & ID)** :
+   - Rechercher un élément par identifiant unique (`tab[i].id === cibleId`).
+   - *Le piège universel du `return` dans le `else`* : à bannir formellement (`if (...) return tab[i]; else return null;`), car cette erreur arrête la boucle dès le tout premier élément testé. L'échec d'une recherche ne se constate **qu'après** la sortie complète de la boucle : placer impérativement `return null;` (ou `return -1` pour une recherche d'indice) immédiatement après l'accolade fermante de la boucle `for`. Prépare directement `.find()` / `.findIndex()` en JS et `WHERE id = ?` en SQL.
+6. **Le filtrage et partitionnement manuel** :
+   - Parcourir un tableau source pour construire un tableau cible ne contenant que les éléments conformes (socle conceptuel de `.filter()` en JS et de `WHERE` en SQL).
+7. **La détection géométrique d'intersection (AABB)** :
+   - Algorithme d'intersection de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && ...`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser.
+
+### 3.6. Robustesse et analyse de complexité
+- **Sensibilité à la complexité intuitive** : comparer un parcours linéaire simple en $O(n)$ et un double parcours imbriqué en $O(n^2)$ (ex. tester chaque entité contre toutes les autres).
+- **Cas limites (Edge cases)** :
+  - Traitement systématique des cas critiques : tableau vide (`.length === 0`), index hors limites (`undefined`), division par zéro.
+  - Détection et prévention du décalage d'indice (« Off-by-one » : confondre `<` et `<=`).
+
+### 3.7. Débogage, traçabilité et observation (R1.12)
+- **Organigrammes normalisés (ISO 5807)** :
+  - Ovales/rectangles arrondis : Début / Fin.
+  - Parallélogrammes : Entrées / Sorties de données.
+  - Rectangles simples : Actions ou calculs élémentaires.
+  - Rectangles à double barre latérale verticale : Processus prédéfinis / Appels de fonctions (liaison avec la décomposition fonctionnelle).
+  - Losanges de décision : Conditions binaires avec branches Vrai / Faux.
+  - Flèches de boucle remontantes : Visualisation du cycle itératif.
+- **Table de trace manuelle** :
+  - Remplir pas à pas un tableau à double entrée : numéro d'étape, ligne de code active, état de chaque variable, évaluation de la condition.
+- **Outils d'instrumentation moderne** :
+  - Utilisation stratégique de `console.log` pour inspecter l'état.
+  - Pose de points d'arrêt (`debugger`) dans les outils de développement du navigateur pour observer l'exécution instruction par instruction.
 
 Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
 
