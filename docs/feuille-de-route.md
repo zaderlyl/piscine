@@ -166,58 +166,44 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 ### Module PHP & Architecture Web (R1.13, R2.13, R2.14)
 
-Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
+Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](programme-par-langage.md).
 
-**1. Fondamentaux, Syntaxe PHP 8+, Dates & Templating serveur**
-- [ ] `00` : Premier script PHP, balises `<?php ?>` et affichage avec `echo`
-- [ ] `01` : Variables `$`, types primitifs et concaténation
-- [ ] `02` : Conditions `if`, `else`, opérateurs logiques et ternaire
-- [ ] `03` : Boucles fondamentales : `while`, `for` et `foreach`
-- [ ] `04` : Tableaux associatifs (clé => valeur) et fonctions de tableaux
-- [ ] `05` : Fonctions personnalisées avec typage des paramètres et du `return`
-- [ ] `06` : Gestion des dates et fuseaux horaires : `DateTimeImmutable` et formatage SQL
-- [ ] `07` : Templating modulaire : découper sa page avec `require_once` (`header`, `footer`)
+**1. Fondamentaux, Typage strict & Templating serveur**
+- [ ] `00` : Premier script, `declare(strict_types=1)` dès le départ, balises `<?php ?>`, types et concaténation
+- [ ] `01` : Structures de contrôle (`if`, `else`, ternaire), boucles (`while`, `for`, `foreach`) et tableaux associatifs
+- [ ] `02` : Fonctions typées, gestion moderne du temps (`DateTimeImmutable`, fuseau horaire) et templating (`require_once`)
 
-**2. Formulaires, Upload de fichiers ($_FILES) & Sécurité XSS / CSRF (R2.13)**
-- [ ] `08` : Paramètres d'URL et superglobale `$_GET`
-- [ ] `09` : Réception de données de formulaires avec `$_POST`
-- [ ] `10` : Prévention des attaques XSS avec `htmlspecialchars()`
-- [ ] `11` : Validation et assainissement côté serveur (`filter_var`, champs obligatoires)
-- [ ] `12` : Upload sécurisé d'images avec `$_FILES` : `enctype`, type MIME réel et renommage
-- [ ] `13` : Protection contre les attaques CSRF : génération et vérification de token de session
+**2. Sessions, Cookies & Authentification sécurisée (R2.13)**
+*Les sessions sont apprises ici afin d'être disponibles pour le token CSRF au module suivant.*
+- [ ] `03` : Cookies HTTP sécurisés (`setcookie`, `httponly`, `secure`) et sessions serveur (`session_start`, `$_SESSION`)
+- [ ] `04` : Authentification complète : hachage (`password_hash`, `password_verify`), régénération (`session_regenerate_id(true)`) et protection de page
 
-**3. État, Sessions & Authentification sécurisée (R2.13)**
-- [ ] `14` : Fonctionnement des cookies HTTP avec `setcookie()` et `$_COOKIE`
-- [ ] `15` : Démarrer et manipuler une session avec `session_start()` et `$_SESSION`
-- [ ] `16` : Prévention de la fixation de session avec `session_regenerate_id(true)`
-- [ ] `17` : Sécurité des mots de passe : `password_hash()` et `password_verify()`
-- [ ] `18` : Système complet de connexion / déconnexion et protection d'espace membre
+**3. Formulaires sécurisés, Uploads & Pattern PRG (R2.13)**
+- [ ] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel (`htmlspecialchars`, validation URL) et pattern PRG (Post-Redirect-Get)
+- [ ] `06` : Protection CSRF : génération de token en session, vérification avec `hash_equals()` et conservation des données
+- [ ] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel (`mime_content_type`), renommage unique et `.htaccess`
 
 **4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
-*Transition naturelle depuis la POO JavaScript (séance 27).*
-- [ ] `19` : Déclaration de classe, propriétés typées et instanciation avec `new`
-- [ ] `20` : Constructeur moderne PHP 8 (`__construct` avec promotion de propriétés)
-- [ ] `21` : Encapsulation et visibilité : `public`, `private`, accesseurs et mutateurs
-- [ ] `22` : Héritage de classe avec `extends` et `parent::__construct()`
-- [ ] `23` : Autoloading de classes sans bundler avec `spl_autoload_register()`
+*Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant la persistance.*
+- [ ] `08` : Classes PHP 8, constructeur avec promotion de propriétés, typage strict et instanciation `new`
+- [ ] `09` : Encapsulation (`public`, `private`, accesseurs) et héritage (`extends`, `parent::__construct()`)
+- [ ] `10` : Autoloading de classes sans dépendance avec `spl_autoload_register()` (fin de la forêt de `require_once`)
 
 **5. Base de données avec PDO, Relations SQL & Transactions (R2.13, R2.14)**
-*Sécurisation des identifiants (config.local.php + .gitignore), try/catch et requêtes préparées.*
-- [ ] `24` : Configuration locale et connexion sécurisée `PDO` enrobée dans un `try / catch`
-- [ ] `25` : Requêtes préparées PDO (`prepare`, `execute`) contre les injections SQL
-- [ ] `26` : Opérations CRUD complètes (Insertion, Lecture, Mise à jour, Suppression)
-- [ ] `27` : Pagination SQL (`LIMIT` et `OFFSET`) et décompte avec `COUNT(*)`
-- [ ] `28` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éviter le piège du N+1
-- [ ] `29` : Transactions PDO (`beginTransaction`, `commit`, `rollBack`) pour l'intégrité multi-tables
+*Sécurisation des identifiants (config.local.php + .gitignore), try/catch et requêtes préparées systématiques.*
+- [ ] `11` : Configuration locale et connexion sécurisée `PDO` enrobée dans un `try / catch`
+- [ ] `12` : Requêtes préparées PDO (`prepare`, `execute`) et opérations CRUD fondamentales
+- [ ] `13` : Pagination SQL : clauses `LIMIT` et `OFFSET` avec typage obligatoire (`bindValue(..., PDO::PARAM_INT)`) et décompte `COUNT(*)`
+- [ ] `14` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éliminer l'anti-pattern des requêtes N+1
+- [ ] `15` : Transactions PDO (`beginTransaction`, `commit`, `rollBack`) pour l'intégrité des opérations multi-tables
 
 **6. Architecture MVC & Routage (R2.13, SAÉ)**
-- [ ] `30` : Séparation des responsabilités : isoler Modèle (PDO), Vue (HTML) et Contrôleur
-- [ ] `31` : Routeur minimaliste : aiguillage des requêtes via un point d'entrée unique `index.php`
+- [ ] `16` : Séparation des responsabilités : isoler Modèle (classes PDO), Vue (HTML) et Contrôleur
+- [ ] `17` : Point d'entrée unique `index.php`, routage par action et fallback 404 obligatoire (`http_response_code(404)` et vue dédiée)
 
-**7. API Back-End JSON & Échanges avec le Front-End (R2.13, R3.12)**
-- [ ] `32` : Réception de requêtes JSON du client JS via le flux d'entrée brut `php://input`
-- [ ] `33` : Renvoyer du JSON avec `json_encode()` et les codes de statut HTTP réels (`http_response_code`)
-- [ ] `34` : Gestion des en-têtes CORS pour autoriser le `fetch()` JS depuis un serveur local
+**7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)**
+- [ ] `18` : Réception de requêtes JSON du client JS via le flux brut `php://input` (contournement du piège de `$_POST` vide)
+- [ ] `19` : Renvoyer du JSON avec `json_encode()`, codes HTTP réels (`http_response_code`) et gestion du CORS avec requêtes Preflight `OPTIONS`
 
 ---
 
