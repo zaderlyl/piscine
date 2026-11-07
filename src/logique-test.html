@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <title>Piscine : Organigrammes algorithmiques</title>
+  <title>Piscine : Visualisation algorithmique & Table de trace (R1.12)</title>
   <style>
     /* Interface globale */
     #editeur {
@@ -15,121 +15,168 @@
       background: #fff;
     }
 
-    /* Sélecteur d'exemples */
-    #selecteur-exemples {
+    #doc-onglet {
       display: flex;
-      background: #eef2f6;
-      border-bottom: 1px solid #d0d7de;
+      background: #e2e8f0;
+      border-bottom: 1px solid #cbd5e1;
       overflow-x: auto;
     }
 
-    .tab-exemple {
-      padding: 9px 16px;
+    #doc-onglet button {
+      padding: 9px 15px;
       border: none;
       background: none;
       font-size: 13px;
       font-weight: 600;
-      color: #555;
+      color: #475569;
       cursor: pointer;
       border-bottom: 3px solid transparent;
       white-space: nowrap;
       transition: all 0.15s ease;
     }
 
-    .tab-exemple:hover {
-      color: #1565c0;
+    #doc-onglet button:hover {
+      color: #0284c7;
+      background: #f1f5f9;
+    }
+
+    #doc-onglet button.actif {
+      color: #0284c7;
+      background: #ffffff;
+      border-bottom: 3px solid #0284c7;
+      font-weight: bold;
+    }
+
+    #enonce {
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 10px 16px;
       background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+    }
+
+    /* Sélecteur d'exemples d'algorithmes */
+    #selecteur-exemples {
+      display: flex;
+      background: #f1f5f9;
+      border-bottom: 1px solid #cbd5e1;
+      overflow-x: auto;
+      padding: 3px 6px;
+      gap: 4px;
+    }
+
+    .tab-exemple {
+      padding: 7px 13px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .tab-exemple:hover {
+      color: #0f172a;
+      background: #e2e8f0;
     }
 
     .tab-exemple.actif {
-      color: #1565c0;
-      font-weight: bold;
-      border-bottom: 3px solid #1565c0;
+      color: #0284c7;
       background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      font-weight: bold;
     }
 
     #commandes-pas {
       display: flex;
       gap: 10px;
-      padding: 10px 14px;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e0e0e0;
+      padding: 9px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .btn-controle {
-      padding: 7px 15px;
+      padding: 6px 14px;
       font-size: 13px;
       font-weight: 600;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
-      border: 1px solid #ccc;
-      background: #fff;
-      color: #333;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
       transition: all 0.15s ease;
     }
 
     .btn-controle:hover:not(:disabled) {
-      background: #f0f0f0;
-      border-color: #999;
+      background: #e2e8f0;
+      border-color: #94a3b8;
     }
 
     .btn-controle:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
     }
 
     .btn-controle.primaire {
-      background: #1565c0;
+      background: #0284c7;
       color: #ffffff;
-      border-color: #0d47a1;
+      border-color: #0369a1;
     }
 
     .btn-controle.primaire:hover:not(:disabled) {
-      background: #0d47a1;
+      background: #0369a1;
     }
 
     #zones {
       background: #ffffff;
       overflow-y: auto;
       flex: 1;
-      padding: 16px 0;
+      padding: 12px 0;
     }
 
     .ligne-code {
       display: flex;
-      padding: 5px 16px;
-      font-family: Consolas, Monaco, monospace;
-      font-size: 14px;
-      line-height: 1.6;
+      padding: 4px 16px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13.5px;
+      line-height: 1.55;
       transition: background 0.15s ease;
     }
 
     .ligne-code.active {
-      background: #e3f2fd;
-      border-left: 5px solid #1565c0;
+      background: #e0f2fe;
+      border-left: 5px solid #0284c7;
       font-weight: bold;
     }
 
     .num-ligne {
-      width: 36px;
-      color: #999;
+      width: 34px;
+      color: #94a3b8;
       user-select: none;
       flex-shrink: 0;
     }
 
     .texte-code {
       white-space: pre;
-      color: #222;
+      color: #0f172a;
     }
 
-    /* Volet de droite : Organigramme épuré */
+    /* Volet droit : Organigramme et Table de trace */
     #droite {
       height: 100vh;
       overflow-y: auto;
-      background: #fbfbfb;
-      padding: 16px 20px;
+      background: #f8fafc;
+      padding: 14px 18px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -142,13 +189,13 @@
       justify-content: space-between;
       align-items: center;
       padding-bottom: 6px;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .titre-flux {
-      font-size: 16px;
-      font-weight: bold;
-      color: #111;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
       margin: 0;
     }
 
@@ -157,24 +204,24 @@
       font-weight: 600;
       padding: 3px 12px;
       border-radius: 12px;
-      background: #eee;
-      color: #555;
+      background: #e2e8f0;
+      color: #475569;
     }
 
     .badge-etape.actif {
-      background: #1565c0;
-      color: #fff;
+      background: #0284c7;
+      color: #ffffff;
     }
 
     .badge-etape.termine {
-      background: #2e7d32;
-      color: #fff;
+      background: #16a34a;
+      color: #ffffff;
     }
 
-    /* Mini barre de variables dynamique */
+    /* Mini-panneau des variables dynamique */
     .barre-variables {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
@@ -182,59 +229,85 @@
       flex: 1;
       min-width: 120px;
       background: #ffffff;
-      border: 1.5px solid #d0d7de;
+      border: 1.5px solid #cbd5e1;
       border-radius: 6px;
-      padding: 8px 14px;
+      padding: 6px 12px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 2px;
       transition: all 0.2s ease;
     }
 
     .case-variable.modifiee {
-      background: #fffde7;
-      border-color: #fbc02d;
-      box-shadow: 0 1px 6px rgba(251,192,45,0.3);
+      background: #fefce8;
+      border-color: #eab308;
+      box-shadow: 0 0 6px rgba(234,179,8,0.3);
+    }
+
+    .entete-var {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .nom-var {
-      font-size: 12px;
-      font-weight: 600;
-      color: #555;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
       text-transform: uppercase;
+      font-family: monospace;
+    }
+
+    .type-var {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #f1f5f9;
+      color: #475569;
     }
 
     .valeur-var {
       font-family: Consolas, Monaco, monospace;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
-      color: #1565c0;
+      color: #0284c7;
     }
 
-    /* Message d'explication */
+    .valeur-var.val-null {
+      color: #7c3aed;
+      font-style: italic;
+    }
+
+    .valeur-var.val-undefined {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    /* Message d'action et d'explication */
     .message-action {
-      background: #e3f2fd;
-      border-left: 4px solid #1565c0;
-      padding: 9px 14px;
+      background: #e0f2fe;
+      border-left: 4px solid #0284c7;
+      padding: 8px 12px;
       border-radius: 4px;
       font-size: 13px;
-      color: #0d47a1;
+      color: #0369a1;
       font-weight: 500;
       line-height: 1.4;
     }
 
     /* Conteneur de l'organigramme SVG */
     .conteneur-organigramme {
-      flex: 1;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       background: #ffffff;
-      border: 1px solid #e0e0e0;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
       overflow: auto;
+      max-height: 440px;
     }
 
     svg.organigramme {
@@ -244,34 +317,34 @@
       display: block;
     }
 
-    /* Formes SVG de l'organigramme */
+    /* Formes SVG de l'organigramme (Norme ISO 5807) */
     .forme-noeud {
       fill: #ffffff;
-      stroke: #222222;
+      stroke: #1e293b;
       stroke-width: 1.8;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.12));
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
       transition: fill 0.2s ease, stroke 0.2s ease;
     }
 
     .noeud.actif .forme-noeud {
-      fill: #1565c0;
-      stroke: #0d47a1;
+      fill: #0284c7;
+      stroke: #0369a1;
       stroke-width: 2.2;
-      filter: drop-shadow(0 0 6px rgba(21,101,192,0.45));
+      filter: drop-shadow(0 0 6px rgba(2,132,199,0.45));
     }
 
     .noeud.actif-vert .forme-noeud {
-      fill: #2e7d32;
-      stroke: #1b5e20;
+      fill: #16a34a;
+      stroke: #15803d;
       stroke-width: 2.2;
-      filter: drop-shadow(0 0 6px rgba(46,125,50,0.45));
+      filter: drop-shadow(0 0 6px rgba(22,163,74,0.45));
     }
 
     .texte-noeud {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      fill: #111111;
+      fill: #0f172a;
       text-anchor: middle;
       dominant-baseline: central;
       pointer-events: none;
@@ -284,58 +357,126 @@
       font-weight: bold;
     }
 
-    /* Lignes et connecteurs */
+    /* Connecteurs et branches */
     .ligne-flux {
-      stroke: #222222;
+      stroke: #1e293b;
       stroke-width: 1.8;
       fill: none;
       transition: stroke 0.2s ease, stroke-width 0.2s ease;
     }
 
     .ligne-flux.actif {
-      stroke: #1565c0;
+      stroke: #0284c7;
       stroke-width: 3;
     }
 
     .ligne-flux.actif-boucle {
-      stroke: #0288d1;
+      stroke: #0284c7;
       stroke-width: 3;
     }
 
     .etiquette-branche {
       font-family: sans-serif;
       font-size: 11px;
-      font-weight: bold;
-      fill: #444444;
+      font-weight: 700;
+      fill: #64748b;
     }
 
     .etiquette-branche.actif {
-      fill: #1565c0;
+      fill: #0284c7;
+    }
+
+    /* Table de trace manuelle (R1.12) */
+    .conteneur-table-trace {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .entete-trace {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .table-scroll {
+      max-height: 170px;
+      overflow-y: auto;
+      border: 1px solid #f1f5f9;
+      border-radius: 4px;
+    }
+
+    .table-trace {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .table-trace th {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 700;
+      text-align: left;
+      padding: 5px 8px;
+      border-bottom: 2px solid #cbd5e1;
+      position: sticky;
+      top: 0;
+      font-size: 11px;
+    }
+
+    .table-trace td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .table-trace tr.active {
+      background: #e0f2fe;
+      font-weight: bold;
+    }
+
+    .table-trace tr.active td {
+      color: #0369a1;
     }
   </style>
 </head>
 <body>
 
-  <!-- Colonne gauche : Éditeur -->
+  <!-- Colonne gauche : Éditeur et Documentation -->
   <div id="editeur">
     <nav id="doc-onglet">
-      <button type="button" class="actif" data-section="enonce">Énoncé</button>
-      <button type="button" data-section="cours">Cours</button>
-      <button type="button" data-section="bilan">Bilan technique</button>
+      <button type="button" class="actif" data-section="enonce">Énoncé & Guide</button>
+      <button type="button" data-section="cours">Cours ISO 5807 & Trace</button>
+      <button type="button" data-section="patterns">Les 7 Patterns (3.5)</button>
+      <button type="button" data-section="bilan">Bilan technique (#41)</button>
     </nav>
     <div id="enonce"></div>
 
-    <!-- Sélecteur d'exemples d'algorithmes -->
+    <!-- Sélecteur des 8 algorithmes types -->
     <nav id="selecteur-exemples">
       <button type="button" class="tab-exemple actif" data-id="for">1. Boucle for</button>
-      <button type="button" class="tab-exemple" data-id="while">2. Boucle while</button>
-      <button type="button" class="tab-exemple" data-id="ifelse">3. Condition if / else</button>
-      <button type="button" class="tab-exemple" data-id="syracuse">4. Syracuse (while + if)</button>
-      <button type="button" class="tab-exemple" data-id="fonction">5. Fonction (appel & return)</button>
+      <button type="button" class="tab-exemple" data-id="while">2. Boucle while (3 phases)</button>
+      <button type="button" class="tab-exemple" data-id="ifelse">3. Condition (===)</button>
+      <button type="button" class="tab-exemple" data-id="swap">4. Swap (Permutation)</button>
+      <button type="button" class="tab-exemple" data-id="accum">5. Accumulation (Neutre)</button>
+      <button type="button" class="tab-exemple" data-id="recherche">6. Recherche (Sortie)</button>
+      <button type="button" class="tab-exemple" data-id="syracuse">7. Syracuse (Collatz)</button>
+      <button type="button" class="tab-exemple" data-id="fonction">8. Fonction (ISO 5807)</button>
     </nav>
 
+    <!-- Contrôles pas à pas -->
     <div id="commandes-pas">
-      <span style="font-weight: bold; font-size: 13px; color: #444;">Exécution pas à pas :</span>
+      <span style="font-weight: bold; font-size: 12px; color: #475569;">Contrôle pas à pas :</span>
       <button type="button" id="btn-suivant" class="btn-controle primaire">Ligne suivante &rarr;</button>
       <button type="button" id="btn-auto" class="btn-controle">Lecture auto</button>
       <button type="button" id="btn-reset" class="btn-controle">Réinitialiser</button>
@@ -347,7 +488,7 @@
   <!-- Barre de redimensionnement vertical -->
   <div id="separateur-v" class="barre barre-v" title="Glisser pour changer la largeur"></div>
 
-  <!-- Colonne droite : Organigramme interactif -->
+  <!-- Colonne droite : Organigramme interactif & Table de trace -->
   <div id="droite">
 
     <!-- En-tête -->
@@ -356,43 +497,85 @@
       <span id="badge-statut" class="badge-etape">Prêt</span>
     </div>
 
-    <!-- Mini-panneau des variables dynamique -->
+    <!-- Mini-panneau des variables dynamique (Section 3.2) -->
     <div class="barre-variables" id="barre-variables"></div>
 
-    <!-- Message explicatif -->
+    <!-- Message d'action de l'étape courante -->
     <div class="message-action" id="message-action">
-      Clique sur le bouton bleu « Ligne suivante » pour suivre l'exécution sur l'organigramme.
+      Clique sur le bouton bleu « Ligne suivante » pour démarrer l'exécution.
     </div>
 
-    <!-- Organigramme SVG dynamique -->
+    <!-- Organigramme SVG normalisé ISO 5807 -->
     <div class="conteneur-organigramme" id="conteneur-organigramme"></div>
+
+    <!-- Table de trace pas à pas (Norme R1.12) -->
+    <div class="conteneur-table-trace">
+      <div class="entete-trace">
+        <span>Table de trace pas à pas (R1.12)</span>
+        <span style="font-weight: normal; color: #64748b;">État mémoire à chaque étape</span>
+      </div>
+      <div class="table-scroll">
+        <table class="table-trace">
+          <thead>
+            <tr>
+              <th style="width: 45px;">Étape</th>
+              <th style="width: 45px;">Ligne</th>
+              <th>Nœud ISO 5807</th>
+              <th>Condition</th>
+              <th>Variables</th>
+              <th>Action / Effet</th>
+            </tr>
+          </thead>
+          <tbody id="corps-table-trace">
+            <!-- Rempli dynamiquement -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   </div>
 
   <script type="module">
     import { glissable } from "./redimensionner.js";
 
-    // Documentation
+    // -------------------------------------------------------------
+    // DOCUMENTATION ALIGNÉE SUR LE PROGRAMME OFFICIEL (R1.12)
+    // -------------------------------------------------------------
     const SECTIONS = {
       enonce: `
-        <strong>Mission :</strong> Visualiser l'exécution de différents algorithmes sous forme d'organigrammes.<br>
-        Choisis un exemple dans la barre d'onglets au-dessus de l'éditeur (Boucle <code>for</code>, Boucle <code>while</code>, Condition <code>if / else</code> ou <code>Syracuse</code>).<br>
-        Clique sur <strong>« Ligne suivante &rarr; »</strong> pour voir le chemin actif s'allumer étape par étape dans l'organigramme.
+        <strong>Mission pédagogique :</strong> Visualiser l'exécution pas à pas de l'algorithme, observer la table de trace se remplir et vérifier les formes ISO 5807.<br>
+        Choisis l'un des 8 algorithmes ci-dessus (boucles, condition, patterns Swap/Accumulation/Recherche, Collatz ou Fonction).<br>
+        Clique sur <strong>« Ligne suivante &rarr; »</strong> ou <strong>« Lecture auto »</strong> pour observer le parcours dans l'organigramme et l'état mémoire des variables.
       `,
       cours: `
-        <strong>Comprendre les formes d'un organigramme :</strong><br>
-        <ul style="margin: 6px 0 0 20px; padding: 0;">
-          <li><strong>Rectangles arrondis :</strong> Début et Fin du programme.</li>
-          <li><strong>Rectangles :</strong> Actions, calculs et affectations de variables (ex. <code>n &larr; n / 2</code>).</li>
-          <li><strong>Losanges :</strong> Conditions et branchements (bifurcation Vrai / Faux).</li>
-          <li><strong>Flèche latérale montante :</strong> Bouclage permettant de répéter le test tant que la condition est valide.</li>
+        <strong>Les formes normalisées de l'organigramme (Norme ISO 5807) :</strong>
+        <ul style="margin: 4px 0 6px 18px; padding: 0;">
+          <li><strong>Rectangles arrondis (ovales) :</strong> Début et Fin du programme.</li>
+          <li><strong>Parallélogrammes :</strong> Entrées / Sorties de données (ex. <code>console.log()</code>, lecture utilisateur).</li>
+          <li><strong>Rectangles simples :</strong> Actions élémentaires, calculs et affectations de variables (ex. <code>a &larr; a + 2</code>).</li>
+          <li><strong>Losanges :</strong> Décisions et conditions binaires (bifurcation Vrai / Faux).</li>
+          <li><strong>Rectangles à double barre latérale :</strong> Processus prédéfinis / Appels de fonctions (sous-programmes).</li>
+          <li><strong>Flèches remontantes :</strong> Bouclages d'itérations.</li>
         </ul>
+        <strong>Règle des 3 phases sur la boucle <code>while</code> :</strong> 1. Initialisation en amont, 2. Test en tête, 3. Mise à jour impérative avant l'accolade fermante (anti-boucle infinie).
+      `,
+      patterns: `
+        <strong>Les 7 patterns algorithmiques incontournables (Section 3.5) :</strong>
+        <ol style="margin: 4px 0 6px 18px; padding: 0;">
+          <li><strong>Swap (Permutation) :</strong> Échanger deux valeurs via variable temporaire (<code>temp = a; a = b; b = temp;</code>) ou déstructuration (<code>[a, b] = [b, a]</code>).</li>
+          <li><strong>Accumulation & élément neutre :</strong> <code>0</code> pour une somme, chaîne vide pour du texte, mais <strong><code>1</code></strong> pour un produit sous peine de blocage à zéro.</li>
+          <li><strong>Comptage sélectif :</strong> Incrémenter un compteur selon un prédicat.</li>
+          <li><strong>Extremum (Min/Max) :</strong> Clause de garde sur tableau vide obligatoire (<code>if (tab.length === 0) return null;</code>).</li>
+          <li><strong>Recherche séquentielle :</strong> L'échec se constate <em>après</em> la sortie de boucle (<code>return null;</code> après l'accolade fermante, jamais dans le <code>else</code>).</li>
+          <li><strong>Filtrage manuel :</strong> Construire un tableau cible filtré (socle de <code>.filter()</code> et <code>WHERE</code>).</li>
+          <li><strong>Intersection AABB :</strong> Boîtes alignées sur les axes pour Canvas 2D et Phaser.</li>
+        </ol>
       `,
       bilan: `
         <strong>Bilan technique de faisabilité (Issue #41) :</strong><br>
-        &bull; <strong>Faisabilité validée :</strong> Sur un code prévisible, les générateurs (<code>yield</code>) permettent d'isoler chaque étape sans figer la page.<br>
-        &bull; <strong>Limite majeure pour le code élève libre :</strong> Transformer automatiquement du code inconnu (fonctions, récursivité, fermetures) nécessiterait un interpréteur lourd (type JS-Interpreter).<br>
-        &bull; <strong>Recommandation :</strong> Conserver pour l'instant le panneau de variables actuel (<code>visualiseur-variables.js</code>) qui lit l'état final via Acorn sans surcharger la plateforme.
+        &bull; <strong>Générateurs fonctionnels :</strong> Les générateurs (<code>yield</code>) permettent un déroulement asynchrone pas à pas sans figer l'interface.<br>
+        &bull; <strong>Code élève libre :</strong> Pour les exercices libres, l'interpréteur Acorn statique (<code>visualiseur-variables.js</code>) reste privilégié car un moteur complet dynamique exigerait un interpréteur JS lourd.<br>
+        &bull; <strong>Usage optimal :</strong> Ce panneau visuel sert d'outil d'illustration guidée pour comprendre les boucles, les embranchements et les 7 patterns fondamentaux.
       `
     };
 
@@ -416,92 +599,110 @@
       axe: "x",
       variable: "--largeur-gauche",
       min: 250,
-      max: () => window.innerWidth - 300,
+      max: () => window.innerWidth - 320,
     });
 
     // -------------------------------------------------------------
-    // DÉFINITION DES 4 EXEMPLES D'ALGORITHMES
+    // DÉFINITION DES 8 ALGORITHMES TYPES
     // -------------------------------------------------------------
     const EXEMPLES = {
 
-      // EXEMPLE 1 : BOUCLE FOR
+      // 1. BOUCLE FOR (Compteur et accumulation)
       for: {
-        titre: "Organigramme : Boucle for",
+        titre: "Organigramme : Boucle for & Accumulation",
         code: [
           "let a = 1;",
           "for (let i = 0; i < 3; i++) {",
           "  a = a + 2;",
           "}",
-          "console.log('Terminé');"
+          "console.log('Terminé, a =', a);"
         ],
         variables: ["a", "i"],
-        noeuds: ["noeud-debut", "noeud-init-a", "noeud-init-i", "noeud-cond", "noeud-corps", "noeud-incr", "noeud-fin"],
-        lignes: ["ligne-debut-a", "ligne-a-i", "ligne-i-cond", "ligne-cond-fin", "ligne-cond-corps", "ligne-corps-incr", "ligne-boucle"],
+        noeuds: ["noeud-debut", "noeud-init-a", "noeud-init-i", "noeud-cond", "noeud-corps", "noeud-incr", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-a", "ligne-a-i", "ligne-i-cond", "ligne-cond-sortie", "ligne-cond-corps", "ligne-corps-incr", "ligne-boucle", "ligne-sortie-fin"],
         labels: ["label-faux", "label-vrai", "label-boucle"],
         svg: `
-          <svg class="organigramme" viewBox="0 0 380 540">
+          <svg class="organigramme" viewBox="0 0 380 570">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
               </marker>
               <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
               <marker id="fleche-active-boucle" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0288d1" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
             </defs>
 
+            <!-- Début (Rectangle arrondi) -->
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="145" y="15" width="110" height="40" rx="8" />
-              <text class="texte-noeud" x="200" y="35">Début</text>
+              <rect class="forme-noeud" x="145" y="15" width="110" height="38" rx="19" />
+              <text class="texte-noeud" x="200" y="34">Début</text>
             </g>
 
-            <line id="ligne-debut-a" class="ligne-flux" x1="200" y1="55" x2="200" y2="85" marker-end="url(#fleche)" />
+            <line id="ligne-debut-a" class="ligne-flux" x1="200" y1="53" x2="200" y2="85" marker-end="url(#fleche)" />
 
+            <!-- a <- 1 -->
             <g id="noeud-init-a" class="noeud">
-              <rect class="forme-noeud" x="135" y="85" width="130" height="40" rx="3" />
-              <text class="texte-noeud" x="200" y="105">a &larr; 1</text>
+              <rect class="forme-noeud" x="135" y="85" width="130" height="38" rx="3" />
+              <text class="texte-noeud" x="200" y="104">a &larr; 1</text>
             </g>
 
-            <line id="ligne-a-i" class="ligne-flux" x1="200" y1="125" x2="200" y2="155" marker-end="url(#fleche)" />
+            <line id="ligne-a-i" class="ligne-flux" x1="200" y1="123" x2="200" y2="155" marker-end="url(#fleche)" />
 
+            <!-- i <- 0 -->
             <g id="noeud-init-i" class="noeud">
-              <rect class="forme-noeud" x="135" y="155" width="130" height="40" rx="3" />
-              <text class="texte-noeud" x="200" y="175">i &larr; 0</text>
+              <rect class="forme-noeud" x="135" y="155" width="130" height="38" rx="3" />
+              <text class="texte-noeud" x="200" y="174">i &larr; 0</text>
             </g>
 
-            <line id="ligne-i-cond" class="ligne-flux" x1="200" y1="195" x2="200" y2="245" marker-end="url(#fleche)" />
+            <line id="ligne-i-cond" class="ligne-flux" x1="200" y1="193" x2="200" y2="240" marker-end="url(#fleche)" />
 
+            <!-- Décision i < 3 (Losange) -->
             <g id="noeud-cond" class="noeud">
-              <polygon class="forme-noeud" points="200,245 275,280 200,315 125,280" />
-              <text class="texte-noeud" x="200" y="280">i &lt; 3 ?</text>
+              <polygon class="forme-noeud" points="200,240 275,275 200,310 125,275" />
+              <text class="texte-noeud" x="200" y="275">i &lt; 3 ?</text>
             </g>
 
-            <line id="ligne-cond-fin" class="ligne-flux" x1="125" y1="280" x2="80" y2="280" marker-end="url(#fleche)" />
-            <text id="label-faux" class="etiquette-branche" x="90" y="272">Faux</text>
+            <!-- Sortie de boucle (Faux) vers la gauche -->
+            <line id="ligne-cond-sortie" class="ligne-flux" x1="125" y1="275" x2="105" y2="275" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="110" y="267">Faux</text>
 
+            <!-- Parallélogramme E/S ISO 5807 : console.log -->
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="15,255 105,255 85,295 -5,295" transform="translate(10,0)" />
+              <text class="texte-noeud" x="60" y="275">Afficher a</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="60" y1="295" x2="60" y2="340" marker-end="url(#fleche)" />
+
+            <!-- Fin (Rectangle arrondi) -->
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="10" y="260" width="70" height="40" rx="8" />
-              <text class="texte-noeud" x="45" y="280">Fin</text>
+              <rect class="forme-noeud" x="15" y="340" width="90" height="38" rx="19" />
+              <text class="texte-noeud" x="60" y="359">Fin</text>
             </g>
 
-            <line id="ligne-cond-corps" class="ligne-flux" x1="200" y1="315" x2="200" y2="365" marker-end="url(#fleche)" />
-            <text id="label-vrai" class="etiquette-branche" x="208" y="342">Vrai</text>
+            <!-- Branche Vrai : descente vers le corps -->
+            <line id="ligne-cond-corps" class="ligne-flux" x1="200" y1="310" x2="200" y2="360" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="208" y="338">Vrai</text>
 
+            <!-- Corps : a <- a + 2 -->
             <g id="noeud-corps" class="noeud">
-              <rect class="forme-noeud" x="125" y="365" width="150" height="44" rx="3" />
-              <text class="texte-noeud" x="200" y="387">a &larr; a + 2</text>
+              <rect class="forme-noeud" x="125" y="360" width="150" height="42" rx="3" />
+              <text class="texte-noeud" x="200" y="381">a &larr; a + 2</text>
             </g>
 
-            <line id="ligne-corps-incr" class="ligne-flux" x1="200" y1="409" x2="200" y2="445" marker-end="url(#fleche)" />
+            <line id="ligne-corps-incr" class="ligne-flux" x1="200" y1="402" x2="200" y2="440" marker-end="url(#fleche)" />
 
+            <!-- Incrément : i <- i + 1 -->
             <g id="noeud-incr" class="noeud">
-              <rect class="forme-noeud" x="125" y="445" width="150" height="44" rx="3" />
-              <text class="texte-noeud" x="200" y="467">i &larr; i + 1</text>
+              <rect class="forme-noeud" x="125" y="440" width="150" height="42" rx="3" />
+              <text class="texte-noeud" x="200" y="461">i &larr; i + 1</text>
             </g>
 
-            <path id="ligne-boucle" class="ligne-flux" d="M 200 489 V 515 H 330 V 215 H 203" marker-end="url(#fleche)" />
+            <!-- Bouclage remontant -->
+            <path id="ligne-boucle" class="ligne-flux" d="M 200 482 V 510 H 330 V 215 H 203" marker-end="url(#fleche)" />
             <text id="label-boucle" class="etiquette-branche" x="245" y="207">Boucle</text>
           </svg>
         `,
@@ -510,105 +711,117 @@
           yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { a, i }, act: "Début du programme." };
 
           a = 1;
-          yield { noeud: "noeud-init-a", ligneSvg: "ligne-debut-a", ligne: 1, statut: "Ligne 1", vars: { a, i }, mod: "a", act: "Affectation : a = 1." };
+          yield { noeud: "noeud-init-a", ligneSvg: "ligne-debut-a", ligne: 1, statut: "Ligne 1", vars: { a, i }, mod: "a", cond: "—", act: "Affectation : a = 1." };
 
           i = 0;
-          yield { noeud: "noeud-init-i", ligneSvg: "ligne-a-i", ligne: 2, statut: "Tour 1 / 3", vars: { a, i }, mod: "i", act: "Compteur i démarre à 0." };
+          yield { noeud: "noeud-init-i", ligneSvg: "ligne-a-i", ligne: 2, statut: "Tour 1 / 3", vars: { a, i }, mod: "i", cond: "—", act: "Compteur i démarre à 0." };
 
           // Tour 1
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 1 / 3", vars: { a, i }, act: "0 < 3 est VRAI : on descend." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 1 / 3", vars: { a, i }, cond: "0 < 3 (Vrai)", act: "Test : 0 < 3 est VRAI -> exécution du corps." };
           a = a + 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 1 / 3", vars: { a, i }, mod: "a", act: "Corps : a = 1 + 2 = 3." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 1 / 3", vars: { a, i }, mod: "a", cond: "—", act: "Calcul corps : a = 1 + 2 = 3." };
           i++;
-          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 1", vars: { a, i }, mod: "i", act: "Incrémentation : i passe à 1." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, act: "La flèche remonte vers le test (Tour 2)." };
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 1", vars: { a, i }, mod: "i", cond: "—", act: "Incrémentation : i passe à 1." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, cond: "—", act: "Remontée vers le test conditionnel (Tour 2)." };
 
           // Tour 2
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 2 / 3", vars: { a, i }, act: "1 < 3 est VRAI : on descend." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 2 / 3", vars: { a, i }, cond: "1 < 3 (Vrai)", act: "Test : 1 < 3 est VRAI -> deuxième passage." };
           a = a + 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 2 / 3", vars: { a, i }, mod: "a", act: "Corps : a = 3 + 2 = 5." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 2 / 3", vars: { a, i }, mod: "a", cond: "—", act: "Calcul corps : a = 3 + 2 = 5." };
           i++;
-          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 2", vars: { a, i }, mod: "i", act: "Incrémentation : i passe à 2." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, act: "La flèche remonte vers le test (Tour 3)." };
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 2", vars: { a, i }, mod: "i", cond: "—", act: "Incrémentation : i passe à 2." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, cond: "—", act: "Remontée vers le test conditionnel (Tour 3)." };
 
           // Tour 3
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 3 / 3", vars: { a, i }, act: "2 < 3 est VRAI : dernier tour." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 2, statut: "Tour 3 / 3", vars: { a, i }, cond: "2 < 3 (Vrai)", act: "Test : 2 < 3 est VRAI -> dernier passage." };
           a = a + 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 3 / 3", vars: { a, i }, mod: "a", act: "Corps : a = 5 + 2 = 7." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 3 / 3", vars: { a, i }, mod: "a", cond: "—", act: "Calcul corps : a = 5 + 2 = 7." };
           i++;
-          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 3", vars: { a, i }, mod: "i", act: "Incrémentation : i passe à 3." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, act: "On remonte tester si on continue." };
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 2, statut: "Fin Tour 3", vars: { a, i }, mod: "i", cond: "—", act: "Incrémentation : i passe à 3." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { a, i }, cond: "—", act: "Remontée vers le test pour vérifier l'arrêt." };
 
           // Fin
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-fin", ligne: 2, statut: "Sortie", vars: { a, i }, act: "3 < 3 est FAUX : sortie par la gauche !" };
-          yield { noeud: "noeud-fin", ligne: 5, statut: "Terminé", vars: { a, i }, act: "Programme terminé. Valeur finale de a : 7.", termine: true };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 2, statut: "Sortie", vars: { a, i }, cond: "3 < 3 (Faux)", act: "Test : 3 < 3 est FAUX ! Sortie de boucle." };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-sortie-fin", ligne: 5, statut: "Sortie E/S", vars: { a, i }, cond: "—", act: "Parallélogramme E/S : console.log affiche 'Terminé, a = 7'." };
+          yield { noeud: "noeud-fin", ligne: 5, statut: "Terminé", vars: { a, i }, cond: "—", act: "Programme terminé avec succès.", termine: true };
         }
       },
 
-      // EXEMPLE 2 : BOUCLE WHILE
+      // 2. BOUCLE WHILE (Règle des 3 phases)
       while: {
-        titre: "Organigramme : Boucle while",
+        titre: "Organigramme : Boucle while & Règle des 3 phases",
         code: [
+          "// 1. Initialisation en amont",
           "let n = 8;",
+          "// 2. Évaluation de condition en tête",
           "while (n > 1) {",
+          "  // 3. Mise à jour impérative avant fin",
           "  n = n / 2;",
           "}",
-          "console.log('Terminé');"
+          "console.log('Terminé, n =', n);"
         ],
         variables: ["n"],
-        noeuds: ["noeud-debut", "noeud-init-n", "noeud-cond", "noeud-corps", "noeud-fin"],
-        lignes: ["ligne-debut-n", "ligne-n-cond", "ligne-cond-fin", "ligne-cond-corps", "ligne-boucle"],
+        noeuds: ["noeud-debut", "noeud-init-n", "noeud-cond", "noeud-corps", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-n", "ligne-n-cond", "ligne-cond-sortie", "ligne-cond-corps", "ligne-boucle", "ligne-sortie-fin"],
         labels: ["label-faux", "label-vrai", "label-boucle"],
         svg: `
-          <svg class="organigramme" viewBox="0 0 360 440">
+          <svg class="organigramme" viewBox="0 0 360 480">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
               </marker>
               <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
-              </marker>
-              <marker id="fleche-active-boucle" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0288d1" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="125" y="15" width="110" height="40" rx="8" />
-              <text class="texte-noeud" x="180" y="35">Début</text>
+              <rect class="forme-noeud" x="125" y="15" width="110" height="38" rx="19" />
+              <text class="texte-noeud" x="180" y="34">Début</text>
             </g>
 
-            <line id="ligne-debut-n" class="ligne-flux" x1="180" y1="55" x2="180" y2="85" marker-end="url(#fleche)" />
+            <line id="ligne-debut-n" class="ligne-flux" x1="180" y1="53" x2="180" y2="85" marker-end="url(#fleche)" />
 
+            <!-- Phase 1 : Initialisation -->
             <g id="noeud-init-n" class="noeud">
-              <rect class="forme-noeud" x="115" y="85" width="130" height="40" rx="3" />
-              <text class="texte-noeud" x="180" y="105">n &larr; 8</text>
+              <rect class="forme-noeud" x="115" y="85" width="130" height="38" rx="3" />
+              <text class="texte-noeud" x="180" y="104">n &larr; 8</text>
             </g>
 
-            <line id="ligne-n-cond" class="ligne-flux" x1="180" y1="125" x2="180" y2="175" marker-end="url(#fleche)" />
+            <line id="ligne-n-cond" class="ligne-flux" x1="180" y1="123" x2="180" y2="175" marker-end="url(#fleche)" />
 
+            <!-- Phase 2 : Condition -->
             <g id="noeud-cond" class="noeud">
               <polygon class="forme-noeud" points="180,175 255,210 180,245 105,210" />
               <text class="texte-noeud" x="180" y="210">n &gt; 1 ?</text>
             </g>
 
-            <line id="ligne-cond-fin" class="ligne-flux" x1="105" y1="210" x2="65" y2="210" marker-end="url(#fleche)" />
-            <text id="label-faux" class="etiquette-branche" x="72" y="202">Faux</text>
+            <!-- Sortie -->
+            <line id="ligne-cond-sortie" class="ligne-flux" x1="105" y1="210" x2="85" y2="210" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="90" y="202">Faux</text>
 
-            <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="5" y="190" width="60" height="40" rx="8" />
-              <text class="texte-noeud" x="35" y="210">Fin</text>
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="10,195 85,195 70,230 -5,230" transform="translate(5,0)" />
+              <text class="texte-noeud" x="40" y="212">Afficher n</text>
             </g>
 
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="40" y1="230" x2="40" y2="270" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="5" y="270" width="70" height="38" rx="19" />
+              <text class="texte-noeud" x="40" y="289">Fin</text>
+            </g>
+
+            <!-- Phase 3 : Corps & mise à jour -->
             <line id="ligne-cond-corps" class="ligne-flux" x1="180" y1="245" x2="180" y2="295" marker-end="url(#fleche)" />
             <text id="label-vrai" class="etiquette-branche" x="188" y="272">Vrai</text>
 
             <g id="noeud-corps" class="noeud">
-              <rect class="forme-noeud" x="110" y="295" width="140" height="44" rx="3" />
-              <text class="texte-noeud" x="180" y="317">n &larr; n / 2</text>
+              <rect class="forme-noeud" x="110" y="295" width="140" height="42" rx="3" />
+              <text class="texte-noeud" x="180" y="316">n &larr; n / 2</text>
             </g>
 
-            <path id="ligne-boucle" class="ligne-flux" d="M 180 339 V 375 H 300 V 145 H 183" marker-end="url(#fleche)" />
+            <path id="ligne-boucle" class="ligne-flux" d="M 180 337 V 375 H 300 V 145 H 183" marker-end="url(#fleche)" />
             <text id="label-boucle" class="etiquette-branche" x="225" y="137">Boucle</text>
           </svg>
         `,
@@ -617,35 +830,36 @@
           yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { n }, act: "Début du programme while." };
 
           n = 8;
-          yield { noeud: "noeud-init-n", ligneSvg: "ligne-debut-n", ligne: 1, statut: "Initialisation", vars: { n }, mod: "n", act: "Affectation : n = 8." };
+          yield { noeud: "noeud-init-n", ligneSvg: "ligne-debut-n", ligne: 2, statut: "Phase 1 (Init)", vars: { n }, mod: "n", cond: "—", act: "Phase 1 : Initialisation de n = 8." };
 
           // Tour 1
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 2, statut: "Tour 1", vars: { n }, act: "Test condition : 8 > 1 est VRAI." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 4, statut: "Phase 2 (Test)", vars: { n }, cond: "8 > 1 (Vrai)", act: "Phase 2 : Test 8 > 1 est VRAI." };
           n = n / 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 1", vars: { n }, mod: "n", act: "Calcul corps : n = 8 / 2 = 4." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, act: "La flèche remonte tester à nouveau la condition." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 6, statut: "Phase 3 (Corps)", vars: { n }, mod: "n", cond: "—", act: "Phase 3 : Mise à jour impérative : n = 8 / 2 = 4." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4, statut: "Bouclage", vars: { n }, cond: "—", act: "Remontée vers le test conditionnel." };
 
           // Tour 2
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 2, statut: "Tour 2", vars: { n }, act: "Test condition : 4 > 1 est VRAI." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 4, statut: "Tour 2", vars: { n }, cond: "4 > 1 (Vrai)", act: "Test : 4 > 1 est VRAI." };
           n = n / 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 2", vars: { n }, mod: "n", act: "Calcul corps : n = 4 / 2 = 2." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, act: "Nouvelle remontée vers le test." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 6, statut: "Tour 2", vars: { n }, mod: "n", cond: "—", act: "Mise à jour : n = 4 / 2 = 2." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4, statut: "Bouclage", vars: { n }, cond: "—", act: "Remontée vers le test." };
 
           // Tour 3
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 2, statut: "Tour 3", vars: { n }, act: "Test condition : 2 > 1 est VRAI." };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-n-cond", ligne: 4, statut: "Tour 3", vars: { n }, cond: "2 > 1 (Vrai)", act: "Test : 2 > 1 est VRAI." };
           n = n / 2;
-          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 3, statut: "Tour 3", vars: { n }, mod: "n", act: "Calcul corps : n = 2 / 2 = 1." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, act: "Dernière remontée vers le test." };
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 6, statut: "Tour 3", vars: { n }, mod: "n", cond: "—", act: "Mise à jour : n = 2 / 2 = 1." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4, statut: "Bouclage", vars: { n }, cond: "—", act: "Dernière remontée vers le test." };
 
           // Fin
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-fin", ligne: 2, statut: "Arrêt", vars: { n }, act: "Test : 1 > 1 est FAUX ! Sortie de boucle." };
-          yield { noeud: "noeud-fin", ligne: 5, statut: "Terminé", vars: { n }, act: "Programme terminé. n vaut désormais 1.", termine: true };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 4, statut: "Sortie", vars: { n }, cond: "1 > 1 (Faux)", act: "Test : 1 > 1 est FAUX ! Sortie de boucle." };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-sortie-fin", ligne: 8, statut: "Sortie E/S", vars: { n }, cond: "—", act: "Affichage console.log('Terminé, n = 1')." };
+          yield { noeud: "noeud-fin", ligne: 8, statut: "Terminé", vars: { n }, cond: "—", act: "Programme terminé.", termine: true };
         }
       },
 
-      // EXEMPLE 3 : CONDITION IF / ELSE
+      // 3. CONDITION IF / ELSE (Égalité stricte ===)
       ifelse: {
-        titre: "Organigramme : Condition if / else",
+        titre: "Organigramme : Condition & Égalité stricte (===)",
         code: [
           "let age = 19;",
           "let statut = '';",
@@ -654,37 +868,38 @@
           "} else {",
           "  statut = 'Mineur';",
           "}",
-          "console.log(statut);"
+          "console.log('Statut :', statut);"
         ],
         variables: ["age", "statut"],
-        noeuds: ["noeud-debut", "noeud-init-age", "noeud-cond", "noeud-vrai", "noeud-faux", "noeud-fin"],
-        lignes: ["ligne-debut-age", "ligne-age-cond", "ligne-cond-vrai", "ligne-cond-faux", "ligne-vrai-fin", "ligne-faux-fin"],
+        noeuds: ["noeud-debut", "noeud-init-age", "noeud-cond", "noeud-vrai", "noeud-faux", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-age", "ligne-age-cond", "ligne-cond-vrai", "ligne-cond-faux", "ligne-vrai-jonc", "ligne-faux-jonc", "ligne-jonc-sortie", "ligne-sortie-fin"],
         labels: ["label-vrai", "label-faux"],
         svg: `
-          <svg class="organigramme" viewBox="0 0 380 440">
+          <svg class="organigramme" viewBox="0 0 380 470">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
               </marker>
               <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="135" y="15" width="110" height="40" rx="8" />
-              <text class="texte-noeud" x="190" y="35">Début</text>
+              <rect class="forme-noeud" x="135" y="15" width="110" height="38" rx="19" />
+              <text class="texte-noeud" x="190" y="34">Début</text>
             </g>
 
-            <line id="ligne-debut-age" class="ligne-flux" x1="190" y1="55" x2="190" y2="85" marker-end="url(#fleche)" />
+            <line id="ligne-debut-age" class="ligne-flux" x1="190" y1="53" x2="190" y2="85" marker-end="url(#fleche)" />
 
             <g id="noeud-init-age" class="noeud">
-              <rect class="forme-noeud" x="120" y="85" width="140" height="40" rx="3" />
-              <text class="texte-noeud" x="190" y="105">age &larr; 19</text>
+              <rect class="forme-noeud" x="120" y="85" width="140" height="38" rx="3" />
+              <text class="texte-noeud" x="190" y="104">age &larr; 19</text>
             </g>
 
-            <line id="ligne-age-cond" class="ligne-flux" x1="190" y1="125" x2="190" y2="165" marker-end="url(#fleche)" />
+            <line id="ligne-age-cond" class="ligne-flux" x1="190" y1="123" x2="190" y2="165" marker-end="url(#fleche)" />
 
+            <!-- Condition -->
             <g id="noeud-cond" class="noeud">
               <polygon class="forme-noeud" points="190,165 270,200 190,235 110,200" />
               <text class="texte-noeud" x="190" y="200">age &gt;= 18 ?</text>
@@ -695,8 +910,8 @@
             <text id="label-vrai" class="etiquette-branche" x="70" y="192">Vrai</text>
 
             <g id="noeud-vrai" class="noeud">
-              <rect class="forme-noeud" x="15" y="250" width="140" height="44" rx="3" />
-              <text class="texte-noeud" x="85" y="272">statut &larr; "Majeur"</text>
+              <rect class="forme-noeud" x="15" y="250" width="140" height="42" rx="3" />
+              <text class="texte-noeud" x="85" y="271">statut &larr; 'Majeur'</text>
             </g>
 
             <!-- Branche Faux (droite) -->
@@ -704,18 +919,26 @@
             <text id="label-faux" class="etiquette-branche" x="298" y="192">Faux</text>
 
             <g id="noeud-faux" class="noeud">
-              <rect class="forme-noeud" x="225" y="250" width="140" height="44" rx="3" />
-              <text class="texte-noeud" x="295" y="272">statut &larr; "Mineur"</text>
+              <rect class="forme-noeud" x="225" y="250" width="140" height="42" rx="3" />
+              <text class="texte-noeud" x="295" y="271">statut &larr; 'Mineur'</text>
             </g>
 
-            <!-- Jonction vers Fin -->
-            <path id="ligne-vrai-fin" class="ligne-flux" d="M 85 294 V 335 H 190" />
-            <path id="ligne-faux-fin" class="ligne-flux" d="M 295 294 V 335 H 190" />
-            <line class="ligne-flux" x1="190" y1="335" x2="190" y2="370" marker-end="url(#fleche)" />
+            <!-- Jonction vers E/S -->
+            <path id="ligne-vrai-jonc" class="ligne-flux" d="M 85 292 V 330 H 190" />
+            <path id="ligne-faux-jonc" class="ligne-flux" d="M 295 292 V 330 H 190" />
+            <line id="ligne-jonc-sortie" class="ligne-flux" x1="190" y1="330" x2="190" y2="365" marker-end="url(#fleche)" />
+
+            <!-- Sortie console.log -->
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="140,365 250,365 230,405 120,405" />
+              <text class="texte-noeud" x="185" y="385">Afficher statut</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="185" y1="405" x2="185" y2="430" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="145" y="370" width="90" height="40" rx="8" />
-              <text class="texte-noeud" x="190" y="390">Fin</text>
+              <rect class="forme-noeud" x="140" y="430" width="90" height="36" rx="18" />
+              <text class="texte-noeud" x="185" y="448">Fin</text>
             </g>
           </svg>
         `,
@@ -724,20 +947,376 @@
           yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { age, statut }, act: "Début du programme conditionnel." };
 
           age = 19;
-          yield { noeud: "noeud-init-age", ligneSvg: "ligne-debut-age", ligne: 1, statut: "Initialisation", vars: { age, statut }, mod: "age", act: "Affectation : age = 19." };
+          yield { noeud: "noeud-init-age", ligneSvg: "ligne-debut-age", ligne: 1, statut: "Ligne 1", vars: { age, statut }, mod: "age", cond: "—", act: "Affectation : age = 19." };
 
-          yield { noeud: "noeud-cond", ligneSvg: "ligne-age-cond", ligne: 3, statut: "Test condition", vars: { age, statut }, act: "Évaluation : 19 >= 18 est VRAI !" };
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-age-cond", ligne: 3, statut: "Test", vars: { age, statut }, cond: "19 >= 18 (Vrai)", act: "Évaluation : 19 >= 18 est VRAI -> bifurcation gauche." };
 
           statut = "Majeur";
-          yield { noeud: "noeud-vrai", ligneSvg: "ligne-cond-vrai", ligne: 4, statut: "Branche Vrai", vars: { age, statut }, mod: "statut", act: "Exécution de la branche Vrai : statut = 'Majeur'." };
+          yield { noeud: "noeud-vrai", ligneSvg: "ligne-cond-vrai", ligne: 4, statut: "Branche Vrai", vars: { age, statut }, mod: "statut", cond: "—", act: "Affectation : statut = 'Majeur'." };
 
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-vrai-fin", ligne: 8, statut: "Terminé", vars: { age, statut }, act: "Sortie de la condition. Programme terminé.", termine: true };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-jonc-sortie", ligne: 8, statut: "Sortie E/S", vars: { age, statut }, cond: "—", act: "Affichage console.log('Statut : Majeur')." };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 8, statut: "Terminé", vars: { age, statut }, cond: "—", act: "Programme terminé.", termine: true };
         }
       },
 
-      // EXEMPLE 4 : SYRACUSE (COLLATZ - exact schéma de ton image !)
+      // 4. PATTERN 1 : SWAP (PERMUTATION DE VALEURS)
+      swap: {
+        titre: "Organigramme : Pattern 1 - Permutation (Swap)",
+        code: [
+          "let a = 5;",
+          "let b = 9;",
+          "// Sauvegarde dans temp pour éviter l'écrasement",
+          "let temp = a;",
+          "a = b;",
+          "b = temp;",
+          "console.log('Permuté :', a, b);"
+        ],
+        variables: ["a", "b", "temp"],
+        noeuds: ["noeud-debut", "noeud-init-ab", "noeud-swap-1", "noeud-swap-2", "noeud-swap-3", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-ab", "ligne-ab-s1", "ligne-s1-s2", "ligne-s2-s3", "ligne-s3-sortie", "ligne-sortie-fin"],
+        labels: [],
+        svg: `
+          <svg class="organigramme" viewBox="0 0 380 480">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+              </marker>
+            </defs>
+
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="135" y="15" width="110" height="38" rx="19" />
+              <text class="texte-noeud" x="190" y="34">Début</text>
+            </g>
+
+            <line id="ligne-debut-ab" class="ligne-flux" x1="190" y1="53" x2="190" y2="85" marker-end="url(#fleche)" />
+
+            <!-- Init a=5, b=9 -->
+            <g id="noeud-init-ab" class="noeud">
+              <rect class="forme-noeud" x="115" y="85" width="150" height="40" rx="3" />
+              <text class="texte-noeud" x="190" y="105">a &larr; 5, b &larr; 9</text>
+            </g>
+
+            <line id="ligne-ab-s1" class="ligne-flux" x1="190" y1="125" x2="190" y2="155" marker-end="url(#fleche)" />
+
+            <!-- Étape 1 : temp <- a -->
+            <g id="noeud-swap-1" class="noeud">
+              <rect class="forme-noeud" x="115" y="155" width="150" height="42" rx="3" />
+              <text class="texte-noeud" x="190" y="176">temp &larr; a (5)</text>
+            </g>
+
+            <line id="ligne-s1-s2" class="ligne-flux" x1="190" y1="197" x2="190" y2="230" marker-end="url(#fleche)" />
+
+            <!-- Étape 2 : a <- b -->
+            <g id="noeud-swap-2" class="noeud">
+              <rect class="forme-noeud" x="115" y="230" width="150" height="42" rx="3" />
+              <text class="texte-noeud" x="190" y="251">a &larr; b (9)</text>
+            </g>
+
+            <line id="ligne-s2-s3" class="ligne-flux" x1="190" y1="272" x2="190" y2="305" marker-end="url(#fleche)" />
+
+            <!-- Étape 3 : b <- temp -->
+            <g id="noeud-swap-3" class="noeud">
+              <rect class="forme-noeud" x="115" y="305" width="150" height="42" rx="3" />
+              <text class="texte-noeud" x="190" y="326">b &larr; temp (5)</text>
+            </g>
+
+            <line id="ligne-s3-sortie" class="ligne-flux" x1="190" y1="347" x2="190" y2="380" marker-end="url(#fleche)" />
+
+            <!-- Parallélogramme E/S -->
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="130,380 260,380 240,420 110,420" />
+              <text class="texte-noeud" x="185" y="400">Afficher a et b</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="185" y1="420" x2="185" y2="445" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="140" y="445" width="90" height="34" rx="17" />
+              <text class="texte-noeud" x="185" y="462">Fin</text>
+            </g>
+          </svg>
+        `,
+        generateur: function* () {
+          let a = undefined, b = undefined, temp = undefined;
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { a, b, temp }, act: "Début de la permutation (Swap)." };
+
+          a = 5; b = 9;
+          yield { noeud: "noeud-init-ab", ligneSvg: "ligne-debut-ab", ligne: 1, statut: "Initialisation", vars: { a, b, temp }, mod: "a", cond: "—", act: "État initial : a = 5 et b = 9." };
+
+          temp = a;
+          yield { noeud: "noeud-swap-1", ligneSvg: "ligne-ab-s1", ligne: 4, statut: "Étape 1 (Sauvegarde)", vars: { a, b, temp }, mod: "temp", cond: "—", act: "Sauvegarde : temp = a (5). La valeur initiale de a est protégée." };
+
+          a = b;
+          yield { noeud: "noeud-swap-2", ligneSvg: "ligne-s1-s2", ligne: 5, statut: "Étape 2 (Copie)", vars: { a, b, temp }, mod: "a", cond: "—", act: "Copie : a prend la valeur de b (9). a = 9." };
+
+          b = temp;
+          yield { noeud: "noeud-swap-3", ligneSvg: "ligne-s2-s3", ligne: 6, statut: "Étape 3 (Restauration)", vars: { a, b, temp }, mod: "b", cond: "—", act: "Restauration : b prend l'ancienne valeur de a sauvée dans temp (5)." };
+
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-s3-sortie", ligne: 7, statut: "Sortie E/S", vars: { a, b, temp }, cond: "—", act: "Affichage : console.log montre a = 9 et b = 5. Permutation réussie !" };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 7, statut: "Terminé", vars: { a, b, temp }, cond: "—", act: "Fin du Swap.", termine: true };
+        }
+      },
+
+      // 5. PATTERN 2 : ACCUMULATION (ÉLÉMENT NEUTRE 0 VS 1)
+      accum: {
+        titre: "Organigramme : Pattern 2 - Accumulation & Élément neutre",
+        code: [
+          "let somme = 0;   // Élément neutre addition (+)",
+          "let produit = 1; // Élément neutre multiplication (*)",
+          "for (let i = 1; i <= 3; i++) {",
+          "  somme = somme + i;",
+          "  produit = produit * i;",
+          "}",
+          "console.log(somme, produit);"
+        ],
+        variables: ["somme", "produit", "i"],
+        noeuds: ["noeud-debut", "noeud-init-acc", "noeud-init-i", "noeud-cond", "noeud-corps", "noeud-incr", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-acc", "ligne-acc-i", "ligne-i-cond", "ligne-cond-corps", "ligne-corps-incr", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        labels: ["label-vrai", "label-faux"],
+        svg: `
+          <svg class="organigramme" viewBox="0 0 380 540">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+              </marker>
+            </defs>
+
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="135" y="10" width="110" height="36" rx="18" />
+              <text class="texte-noeud" x="190" y="28">Début</text>
+            </g>
+
+            <line id="ligne-debut-acc" class="ligne-flux" x1="190" y1="46" x2="190" y2="75" marker-end="url(#fleche)" />
+
+            <!-- Neutres : somme=0, produit=1 -->
+            <g id="noeud-init-acc" class="noeud">
+              <rect class="forme-noeud" x="105" y="75" width="170" height="42" rx="3" />
+              <text class="texte-noeud" x="190" y="96">somme &larr; 0, produit &larr; 1</text>
+            </g>
+
+            <line id="ligne-acc-i" class="ligne-flux" x1="190" y1="117" x2="190" y2="150" marker-end="url(#fleche)" />
+
+            <g id="noeud-init-i" class="noeud">
+              <rect class="forme-noeud" x="130" y="150" width="120" height="38" rx="3" />
+              <text class="texte-noeud" x="190" y="169">i &larr; 1</text>
+            </g>
+
+            <line id="ligne-i-cond" class="ligne-flux" x1="190" y1="188" x2="190" y2="230" marker-end="url(#fleche)" />
+
+            <g id="noeud-cond" class="noeud">
+              <polygon class="forme-noeud" points="190,230 265,265 190,300 115,265" />
+              <text class="texte-noeud" x="190" y="265">i &lt;= 3 ?</text>
+            </g>
+
+            <line id="ligne-cond-corps" class="ligne-flux" x1="190" y1="300" x2="190" y2="345" marker-end="url(#fleche)" />
+            <text id="label-vrai" class="etiquette-branche" x="198" y="325">Vrai</text>
+
+            <!-- Corps accumulation -->
+            <g id="noeud-corps" class="noeud">
+              <rect class="forme-noeud" x="95" y="345" width="190" height="48" rx="3" />
+              <text class="texte-noeud" x="190" y="362">somme &larr; somme + i</text>
+              <text class="texte-noeud" x="190" y="378">produit &larr; produit * i</text>
+            </g>
+
+            <line id="ligne-corps-incr" class="ligne-flux" x1="190" y1="393" x2="190" y2="430" marker-end="url(#fleche)" />
+
+            <g id="noeud-incr" class="noeud">
+              <rect class="forme-noeud" x="125" y="430" width="130" height="38" rx="3" />
+              <text class="texte-noeud" x="190" y="449">i &larr; i + 1</text>
+            </g>
+
+            <path id="ligne-boucle" class="ligne-flux" d="M 190 468 V 495 H 325 V 205 H 193" marker-end="url(#fleche)" />
+
+            <!-- Sortie -->
+            <line id="ligne-cond-sortie" class="ligne-flux" x1="115" y1="265" x2="85" y2="265" marker-end="url(#fleche)" />
+            <text id="label-faux" class="etiquette-branche" x="90" y="257">Faux</text>
+
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="10,245 85,245 70,285 -5,285" transform="translate(5,0)" />
+              <text class="texte-noeud" x="40" y="265">Afficher</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="40" y1="285" x2="40" y2="330" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="5" y="330" width="70" height="36" rx="18" />
+              <text class="texte-noeud" x="40" y="348">Fin</text>
+            </g>
+          </svg>
+        `,
+        generateur: function* () {
+          let somme = undefined, produit = undefined, i = undefined;
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { somme, produit, i }, act: "Début de l'accumulation." };
+
+          somme = 0; produit = 1;
+          yield { noeud: "noeud-init-acc", ligneSvg: "ligne-debut-acc", ligne: 1, statut: "Éléments neutres", vars: { somme, produit, i }, mod: "somme", cond: "—", act: "somme = 0 (neutre addition), produit = 1 (neutre multiplication)." };
+
+          i = 1;
+          yield { noeud: "noeud-init-i", ligneSvg: "ligne-acc-i", ligne: 3, statut: "Compteur", vars: { somme, produit, i }, mod: "i", cond: "—", act: "Compteur i démarre à 1." };
+
+          // Tour 1
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 3, statut: "Tour 1", vars: { somme, produit, i }, cond: "1 <= 3 (Vrai)", act: "1 <= 3 est VRAI." };
+          somme = somme + 1; produit = produit * 1;
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 4, statut: "Tour 1", vars: { somme, produit, i }, mod: "somme", cond: "—", act: "somme = 0 + 1 = 1 | produit = 1 * 1 = 1." };
+          i++;
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 3, statut: "Incrément", vars: { somme, produit, i }, mod: "i", cond: "—", act: "i passe à 2." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3, statut: "Bouclage", vars: { somme, produit, i }, cond: "—", act: "Remontée vers le test." };
+
+          // Tour 2
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 3, statut: "Tour 2", vars: { somme, produit, i }, cond: "2 <= 3 (Vrai)", act: "2 <= 3 est VRAI." };
+          somme = somme + 2; produit = produit * 2;
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 4, statut: "Tour 2", vars: { somme, produit, i }, mod: "produit", cond: "—", act: "somme = 1 + 2 = 3 | produit = 1 * 2 = 2." };
+          i++;
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 3, statut: "Incrément", vars: { somme, produit, i }, mod: "i", cond: "—", act: "i passe à 3." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3, statut: "Bouclage", vars: { somme, produit, i }, cond: "—", act: "Remontée vers le test." };
+
+          // Tour 3
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-i-cond", ligne: 3, statut: "Tour 3", vars: { somme, produit, i }, cond: "3 <= 3 (Vrai)", act: "3 <= 3 est VRAI." };
+          somme = somme + 3; produit = produit * 3;
+          yield { noeud: "noeud-corps", ligneSvg: "ligne-cond-corps", ligne: 4, statut: "Tour 3", vars: { somme, produit, i }, mod: "somme", cond: "—", act: "somme = 3 + 3 = 6 | produit = 2 * 3 = 6." };
+          i++;
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-corps-incr", ligne: 3, statut: "Incrément", vars: { somme, produit, i }, mod: "i", cond: "—", act: "i passe à 4." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 3, statut: "Bouclage", vars: { somme, produit, i }, cond: "—", act: "Remontée vers le test final." };
+
+          // Fin
+          yield { noeud: "noeud-cond", ligneSvg: "ligne-cond-sortie", ligne: 3, statut: "Sortie", vars: { somme, produit, i }, cond: "4 <= 3 (Faux)", act: "4 <= 3 est FAUX ! Sortie." };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-sortie-fin", ligne: 7, statut: "Sortie E/S", vars: { somme, produit, i }, cond: "—", act: "Affichage final : somme = 6, produit = 6." };
+          yield { noeud: "noeud-fin", ligne: 7, statut: "Terminé", vars: { somme, produit, i }, cond: "—", act: "Fin accumulation.", termine: true };
+        }
+      },
+
+      // 6. PATTERN 5 : RECHERCHE SÉQUENTIELLE (FLAG & SORTIE PROPRE)
+      recherche: {
+        titre: "Organigramme : Pattern 5 - Recherche & Sortie de boucle",
+        code: [
+          "let tab = [12, 45, 78];",
+          "let cible = 45;",
+          "let trouve = false;",
+          "for (let i = 0; i < tab.length; i++) {",
+          "  if (tab[i] === cible) {",
+          "    trouve = true;",
+          "    break; // Sortie immédiate",
+          "  }",
+          "}",
+          "console.log('Résultat :', trouve);"
+        ],
+        variables: ["cible", "trouve", "i"],
+        noeuds: ["noeud-debut", "noeud-init", "noeud-for-cond", "noeud-test-cible", "noeud-trouve-vrai", "noeud-incr", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-init", "ligne-init-cond", "ligne-cond-test", "ligne-test-trouve", "ligne-test-faux", "ligne-trouve-break", "ligne-boucle", "ligne-cond-sortie", "ligne-sortie-fin"],
+        labels: ["label-trouve-oui", "label-trouve-non", "label-for-non"],
+        svg: `
+          <svg class="organigramme" viewBox="0 0 400 520">
+            <defs>
+              <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+              </marker>
+              <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+              </marker>
+            </defs>
+
+            <g id="noeud-debut" class="noeud">
+              <rect class="forme-noeud" x="145" y="10" width="110" height="36" rx="18" />
+              <text class="texte-noeud" x="200" y="28">Début</text>
+            </g>
+
+            <line id="ligne-debut-init" class="ligne-flux" x1="200" y1="46" x2="200" y2="75" marker-end="url(#fleche)" />
+
+            <g id="noeud-init" class="noeud">
+              <rect class="forme-noeud" x="110" y="75" width="180" height="40" rx="3" />
+              <text class="texte-noeud" x="200" y="95">cible &larr; 45, trouve &larr; false</text>
+            </g>
+
+            <line id="ligne-init-cond" class="ligne-flux" x1="200" y1="115" x2="200" y2="155" marker-end="url(#fleche)" />
+
+            <!-- Test boucle for : i < tab.length -->
+            <g id="noeud-for-cond" class="noeud">
+              <polygon class="forme-noeud" points="200,155 275,190 200,225 125,190" />
+              <text class="texte-noeud" x="200" y="190">i &lt; tab.length ?</text>
+            </g>
+
+            <!-- Test tab[i] === cible -->
+            <line id="ligne-cond-test" class="ligne-flux" x1="200" y1="225" x2="200" y2="265" marker-end="url(#fleche)" />
+
+            <g id="noeud-test-cible" class="noeud">
+              <polygon class="forme-noeud" points="200,265 285,300 200,335 115,300" />
+              <text class="texte-noeud" x="200" y="300">tab[i] === cible ?</text>
+            </g>
+
+            <!-- VRAI : trouve <- true et break vers sortie -->
+            <path id="ligne-test-trouve" class="ligne-flux" d="M 285 300 H 330 V 350" marker-end="url(#fleche)" />
+            <text id="label-trouve-oui" class="etiquette-branche" x="300" y="292">Oui</text>
+
+            <g id="noeud-trouve-vrai" class="noeud">
+              <rect class="forme-noeud" x="260" y="350" width="130" height="42" rx="3" />
+              <text class="texte-noeud" x="325" y="365">trouve &larr; true</text>
+              <text class="texte-noeud" x="325" y="380">break</text>
+            </g>
+
+            <!-- FAUX : i <- i + 1 et boucle -->
+            <path id="ligne-test-faux" class="ligne-flux" d="M 115 300 H 75 V 350" marker-end="url(#fleche)" />
+            <text id="label-trouve-non" class="etiquette-branche" x="80" y="292">Non</text>
+
+            <g id="noeud-incr" class="noeud">
+              <rect class="forme-noeud" x="20" y="350" width="110" height="42" rx="3" />
+              <text class="texte-noeud" x="75" y="371">i &larr; i + 1</text>
+            </g>
+
+            <path id="ligne-boucle" class="ligne-flux" d="M 75 392 V 420 H 15 V 190 H 122" marker-end="url(#fleche)" />
+
+            <!-- Sortie break ou fin boucle for -->
+            <path id="ligne-trouve-break" class="ligne-flux" d="M 325 392 V 445 H 200" marker-end="url(#fleche)" />
+            <line id="ligne-cond-sortie" class="ligne-flux" x1="200" y1="225" x2="200" y2="225" />
+
+            <!-- Parallélogramme E/S -->
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="145,430 255,430 235,470 125,470" />
+              <text class="texte-noeud" x="190" y="450">Afficher trouve</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="190" y1="470" x2="190" y2="495" marker-end="url(#fleche)" />
+
+            <g id="noeud-fin" class="noeud">
+              <rect class="forme-noeud" x="145" y="495" width="90" height="34" rx="17" />
+              <text class="texte-noeud" x="190" y="512">Fin</text>
+            </g>
+          </svg>
+        `,
+        generateur: function* () {
+          let cible = undefined, trouve = undefined, i = undefined;
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { cible, trouve, i }, act: "Début de la recherche séquentielle." };
+
+          cible = 45; trouve = false;
+          yield { noeud: "noeud-init", ligneSvg: "ligne-debut-init", ligne: 1, statut: "Initialisation", vars: { cible, trouve, i }, mod: "trouve", cond: "—", act: "tab = [12, 45, 78], cible = 45, trouve = false." };
+
+          i = 0;
+          // Tour 1 : i = 0, tab[0] = 12
+          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4, statut: "Tour 1", vars: { cible, trouve, i }, cond: "0 < 3 (Vrai)", act: "0 < 3 est VRAI -> test premier élément." };
+          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5, statut: "Test élément 0", vars: { cible, trouve, i }, cond: "12 === 45 (Faux)", act: "tab[0] (12) === 45 est FAUX ! Règle d'or : pas de return false !" };
+          i++;
+          yield { noeud: "noeud-incr", ligneSvg: "ligne-test-faux", ligne: 4, statut: "Incrément", vars: { cible, trouve, i }, mod: "i", cond: "—", act: "On continue la recherche : i passe à 1." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 4, statut: "Bouclage", vars: { cible, trouve, i }, cond: "—", act: "Remontée vers le test." };
+
+          // Tour 2 : i = 1, tab[1] = 45
+          yield { noeud: "noeud-for-cond", ligneSvg: "ligne-init-cond", ligne: 4, statut: "Tour 2", vars: { cible, trouve, i }, cond: "1 < 3 (Vrai)", act: "1 < 3 est VRAI -> test deuxième élément." };
+          yield { noeud: "noeud-test-cible", ligneSvg: "ligne-cond-test", ligne: 5, statut: "Test élément 1", vars: { cible, trouve, i }, cond: "45 === 45 (VRAI)", act: "tab[1] (45) === 45 est VRAI ! Élément trouvé !" };
+          trouve = true;
+          yield { noeud: "noeud-trouve-vrai", ligneSvg: "ligne-test-trouve", ligne: 6, statut: "Succès & Break", vars: { cible, trouve, i }, mod: "trouve", cond: "—", act: "trouve = true. Instruction break : interruption immédiate." };
+
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-trouve-break", ligne: 10, statut: "Sortie E/S", vars: { cible, trouve, i }, cond: "—", act: "Affichage final : console.log montre true." };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 10, statut: "Terminé", vars: { cible, trouve, i }, cond: "—", act: "Fin de la recherche.", termine: true };
+        }
+      },
+
+      // 7. SYRACUSE (COLLATZ & MODULO %)
       syracuse: {
-        titre: "Organigramme : Syracuse (Collatz)",
+        titre: "Organigramme : Syracuse (Modulo % & Boucle)",
         code: [
           "let n = 4;",
           "while (n !== 1) {",
@@ -750,25 +1329,22 @@
           "console.log('Arrivé à 1 !');"
         ],
         variables: ["n"],
-        noeuds: ["noeud-debut", "noeud-init-n", "noeud-cond-1", "noeud-cond-pair", "noeud-pair", "noeud-impair", "noeud-fin"],
-        lignes: ["ligne-debut-n", "ligne-n-cond1", "ligne-cond1-fin", "ligne-cond1-pair", "ligne-pair-gauche", "ligne-impair-droite", "ligne-boucle"],
+        noeuds: ["noeud-debut", "noeud-init-n", "noeud-cond-1", "noeud-cond-pair", "noeud-pair", "noeud-impair", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-n", "ligne-n-cond1", "ligne-cond1-fin", "ligne-cond1-pair", "ligne-pair-gauche", "ligne-impair-droite", "ligne-boucle", "ligne-sortie-fin"],
         labels: ["label-vrai1", "label-faux1", "label-pair", "label-impair"],
         svg: `
           <svg class="organigramme" viewBox="0 0 380 500">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
               </marker>
               <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
-              </marker>
-              <marker id="fleche-active-boucle" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0288d1" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
             </defs>
 
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="135" y="10" width="110" height="38" rx="8" />
+              <rect class="forme-noeud" x="135" y="10" width="110" height="38" rx="19" />
               <text class="texte-noeud" x="190" y="29">Début</text>
             </g>
 
@@ -781,32 +1357,37 @@
 
             <line id="ligne-n-cond1" class="ligne-flux" x1="190" y1="116" x2="190" y2="160" marker-end="url(#fleche)" />
 
-            <!-- Test 1 : n vaut 1 ? -->
+            <!-- Test n === 1 -->
             <g id="noeud-cond-1" class="noeud">
               <polygon class="forme-noeud" points="190,160 265,192 190,224 115,192" />
-              <text class="texte-noeud" x="190" y="192">n vaut 1 ?</text>
+              <text class="texte-noeud" x="190" y="192">n === 1 ?</text>
             </g>
 
-            <!-- Si n vaut 1 (Vrai) -> Sortie vers Fin à gauche -->
-            <line id="ligne-cond1-fin" class="ligne-flux" x1="115" y1="192" x2="70" y2="192" marker-end="url(#fleche)" />
-            <text id="label-vrai1" class="etiquette-branche" x="80" y="184">Oui</text>
+            <line id="ligne-cond1-fin" class="ligne-flux" x1="115" y1="192" x2="85" y2="192" marker-end="url(#fleche)" />
+            <text id="label-vrai1" class="etiquette-branche" x="90" y="184">Oui</text>
+
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="10,175 80,175 65,210 -5,210" transform="translate(5,0)" />
+              <text class="texte-noeud" x="35" y="193">Afficher 1</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="35" y1="210" x2="35" y2="245" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="10" y="173" width="60" height="38" rx="8" />
-              <text class="texte-noeud" x="40" y="192">Fin</text>
+              <rect class="forme-noeud" x="5" y="245" width="60" height="36" rx="18" />
+              <text class="texte-noeud" x="35" y="263">Fin</text>
             </g>
 
-            <!-- Si n !== 1 (Faux) -> descente vers n est pair ? -->
+            <!-- Test n % 2 === 0 -->
             <line id="ligne-cond1-pair" class="ligne-flux" x1="190" y1="224" x2="190" y2="260" marker-end="url(#fleche)" />
             <text id="label-faux1" class="etiquette-branche" x="198" y="244">Non</text>
 
-            <!-- Test 2 : n est pair ? -->
             <g id="noeud-cond-pair" class="noeud">
               <polygon class="forme-noeud" points="190,260 265,292 190,324 115,292" />
-              <text class="texte-noeud" x="190" y="292">n est pair ?</text>
+              <text class="texte-noeud" x="190" y="292">n % 2 === 0 ?</text>
             </g>
 
-            <!-- Branche Pair (gauche) : n <- n / 2 -->
+            <!-- Branche Pair -->
             <path id="ligne-pair-gauche" class="ligne-flux" d="M 115 292 H 80 V 345" marker-end="url(#fleche)" />
             <text id="label-pair" class="etiquette-branche" x="65" y="284">Oui</text>
 
@@ -815,7 +1396,7 @@
               <text class="texte-noeud" x="80" y="366">n &larr; n / 2</text>
             </g>
 
-            <!-- Branche Impair (droite) : n <- 3n + 1 -->
+            <!-- Branche Impair -->
             <path id="ligne-impair-droite" class="ligne-flux" d="M 265 292 H 300 V 345" marker-end="url(#fleche)" />
             <text id="label-impair" class="etiquette-branche" x="302" y="284">Non</text>
 
@@ -824,40 +1405,40 @@
               <text class="texte-noeud" x="300" y="366">n &larr; 3n + 1</text>
             </g>
 
-            <!-- Flèche de remontée de boucle : rejoint au-dessus du test n vaut 1 ? -->
             <path id="ligne-boucle" class="ligne-flux" d="M 80 387 V 420 H 190 V 420 H 300 V 420 H 360 V 135 H 193" marker-end="url(#fleche)" />
           </svg>
         `,
         generateur: function* () {
           let n = undefined;
-          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { n }, act: "Algorithme de Syracuse (conjecture de Collatz)." };
+          yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { n }, act: "Départ algorithme de Syracuse." };
 
           n = 4;
-          yield { noeud: "noeud-init-n", ligneSvg: "ligne-debut-n", ligne: 1, statut: "Initialisation", vars: { n }, mod: "n", act: "Départ avec n = 4." };
+          yield { noeud: "noeud-init-n", ligneSvg: "ligne-debut-n", ligne: 1, statut: "Initialisation", vars: { n }, mod: "n", cond: "—", act: "n prend la valeur 4." };
 
-          // Tour 1 : n = 4
-          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Test 4 vaut 1 ?", vars: { n }, act: "Test : 4 vaut 1 ? Non, on continue." };
-          yield { noeud: "noeud-cond-pair", ligneSvg: "ligne-cond1-pair", ligne: 3, statut: "Test parité", vars: { n }, act: "4 est pair ? Oui (4 % 2 === 0)." };
-          n = n / 2; // n = 2
-          yield { noeud: "noeud-pair", ligneSvg: "ligne-pair-gauche", ligne: 4, statut: "n / 2", vars: { n }, mod: "n", act: "Calcul n / 2 : n prend la valeur 2." };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, act: "La flèche remonte avant le test 'n vaut 1 ?'." };
+          // Tour 1 : 4
+          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Tour 1", vars: { n }, cond: "4 === 1 (Faux)", act: "Test arrêt : 4 === 1 est FAUX." };
+          yield { noeud: "noeud-cond-pair", ligneSvg: "ligne-cond1-pair", ligne: 3, statut: "Parité", vars: { n }, cond: "4 % 2 === 0 (Vrai)", act: "Modulo : 4 % 2 === 0 est VRAI (nombre pair)." };
+          n = n / 2;
+          yield { noeud: "noeud-pair", ligneSvg: "ligne-pair-gauche", ligne: 4, statut: "Calcul", vars: { n }, mod: "n", cond: "—", act: "n = 4 / 2 = 2." };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, cond: "—", act: "Remontée vers le test arrêt." };
 
-          // Tour 2 : n = 2
-          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Test 2 vaut 1 ?", vars: { n }, act: "Test : 2 vaut 1 ? Non, on continue." };
-          yield { noeud: "noeud-cond-pair", ligneSvg: "ligne-cond1-pair", ligne: 3, statut: "Test parité", vars: { n }, act: "2 est pair ? Oui." };
-          n = n / 2; // n = 1
-          yield { noeud: "noeud-pair", ligneSvg: "ligne-pair-gauche", ligne: 4, statut: "n / 2", vars: { n }, mod: "n", act: "Calcul n / 2 : n prend la valeur 1 !" };
-          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, act: "On remonte tester à nouveau avec n = 1." };
+          // Tour 2 : 2
+          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Tour 2", vars: { n }, cond: "2 === 1 (Faux)", act: "Test arrêt : 2 === 1 est FAUX." };
+          yield { noeud: "noeud-cond-pair", ligneSvg: "ligne-cond1-pair", ligne: 3, statut: "Parité", vars: { n }, cond: "2 % 2 === 0 (Vrai)", act: "Modulo : 2 % 2 === 0 est VRAI." };
+          n = n / 2;
+          yield { noeud: "noeud-pair", ligneSvg: "ligne-pair-gauche", ligne: 4, statut: "Calcul", vars: { n }, mod: "n", cond: "—", act: "n = 2 / 2 = 1 !" };
+          yield { noeud: null, ligneSvg: "ligne-boucle", ligne: 2, statut: "Bouclage", vars: { n }, cond: "—", act: "Remontée vers le test final." };
 
-          // Tour 3 : n = 1 -> FIN
-          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Test 1 vaut 1 ?", vars: { n }, act: "Test : n vaut 1 ? OUI ! On bifurque vers Fin." };
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-cond1-fin", ligne: 9, statut: "Terminé", vars: { n }, act: "Objectif atteint : n = 1. Algorithme terminé !", termine: true };
+          // Tour 3 : 1
+          yield { noeud: "noeud-cond-1", ligneSvg: "ligne-n-cond1", ligne: 2, statut: "Arrêt", vars: { n }, cond: "1 === 1 (VRAI)", act: "Test arrêt : 1 === 1 est VRAI ! Objectif atteint." };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-cond1-fin", ligne: 9, statut: "Sortie E/S", vars: { n }, cond: "—", act: "Affichage 'Arrivé à 1 !'." };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 9, statut: "Terminé", vars: { n }, cond: "—", act: "Conjecture vérifiée.", termine: true };
         }
       },
 
-      // EXEMPLE 5 : FONCTION (APPEL ET RETURN)
+      // 8. FONCTION & CALL STACK (NORME ISO 5807)
       fonction: {
-        titre: "Organigramme : Fonction (appel & return)",
+        titre: "Organigramme : Fonction & Sous-programme ISO 5807",
         code: [
           "function doubler(n) {",
           "  let res = n * 2;",
@@ -866,30 +1447,29 @@
           "",
           "let x = 5;",
           "let y = doubler(x);",
-          "console.log(y);"
+          "console.log('Résultat :', y);"
         ],
         variables: ["x", "n", "res", "y"],
-        noeuds: ["noeud-debut", "noeud-init-x", "noeud-appel", "noeud-fn-entree", "noeud-fn-calc", "noeud-fn-ret", "noeud-aff-y", "noeud-fin"],
-        lignes: ["ligne-debut-x", "ligne-x-appel", "ligne-saut-fn", "ligne-fn-entree-calc", "ligne-fn-calc-ret", "ligne-retour-fn", "ligne-y-fin"],
+        noeuds: ["noeud-debut", "noeud-init-x", "noeud-appel", "noeud-fn-entree", "noeud-fn-calc", "noeud-fn-ret", "noeud-aff-y", "noeud-sortie", "noeud-fin"],
+        lignes: ["ligne-debut-x", "ligne-x-appel", "ligne-saut-fn", "ligne-fn-entree-calc", "ligne-fn-calc-ret", "ligne-retour-fn", "ligne-y-sortie", "ligne-sortie-fin"],
         labels: [],
         svg: `
           <svg class="organigramme" viewBox="0 0 380 520">
             <defs>
               <marker id="fleche" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#222222" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
               </marker>
               <marker id="fleche-active" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1565c0" />
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
               </marker>
             </defs>
 
-            <!-- CADRE DU SOUS-PROGRAMME (FONCTION DOUBLER) -->
+            <!-- CADRE DU SOUS-PROGRAMME ISO (FONCTION DOUBLER) -->
             <rect x="200" y="140" width="170" height="230" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="4,4" stroke-width="1.5" />
-            <text x="285" y="160" font-family="sans-serif" font-size="11px" font-weight="bold" fill="#64748b" text-anchor="middle">Fonction doubler(n)</text>
+            <text x="285" y="160" font-family="sans-serif" font-size="11px" font-weight="bold" fill="#64748b" text-anchor="middle">Sous-programme doubler(n)</text>
 
-            <!-- PROGRAMME PRINCIPAL (A GAUCHE) -->
             <g id="noeud-debut" class="noeud">
-              <rect class="forme-noeud" x="35" y="15" width="110" height="38" rx="8" />
+              <rect class="forme-noeud" x="35" y="15" width="110" height="38" rx="19" />
               <text class="texte-noeud" x="90" y="34">Début</text>
             </g>
 
@@ -902,18 +1482,17 @@
 
             <line id="ligne-x-appel" class="ligne-flux" x1="90" y1="123" x2="90" y2="160" marker-end="url(#fleche)" />
 
-            <!-- Nœud d'appel de fonction (double barre latérale standard ISO) -->
+            <!-- Nœud d'appel avec double barre latérale ISO 5807 -->
             <g id="noeud-appel" class="noeud">
               <rect class="forme-noeud" x="15" y="160" width="150" height="42" rx="3" />
-              <line x1="27" y1="160" x2="27" y2="202" stroke="#222" stroke-width="1.5" />
-              <line x1="153" y1="160" x2="153" y2="202" stroke="#222" stroke-width="1.5" />
+              <line x1="27" y1="160" x2="27" y2="202" stroke="#1e293b" stroke-width="1.5" />
+              <line x1="153" y1="160" x2="153" y2="202" stroke="#1e293b" stroke-width="1.5" />
               <text class="texte-noeud" x="90" y="181">doubler(x)</text>
             </g>
 
-            <!-- Flèche de saut vers la fonction -->
             <path id="ligne-saut-fn" class="ligne-flux" stroke-dasharray="3,3" d="M 165 181 H 215" marker-end="url(#fleche)" />
 
-            <!-- SOUS-PROGRAMME DOUBLER -->
+            <!-- Sous-programme -->
             <g id="noeud-fn-entree" class="noeud">
               <rect class="forme-noeud" x="215" y="180" width="140" height="38" rx="8" />
               <text class="texte-noeud" x="285" y="199">n &larr; x (5)</text>
@@ -933,20 +1512,26 @@
               <text class="texte-noeud" x="285" y="339">return res</text>
             </g>
 
-            <!-- Flèche de retour du sous-programme vers le programme principal -->
             <path id="ligne-retour-fn" class="ligne-flux" stroke-dasharray="3,3" d="M 215 339 H 90 V 380" marker-end="url(#fleche)" />
 
-            <!-- RETOUR DANS LE PROGRAMME PRINCIPAL -->
+            <!-- Retour principal -->
             <g id="noeud-aff-y" class="noeud">
               <rect class="forme-noeud" x="20" y="380" width="140" height="42" rx="3" />
               <text class="texte-noeud" x="90" y="401">y &larr; retour (10)</text>
             </g>
 
-            <line id="ligne-y-fin" class="ligne-flux" x1="90" y1="422" x2="90" y2="460" marker-end="url(#fleche)" />
+            <line id="ligne-y-sortie" class="ligne-flux" x1="90" y1="422" x2="90" y2="450" marker-end="url(#fleche)" />
+
+            <g id="noeud-sortie" class="noeud">
+              <polygon class="forme-noeud" points="40,450 140,450 120,485 20,485" />
+              <text class="texte-noeud" x="80" y="468">Afficher y</text>
+            </g>
+
+            <line id="ligne-sortie-fin" class="ligne-flux" x1="80" y1="485" x2="80" y2="505" marker-end="url(#fleche)" />
 
             <g id="noeud-fin" class="noeud">
-              <rect class="forme-noeud" x="35" y="460" width="110" height="38" rx="8" />
-              <text class="texte-noeud" x="90" y="479">Fin</text>
+              <rect class="forme-noeud" x="40" y="505" width="80" height="32" rx="16" />
+              <text class="texte-noeud" x="80" y="521">Fin</text>
             </g>
           </svg>
         `,
@@ -955,45 +1540,64 @@
           yield { noeud: "noeud-debut", ligne: null, statut: "Début", vars: { x, n, res, y }, act: "Début du programme principal." };
 
           x = 5;
-          yield { noeud: "noeud-init-x", ligneSvg: "ligne-debut-x", ligne: 6, statut: "Ligne 6", vars: { x, n, res, y }, mod: "x", act: "Affectation dans le programme principal : x = 5." };
+          yield { noeud: "noeud-init-x", ligneSvg: "ligne-debut-x", ligne: 6, statut: "Ligne 6", vars: { x, n, res, y }, mod: "x", cond: "—", act: "Affectation principale : x = 5." };
 
-          yield { noeud: "noeud-appel", ligneSvg: "ligne-x-appel", ligne: 7, statut: "Appel doubler(x)", vars: { x, n, res, y }, act: "Ligne 7 : Appel de la fonction doubler(x). Passage de l'argument x = 5." };
+          yield { noeud: "noeud-appel", ligneSvg: "ligne-x-appel", ligne: 7, statut: "Appel fonction", vars: { x, n, res, y }, cond: "—", act: "Ligne 7 : Appel doubler(x). Symbole double barre ISO 5807." };
 
           n = 5;
-          yield { noeud: "noeud-fn-entree", ligneSvg: "ligne-saut-fn", ligne: 1, statut: "Entrée fonction", vars: { x, n, res, y }, mod: "n", act: "Entrée dans la fonction doubler : le paramètre n reçoit la valeur 5." };
+          yield { noeud: "noeud-fn-entree", ligneSvg: "ligne-saut-fn", ligne: 1, statut: "Entrée fonction", vars: { x, n, res, y }, mod: "n", cond: "—", act: "Entrée dans doubler : le paramètre n reçoit 5." };
 
           res = n * 2;
-          yield { noeud: "noeud-fn-calc", ligneSvg: "ligne-fn-entree-calc", ligne: 2, statut: "Calcul fonction", vars: { x, n, res, y }, mod: "res", act: "Corps de la fonction : let res = 5 * 2 = 10." };
+          yield { noeud: "noeud-fn-calc", ligneSvg: "ligne-fn-entree-calc", ligne: 2, statut: "Calcul fonction", vars: { x, n, res, y }, mod: "res", cond: "—", act: "Calcul pur : res = 5 * 2 = 10." };
 
-          yield { noeud: "noeud-fn-ret", ligneSvg: "ligne-fn-calc-ret", ligne: 3, statut: "Return", vars: { x, n, res, y }, act: "Ligne 3 : return res. La fonction renvoie la valeur 10 au programme appelant." };
+          yield { noeud: "noeud-fn-ret", ligneSvg: "ligne-fn-calc-ret", ligne: 3, statut: "Return", vars: { x, n, res, y }, cond: "—", act: "Ligne 3 : return res (10) renvoyé à l'appelant." };
 
           y = res;
-          yield { noeud: "noeud-aff-y", ligneSvg: "ligne-retour-fn", ligne: 7, statut: "Retour", vars: { x, n, res, y }, mod: "y", act: "Retour dans le programme principal : la variable y reçoit la valeur de retour (10)." };
+          yield { noeud: "noeud-aff-y", ligneSvg: "ligne-retour-fn", ligne: 7, statut: "Retour appelant", vars: { x, n, res, y }, mod: "y", cond: "—", act: "Ligne 7 : y reçoit la valeur 10." };
 
-          yield { noeud: "noeud-fin", ligneSvg: "ligne-y-fin", ligne: 8, statut: "Terminé", vars: { x, n, res, y }, act: "Ligne 8 : console.log(y). Fin de l'exécution.", termine: true };
+          yield { noeud: "noeud-sortie", ligneSvg: "ligne-y-sortie", ligne: 8, statut: "Sortie E/S", vars: { x, n, res, y }, cond: "—", act: "Parallélogramme E/S : console.log affiche 10." };
+          yield { noeud: "noeud-fin", ligneSvg: "ligne-sortie-fin", ligne: 8, statut: "Terminé", vars: { x, n, res, y }, cond: "—", act: "Fin de l'exécution.", termine: true };
         }
       }
     };
 
     // -------------------------------------------------------------
-    // GESTION DU CYCLE DE VIE ET DE L'AFFICHAGE
+    // GESTION DU CYCLE DE VIE, VARIABLES ET TABLE DE TRACE
     // -------------------------------------------------------------
     let exempleActifId = "for";
     let generateur = null;
     let etapeNum = 0;
     let minuteurAuto = null;
 
+    const tabsExemples = document.querySelectorAll(".tab-exemple");
     const zonesCode = document.getElementById("zones");
     const conteneurSvg = document.getElementById("conteneur-organigramme");
     const barreVars = document.getElementById("barre-variables");
     const titreOrg = document.getElementById("titre-organigramme");
     const badgeStatut = document.getElementById("badge-statut");
     const messageAction = document.getElementById("message-action");
+    const corpsTableTrace = document.getElementById("corps-table-trace");
 
     const btnSuivant = document.getElementById("btn-suivant");
     const btnAuto = document.getElementById("btn-auto");
     const btnReset = document.getElementById("btn-reset");
-    const tabsExemples = document.querySelectorAll(".tab-exemple");
+
+    function determinerType(val) {
+      if (val === undefined) return "undefined";
+      if (val === null) return "null";
+      if (typeof val === "boolean") return "boolean";
+      if (typeof val === "number") return "number";
+      if (typeof val === "string") return "string";
+      if (Array.isArray(val)) return "Array";
+      return typeof val;
+    }
+
+    function formaterValeur(val) {
+      if (val === undefined) return "undefined";
+      if (val === null) return "null";
+      if (typeof val === "string") return `"${val}"`;
+      return String(val);
+    }
 
     function chargerExemple(id) {
       if (minuteurAuto) {
@@ -1010,7 +1614,7 @@
         tab.classList.toggle("actif", tab.dataset.id === id);
       });
 
-      // 2. Mettre à jour le titre
+      // 2. Titre
       titreOrg.textContent = ex.titre;
 
       // 3. Charger le code dans l'éditeur
@@ -1026,17 +1630,26 @@
       // 4. Charger l'organigramme SVG
       conteneurSvg.innerHTML = ex.svg;
 
-      // 5. Charger la barre des variables
+      // 5. Charger la barre des variables (Section 3.2 avec typage)
       barreVars.innerHTML = "";
       ex.variables.forEach(v => {
         const box = document.createElement("div");
         box.className = "case-variable";
         box.id = `case-var-${v}`;
-        box.innerHTML = `<span class="nom-var">Variable ${v}</span><span class="valeur-var" id="val-var-${v}">--</span>`;
+        box.innerHTML = `
+          <div class="entete-var">
+            <span class="nom-var">${v}</span>
+            <span class="type-var" id="type-var-${v}">undefined</span>
+          </div>
+          <span class="valeur-var val-undefined" id="val-var-${v}">undefined</span>
+        `;
         barreVars.appendChild(box);
       });
 
-      // 6. Réinitialiser l'exécution
+      // 6. Réinitialiser la table de trace
+      corpsTableTrace.innerHTML = "";
+
+      // 7. Réinitialiser l'exécution
       generateur = ex.generateur();
       etapeNum = 0;
 
@@ -1069,7 +1682,7 @@
 
       etapeNum++;
 
-      // 1. Surlignage de la ligne de code
+      // 1. Surlignage de la ligne de code active
       const lignesEl = zonesCode.querySelectorAll(".ligne-code");
       lignesEl.forEach(l => {
         l.classList.toggle("active", l.dataset.ligne === String(etape.ligne));
@@ -1096,7 +1709,6 @@
           if (id === etape.ligneSvg) {
             if (id === "ligne-boucle") {
               el.classList.add("actif-boucle");
-              el.setAttribute("marker-end", "url(#fleche-active-boucle)");
             } else {
               el.classList.add("actif");
               el.setAttribute("marker-end", "url(#fleche-active)");
@@ -1111,26 +1723,40 @@
           const l = document.getElementById(id);
           if (l) l.classList.remove("actif");
         });
-        if (etape.ligneSvg === "ligne-cond-fin") {
-          const lf = document.getElementById("label-faux");
+        if (etape.ligneSvg === "ligne-cond-sortie" || etape.ligneSvg === "ligne-cond-fin") {
+          const lf = document.getElementById("label-faux") || document.getElementById("label-faux1");
           if (lf) lf.classList.add("actif");
         }
-        if (etape.ligneSvg === "ligne-cond-corps" || etape.ligneSvg === "ligne-cond-vrai") {
-          const lv = document.getElementById("label-vrai");
+        if (etape.ligneSvg === "ligne-cond-corps" || etape.ligneSvg === "ligne-cond-vrai" || etape.ligneSvg === "ligne-test-trouve") {
+          const lv = document.getElementById("label-vrai") || document.getElementById("label-vrai1") || document.getElementById("label-trouve-oui");
           if (lv) lv.classList.add("actif");
         }
       }
 
-      // 4. Variables
+      // 4. Mise à jour des variables et typage
+      let resumeVariables = [];
       if (etape.vars) {
         Object.entries(etape.vars).forEach(([cle, val]) => {
           const valEl = document.getElementById(`val-var-${cle}`);
+          const typeEl = document.getElementById(`type-var-${cle}`);
           const boxEl = document.getElementById(`case-var-${cle}`);
-          if (valEl && val !== undefined) {
-            valEl.textContent = val;
+
+          const t = determinerType(val);
+          if (typeEl) typeEl.textContent = t;
+
+          if (valEl) {
+            valEl.textContent = formaterValeur(val);
+            valEl.className = "valeur-var";
+            if (val === null) valEl.classList.add("val-null");
+            else if (val === undefined) valEl.classList.add("val-undefined");
           }
+
           if (boxEl) {
             boxEl.classList.toggle("modifiee", etape.mod === cle);
+          }
+
+          if (val !== undefined) {
+            resumeVariables.push(`${cle}=${formaterValeur(val)}`);
           }
         });
       }
@@ -1139,6 +1765,32 @@
       badgeStatut.textContent = `${etape.statut} (${etapeNum})`;
       badgeStatut.classList.add("actif");
       messageAction.textContent = etape.act;
+
+      // 6. Ajout dans la Table de trace manuelle (Norme R1.12)
+      const tr = document.createElement("tr");
+      tr.className = "active";
+      // Enlever 'active' sur les anciennes lignes
+      corpsTableTrace.querySelectorAll("tr").forEach(r => r.classList.remove("active"));
+
+      const noeudTexte = etape.noeud ? etape.noeud.replace("noeud-", "") : "flux";
+      const condTexte = etape.cond || "—";
+      const varsTexte = resumeVariables.length ? resumeVariables.join(", ") : "—";
+
+      tr.innerHTML = `
+        <td><strong>#${etapeNum}</strong></td>
+        <td>${etape.ligne !== null ? 'L' + etape.ligne : '—'}</td>
+        <td><code>${noeudTexte}</code></td>
+        <td>${condTexte}</td>
+        <td>${varsTexte}</td>
+        <td>${etape.act}</td>
+      `;
+      corpsTableTrace.appendChild(tr);
+
+      // Scroll automatique de la table vers le bas
+      const scrollParent = corpsTableTrace.closest(".table-scroll");
+      if (scrollParent) {
+        scrollParent.scrollTop = scrollParent.scrollHeight;
+      }
 
       if (etape.termine) {
         btnSuivant.disabled = true;

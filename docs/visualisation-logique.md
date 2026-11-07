@@ -40,12 +40,24 @@ Le même panneau peut servir aux deux sujets. Un exo JS peut être versionné : 
 
 ## Bilan du prototype pas à pas (Issue #41)
 
-Un prototype isolé a été réalisé dans `src/logique-test.html` pour tester la faisabilité d'une exécution pas à pas dans le navigateur (sur un code très court avec une variable et une boucle `for`).
+Un prototype interactif complet a été réalisé dans `src/logique-test.html` pour valider la faisabilité d'une exécution pas à pas dans le navigateur, synchronisée avec un organigramme normalisé ISO 5807 et une table de trace manuelle (R1.12).
 
-### Ce qui fonctionne
-- L'utilisation des fonctions génératrices (`function*` et `yield`) permet de dérouler l'exécution ligne par ligne sans bloquer l'interface.
-- L'affichage montre clairement les différentes phases d'une boucle : initialisation, évaluation de condition, exécution du corps, et incrémentation.
-- La surbrillance visuelle des variables lors de leur modification donne un retour immédiat.
+### Ce qui fonctionne et a été intégré
+- **8 algorithmes types interactifs** :
+  1. Boucle `for` (compteur, initialisation, condition, corps, incrément, sortie).
+  2. Boucle `while` (mise en application de la règle des 3 phases anti-boucle infinie).
+  3. Condition `if / else` (bifurcation Vrai / Faux et égalité stricte `===`).
+  4. Pattern 1 - Permutation (*Swap*) avec variable temporaire `temp` et protection contre l'écrasement.
+  5. Pattern 2 - Accumulation & élément neutre (`0` pour la somme, `1` pour le produit).
+  6. Pattern 5 - Recherche séquentielle (Flag & `break`, éradication du piège du `return` dans le `else`, sortie de boucle propre).
+  7. Suite de Syracuse (arithmétique cyclique, modulo `%` et test de parité `n % 2 === 0`).
+  8. Sous-programme / Fonction (symbole ISO 5807 à double barre latérale, passage de paramètre et `return`).
+- **Synchronisation dynamique tridirectionnelle** :
+  - Surlignage de la ligne de code active dans l'éditeur.
+  - Activation du nœud et du connecteur orienté dans le SVG de l'organigramme.
+  - Barre des variables avec affichage de la valeur courante et du type primitif (`number`, `string`, `boolean`, `null`, `undefined`).
+- **Table de trace pas à pas (Norme R1.12)** :
+  - Génération automatique et incrémentale de la table de trace (étape, ligne de code, identifiant du nœud ISO 5807, évaluation de condition, état mémoire des variables et action effectuée).
 
 ### Ce qui est trop difficile pour du code élève libre
 - **Transformation automatique de l'AST** : instrumenter du code libre tapé par l'élève pour insérer des points d'arrêt à chaque expression ou sous-condition nécessite un transformateur lourd (Babel) ou un interpréteur JS en JS (type `JS-Interpreter`).
@@ -55,4 +67,4 @@ Un prototype isolé a été réalisé dans `src/logique-test.html` pour tester l
 
 ### Décision et recommandation
 1. **Ne pas embarquer de moteur pas à pas complexe pour les exercices classiques** : le visualiseur actuel (`src/visualiseur-variables.js`), basé sur Acorn et affichant l'état final des variables globales, est robuste, léger et suffisant pour les débutants.
-2. **Usage réservé aux démonstrations guidées** : le pas à pas peut être utilisé ponctuellement sous forme d'animations pré-enregistrées ou de cours interactifs, mais pas sur du code élève libre.
+2. **Usage réservé aux démonstrations guidées** : le pas à pas et les organigrammes ISO 5807 (`src/logique-test.html`) constituent un support pédagogique pour illustrer les cours, les 7 patterns fondamentaux et la méthode de la table de trace exigée aux examens (R1.12).
