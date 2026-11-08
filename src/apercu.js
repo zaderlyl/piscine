@@ -6,7 +6,7 @@ let urlApercu = null;
 // Assemble la page : injecte le CSS et le JS dans index.html, puis les tests.
 // contenus = { "index.html": "...", "style.css": "...", ... }
 export function assemblerPage(contenus, tests) {
-  let code = contenus["index.html"];
+  let code = contenus["index.html"] || "";
   let analyse = analyserScript("");
   let balisePresente = false;
 
@@ -17,16 +17,26 @@ export function assemblerPage(contenus, tests) {
 
     if (extension === "css") {
       const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
-      code = code.replace(lien, () => `<style>${contenu}</style>`);
+      if (code.search(lien) !== -1) {
+        code = code.replace(lien, () => `<style>${contenu}</style>`);
+      } else if (contenu.trim()) {
+        code += `<style>${contenu}</style>`;
+      }
     } else if (extension === "js") {
       analyse = analyserScript(contenu);
       const balise = new RegExp(
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
-      // Sans cette balise dans index.html, le script de l'élève ne tourne pas : on le dit au panneau
       balisePresente = code.search(balise) !== -1;
-      code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
+      if (balisePresente) {
+        code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
+      } else if (contenu.trim()) {
+        // En mode exercice JS (ou si index.html ne contient pas la balise),
+        // on injecte automatiquement le script pour que le code tourne et que les tests passent
+        code += `<script>${analyse.code}<\/script>`;
+        balisePresente = true;
+      }
     }
   }
   return { code: injecterTests(code, tests), analyse, balisePresente };

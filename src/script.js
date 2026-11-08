@@ -100,7 +100,8 @@ afficherPanneauDoc(exo, panneauEnonce, docOnglet);
 function chargerSolution() {
   for (const [tire, contenu] of Object.entries(exo)) {
     if (!tire.startsWith("Solution: ")) continue;
-    const editeur = editeurs[tire.slice("Solution: ".length).trim()];
+    const nomFichier = tire.slice("Solution: ".length).trim();
+    const editeur = editeurs[nomFichier];
     if (!editeur) continue;
     editeur.dispatch({
       changes: {
@@ -109,7 +110,9 @@ function chargerSolution() {
         insert: lireCode(contenu),
       },
     });
+    afficherFichier(nomFichier);
   }
+  afficherApercu();
 }
 
 // Mode auteur ( acces via ?auteur ) bouton pour verif solution
@@ -146,7 +149,13 @@ boutonSuivant.addEventListener("click", () => {
 
 afficherSuivant();
 
-afficherFichier("index.html");
+const fichierParDefaut = (EXO.startsWith("js/") || exo["Solution: script.js"])
+  ? "script.js"
+  : (EXO.startsWith("php/") || exo["Solution: index.php"])
+  ? "index.php"
+  : "index.html";
+
+afficherFichier(fichierParDefaut);
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
   localStorage.removeItem(CLE_SUSPENDU);

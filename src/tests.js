@@ -1,7 +1,7 @@
 // Construit le bloc <script> de tests injecté dans l'aperçu
 export function construireTests(tests) {
   return `<script>
-    window.addEventListener("load", async () => {
+    const executerTests = async () => {
       const resultats = [];
       const $ = (selecteur) => document.querySelector(selecteur);
       const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
@@ -25,7 +25,12 @@ export function construireTests(tests) {
         resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
       }
       parent.postMessage({ type: "tests", resultats }, "*");
-    });
+    };
+    if (document.readyState === "complete") {
+      executerTests();
+    } else {
+      window.addEventListener("load", executerTests);
+    }
   <\/script>`;
 }
 
