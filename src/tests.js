@@ -19,6 +19,7 @@ export function construireTests(tests) {
       };
       const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+      const code = window.__code ?? "";
       try {
         ${tests}
       } catch (erreur) {
