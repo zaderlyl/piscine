@@ -60,6 +60,7 @@ function validerExo() {
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
+  if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
   const { code, analyse, balisePresente } = assemblerPage(
     lireContenus(),
     testsExo,
@@ -152,7 +153,7 @@ boutonSuivant.addEventListener("click", () => {
 
 afficherSuivant();
 
-afficherFichier("index.html");
+afficherFichier(EXO.startsWith("php/") ? "index.php" : "index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
   localStorage.removeItem(CLE_SUSPENDU);
