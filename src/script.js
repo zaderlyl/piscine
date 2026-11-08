@@ -45,6 +45,9 @@ let minuteurTests = null;
 let minuteur = null;
 let testsExo = "";
 
+let phpEnCours = false;
+
+
 function arreterApercu() {
   enregistrerBrouillon();
   localStorage.setItem(CLE_SUSPENDU, "1");
@@ -193,24 +196,31 @@ window.addEventListener("message", (e) => {
   }
 });
 
+
 async function lancerPhp() {
-  panneauResultats.textContent = "Exécution en cours...";
-  const { sortie, resultats } = await executerPhp(
-    editeurs["index.php"].state.doc.toString(),
-    testsExo,
-  );
+  if (phpEnCours) return; // ignore les clics pendant une exécution
+  phpEnCours = true;
+  try {
+    panneauResultats.textContent = "Exécution en cours...";
+    const { sortie, resultats } = await executerPhp(
+      editeurs["index.php"].state.doc.toString(),
+      testsExo,
+    );
 
-  const echecs = resultats.filter((r) => !r.ok);
-  panneauResultats.textContent =
-    sortie +
-    "\n\n" +
-    (echecs.length
-      ? echecs.map((r) => "❌ " + r.message).join("\n")
-      : "✅ Tous les tests passent");
-  if (!echecs.length && resultats.length) {
-    validerExo();
+    const echecs = resultats.filter((r) => !r.ok);
+    panneauResultats.textContent =
+      sortie +
+      "\n\n" +
+      (echecs.length
+        ? echecs.map((r) => "❌ " + r.message).join("\n")
+        : "✅ Tous les tests passent");
+    if (!echecs.length && resultats.length) {
+      validerExo();
+    }
+
+    clearTimeout(minuteurTests);
+    afficherDansApercu(apercu, sortie);
+  } finally {
+    phpEnCours = false;
   }
-
-  clearTimeout(minuteurTests);
-  afficherDansApercu(apercu, sortie);
 }
