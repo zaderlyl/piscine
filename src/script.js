@@ -1,6 +1,6 @@
 import { lireCode, chargerExo } from "./exo.js";
 import { assemblerPage, afficherDansApercu } from "./apercu.js";
-import { executerPhp } from "./php.js";
+import { executerPhp } from "./php.js?v=2";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
@@ -60,7 +60,8 @@ function validerExo() {
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
-  const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
+  const testsPourApercu = EXO.startsWith("php/") ? "" : testsExo;
+  const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsPourApercu);
   afficherVariables(analyse, balisePresente);
   afficherDansApercu(apercu, code);
   clearTimeout(minuteurTests);
@@ -195,6 +196,7 @@ glissable(document.getElementById("separateur-b"), document.getElementById("vari
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
   if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
+  if (EXO.startsWith("php/")) return;
   clearTimeout(minuteurTests);
   const echecs = e.data.resultats.filter((r) => !r.ok);
   panneauResultats.textContent = echecs.length
