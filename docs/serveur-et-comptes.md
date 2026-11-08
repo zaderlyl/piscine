@@ -11,6 +11,7 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 - **Premier morceau** : compte + progression en base. La progression de l'issue #30 devient la première donnée stockée côté serveur.
 - **Pile** : PHP, MySQL, sessions PHP (README section 15). Le serveur de l'IUT héberge la vraie application.
 - **Un seul serveur pour le front et l'API** : le HTML et le JS sont servis par le même serveur PHP que l'API. Pas de CORS, les cookies de session fonctionnent normalement. GitHub Pages ne sert plus qu'à la vitrine et aux prototypes.
+- **Format de l'API** : fichiers PHP simples qui reçoivent et renvoient du JSON (ex. `api/connexion.php`, `api/progression.php`), sans framework. Choix validé par l'équipe.
 - **Inscription de test** : l'élève saisit son mail, son prénom, son nom, un mot de passe et un **code d'inscription universel**. La confirmation par mail et le code de promo viendront plus tard.
 - **Le code universel n'est pas dans le code versionné** : il est dans un fichier de configuration local, `config.local.php`, ignoré par Git, avec un fichier d'exemple `config.exemple.php` versionné dans le dépôt
 - **Hébergement confirmé** : le serveur de l'IUT, avec phpMyAdmin pour administrer la base. Les versions de PHP et MySQL sont des versions standard récentes. Les fichiers sont déposés avec FileZilla (SFTP), sans `git pull` sur le serveur.
@@ -20,7 +21,6 @@ Aujourd'hui, tout est dans le navigateur d'un seul poste : la progression et le 
 
 ## À trancher
 
-- **Format de l'API** : fichiers PHP simples qui reçoivent et renvoient du JSON, ou un framework. À discuter en équipe.
 - **Répartition du travail** : après la réflexion.
 - **Versions exactes de PHP et MySQL** : à relever sur le serveur de l'IUT (phpMyAdmin les affiche) et à noter ici, car elles décident de ce qu'on peut utiliser dans le code.
 - **Réponses de l'IUT restantes** : envoi de mails depuis le serveur, règles sur les données d'élèves, maintenance.
