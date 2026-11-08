@@ -60,7 +60,11 @@ function validerExo() {
 
 // Affiche index.html dans l'iframe
 function afficherApercu() {
-  const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
+  if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
+  const { code, analyse, balisePresente } = assemblerPage(
+    lireContenus(),
+    testsExo,
+  );
   afficherVariables(analyse, balisePresente);
   afficherDansApercu(apercu, code);
   clearTimeout(minuteurTests);
@@ -83,6 +87,7 @@ const { editeurs, afficherFichier } = creerEditeurs({
   zones,
   onglets,
   brouillon: lireBrouillon(CLE_BROUILLON),
+  avecPhp: EXO.startsWith("php/"),
   surChangement(vue) {
     if (vue !== editeurs["index.php"]) afficherApercu();
     clearTimeout(minuteur);
@@ -121,9 +126,11 @@ if (new URLSearchParams(location.search).has("auteur")) {
   onglets.append(boutonSolution);
 }
 
-boutonPhp.textContent = "Exécuter PHP";
-boutonPhp.addEventListener("click", lancerPhp);
-onglets.append(boutonPhp);
+if (EXO.startsWith("php/")) {
+  boutonPhp.textContent = "Exécuter PHP";
+  boutonPhp.addEventListener("click", lancerPhp);
+  onglets.append(boutonPhp);
+}
 
 // bouton "suivant"
 
@@ -146,7 +153,7 @@ boutonSuivant.addEventListener("click", () => {
 
 afficherSuivant();
 
-afficherFichier("index.html");
+afficherFichier(EXO.startsWith("php/") ? "index.php" : "index.html");
 
 if (localStorage.getItem(CLE_SUSPENDU)) {
   localStorage.removeItem(CLE_SUSPENDU);
@@ -160,24 +167,32 @@ ecouterValeurs(apercu);
 
 // Barres pour agrandir ou réduire les colonnes et les panneaux de droite
 // Les limites hautes laissent toujours de la place au résultat des tests (environ 10 % de la hauteur)
-glissable(document.getElementById("separateur-v"), document.getElementById("editeur"), {
-  axe: "x",
-  variable: "--largeur-gauche",
-  min: 200,
-  max: () => window.innerWidth - 200,
-});
+glissable(
+  document.getElementById("separateur-v"),
+  document.getElementById("editeur"),
+  {
+    axe: "x",
+    variable: "--largeur-gauche",
+    min: 200,
+    max: () => window.innerWidth - 200,
+  },
+);
 glissable(document.getElementById("separateur-a"), apercu, {
   axe: "y",
   variable: "--h-apercu",
   min: 80,
   max: () => window.innerHeight * 0.6,
 });
-glissable(document.getElementById("separateur-b"), document.getElementById("variables"), {
-  axe: "y",
-  variable: "--h-variables",
-  min: 60,
-  max: () => window.innerHeight * 0.3,
-});
+glissable(
+  document.getElementById("separateur-b"),
+  document.getElementById("variables"),
+  {
+    axe: "y",
+    variable: "--h-variables",
+    min: 60,
+    max: () => window.innerHeight * 0.3,
+  },
+);
 
 // Affiche les résultats envoyés par l'aperçu
 window.addEventListener("message", (e) => {
