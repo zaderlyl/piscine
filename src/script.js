@@ -36,6 +36,103 @@ const FICHIER_EXO = `../exos/${EXO}.md`;
 
 const DELAI_SUSPENDU = 5000;
 
+const types = {
+  html: "text/html",
+  css: "text/css",
+  js: "text/javascript",
+};
+
+let minuteurTests = null;
+let minuteur = null;
+let testsExo = "";
+
+function arreterApercu() {
+  enregistrerBrouillon();
+  localStorage.setItem(CLE_SUSPENDU, "1");
+  location.reload();
+}
+
+// validation + exo suivant
+
+function validerExo() {
+  marquerReussi(EXO);
+  afficherSuivant();
+}
+
+// Affiche index.html dans l'iframe
+function afficherApercu() {
+  if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
+  const { code, analyse, balisePresente } = assemblerPage(
+    lireContenus(),
+    testsExo,
+  );
+  afficherVariables(analyse, balisePresente);
+  afficherDansApercu(apercu, code);
+  clearTimeout(minuteurTests);
+  minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
+}
+
+function lireContenus() {
+  const contenus = {};
+  for (const nom in editeurs) {
+    contenus[nom] = editeurs[nom].state.doc.toString();
+  }
+  return contenus;
+}
+
+function enregistrerBrouillon() {
+  sauvegarderBrouillon(CLE_BROUILLON, lireContenus());
+}
+
+const { editeurs, afficherFichier } = creerEditeurs({
+  zones,
+  onglets,
+  brouillon: lireBrouillon(CLE_BROUILLON),
+  avecPhp: EXO.startsWith("php/"),
+  surChangement(vue) {
+    if (vue !== editeurs["index.php"]) afficherApercu();
+    clearTimeout(minuteur);
+    minuteur = setTimeout(enregistrerBrouillon, 1000);
+  },
+});
+
+const exo = await chargerExo(FICHIER_EXO);
+testsExo = lireCode(exo["Tests"]);
+
+afficherPanneauDoc(exo, panneauEnonce, docOnglet);
+
+// remplace le code des editeurs par la solution de reference
+
+function chargerSolution() {
+  for (const [tire, contenu] of Object.entries(exo)) {
+    if (!tire.startsWith("Solution: ")) continue;
+    const editeur = editeurs[tire.slice("Solution: ".length).trim()];
+    if (!editeur) continue;
+    editeur.dispatch({
+      changes: {
+        from: 0,
+        to: editeur.state.doc.length,
+        insert: lireCode(contenu),
+      },
+    });
+  }
+}
+
+// Mode auteur ( acces via ?auteur ) bouton pour verif solution
+
+if (new URLSearchParams(location.search).has("auteur")) {
+  const boutonSolution = document.createElement("button");
+  boutonSolution.textContent = "Charger la solution";
+  boutonSolution.addEventListener("click", chargerSolution);
+  onglets.append(boutonSolution);
+}
+
+if (EXO.startsWith("php/")) {
+  boutonPhp.textContent = "Exécuter PHP";
+  boutonPhp.addEventListener("click", lancerPhp);
+  onglets.append(boutonPhp);
+}
+
 // bouton "suivant"
 const boutonSuivant = document.createElement("button");
 boutonSuivant.textContent = "Exo suivant →";
@@ -67,6 +164,48 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
   min: 200,
   max: () => window.innerWidth - 200,
 });
+afficherSuivant();
+
+afficherFichier(EXO.startsWith("php/") ? "index.php" : "index.html");
+
+if (localStorage.getItem(CLE_SUSPENDU)) {
+  localStorage.removeItem(CLE_SUSPENDU);
+  panneauResultats.textContent =
+    "Aperçu suspendu : ton code semble tourner à l'infini. Corrige-le pour relancer.";
+} else {
+  afficherApercu();
+}
+
+ecouterValeurs(apercu);
+
+// Barres pour agrandir ou réduire les colonnes et les panneaux de droite
+// Les limites hautes laissent toujours de la place au résultat des tests (environ 10 % de la hauteur)
+glissable(
+  document.getElementById("separateur-v"),
+  document.getElementById("editeur"),
+  {
+    axe: "x",
+    variable: "--largeur-gauche",
+    min: 200,
+    max: () => window.innerWidth - 200,
+  },
+);
+glissable(document.getElementById("separateur-a"), apercu, {
+  axe: "y",
+  variable: "--h-apercu",
+  min: 80,
+  max: () => window.innerHeight * 0.6,
+});
+glissable(
+  document.getElementById("separateur-b"),
+  document.getElementById("variables"),
+  {
+    axe: "y",
+    variable: "--h-variables",
+    min: 60,
+    max: () => window.innerHeight * 0.3,
+  },
+);
 
 const exo = await chargerExo(FICHIER_EXO);
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
