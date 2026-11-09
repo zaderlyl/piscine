@@ -9,20 +9,25 @@ export function construireTests(tests) {
   return `<script>
     ${GARDE_BOUCLE_CODE}
     let __erreurInterrompue = false;
+    const __signalerBoucle = () => {
+      if (__erreurInterrompue) return;
+      __erreurInterrompue = true;
+      parent.postMessage(
+        {
+          type: "tests",
+          resultats: [{ ok: false, message: "${MESSAGE_BOUCLE_TROP_LONGUE}" }],
+        },
+        "*",
+      );
+    };
+    // L'erreur du garde est reconnue à son marqueur, pas à son texte : une erreur de l'élève
+    // qui parlerait de « boucles » ne sera pas prise pour une boucle infinie.
     window.addEventListener("error", (e) => {
-      const msg = e.error?.message || e.message || "";
-      if (msg.includes("trop de temps") || msg.includes("boucles")) {
-        __erreurInterrompue = true;
-        parent.postMessage(
-          {
-            type: "tests",
-            resultats: [{ ok: false, message: "${MESSAGE_BOUCLE_TROP_LONGUE}" }],
-          },
-          "*",
-        );
-      }
+      if (e.error && e.error.garde === true) __signalerBoucle();
     });
     window.addEventListener("load", async () => {
+      // Le garde a pu se déclencher sans que l'erreur remonte (try/catch de l'élève)
+      if (window.__gardeDeclenche) __signalerBoucle();
       if (__erreurInterrompue) return;
       const resultats = [];
       const $ = (selecteur) => document.querySelector(selecteur);
@@ -43,7 +48,7 @@ export function construireTests(tests) {
       const assert = (condition, message) => resultats.push({ ok: !!condition, message });
       const delaiTests = new Promise((_, reject) =>
         setTimeout(
-          () => reject(new Error("${MESSAGE_BOUCLE_TROP_LONGUE}")),
+          () => reject({ garde: true }),
           ${DELAI_TESTS_MS},
         ),
       );
@@ -55,11 +60,12 @@ export function construireTests(tests) {
           delaiTests,
         ]);
       } catch (erreur) {
-        const message = erreur.message?.includes("trop de temps")
-          ? erreur.message
-          : "Erreur dans les tests : " + erreur.message;
+        const message = erreur && erreur.garde
+          ? "${MESSAGE_BOUCLE_TROP_LONGUE}"
+          : "Erreur dans les tests : " + (erreur && erreur.message);
         resultats.push({ ok: false, message });
       }
+      if (window.__gardeDeclenche) __signalerBoucle();
       if (__erreurInterrompue) return;
       parent.postMessage({ type: "tests", resultats }, "*");
     });

@@ -1,6 +1,6 @@
 import { analyserScript } from "./visualiseur-variables.js";
 import { injecterTests } from "./tests.js";
-import { protegerBoucles } from "./boucle-garde.js";
+import { protegerBoucles, scriptEstJavaScript } from "./boucle-garde.js";
 
 export { protegerBoucles };
 
@@ -16,8 +16,10 @@ export function assemblerPage(contenus, tests) {
   // Protège les boucles dans les éventuels scripts inline de index.html
   code = code.replace(
     /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi,
-    (_, attrs, contenuScript) =>
-      `<script${attrs}>${protegerBoucles(contenuScript)}<\/script>`,
+    (tout, attrs, contenuScript) =>
+      scriptEstJavaScript(attrs)
+        ? `<script${attrs}>${protegerBoucles(contenuScript)}<\/script>`
+        : tout,
   );
 
   for (const [nom, contenu] of Object.entries(contenus)) {

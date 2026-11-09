@@ -7,35 +7,60 @@ export const DELAI_TESTS_MS = 4000;
 export const MESSAGE_BOUCLE_TROP_LONGUE =
   "L'exécution a pris trop de temps (vérifie tes boucles)";
 
-export const GARDE_BOUCLE_CODE = `
+// Code du garde injecté dans la page. Le délai est un paramètre pour pouvoir le réduire dans les tests.
+//  - Le temps est mesuré sur l'exécution synchrone : le chronomètre repart à zéro dès que la page
+//    rend la main au navigateur (await, setTimeout...), donc une boucle qui attend vraiment n'est pas coupée.
+//  - Une fois le délai dépassé, TOUS les appels suivants lèvent l'erreur : un try/catch placé autour
+//    d'une boucle ne peut plus la relancer indéfiniment.
+//  - L'erreur porte `garde: true`, ce qui permet de la reconnaître sans lire son texte.
+export function creerGardeCode(delai = DELAI_BOUCLE_MS) {
+  return `
 window.__boucles = {};
+window.__epoque = 0;
+window.__epoquePlanifiee = false;
+window.__gardeDeclenche = false;
 window.__verifierBoucle = function (id) {
-  const b = window.__boucles[id] || (window.__boucles[id] = { debut: Date.now(), dernier: Date.now(), cpt: 0 });
-  if ((++b.cpt & 511) === 0) {
-    const mnt = Date.now();
-    if (mnt - b.dernier > 200) {
-      b.debut = mnt;
+  if (window.__gardeDeclenche) {
+    const e = new Error("${MESSAGE_BOUCLE_TROP_LONGUE}");
+    e.garde = true;
+    throw e;
+  }
+  let b = window.__boucles[id];
+  if (!b || b.epoque !== window.__epoque) {
+    b = window.__boucles[id] = { debut: Date.now(), cpt: 0, epoque: window.__epoque };
+    if (!window.__epoquePlanifiee) {
+      window.__epoquePlanifiee = true;
+      setTimeout(function () { window.__epoque++; window.__epoquePlanifiee = false; }, 0);
     }
-    b.dernier = mnt;
-    if (mnt - b.debut > ${DELAI_BOUCLE_MS}) {
-      delete window.__boucles[id];
-      throw new Error("${MESSAGE_BOUCLE_TROP_LONGUE}");
-    }
+  }
+  if ((++b.cpt & 15) === 0 && Date.now() - b.debut > ${delai}) {
+    window.__gardeDeclenche = true;
+    const e = new Error("${MESSAGE_BOUCLE_TROP_LONGUE}");
+    e.garde = true;
+    throw e;
   }
 };
 function __verifierBoucle(id) {
   window.__verifierBoucle(id);
 }
 `;
+}
+
+export const GARDE_BOUCLE_CODE = creerGardeCode();
 
 // Transforme un code JavaScript en insérant __verifierBoucle(id) dans chaque boucle (while, for, do...while)
 export function protegerBoucles(code) {
+  return proteger(code, { n: 0 });
+}
+
+// `compteur` est partagé avec les appels récursifs (corps sans accolades, expressions de template)
+// pour que chaque boucle garde un identifiant unique.
+function proteger(code, compteur) {
   if (!code || typeof code !== "string") return "";
 
   let resultat = "";
   let i = 0;
   const n = code.length;
-  let boucleId = 0;
 
   const attentesDo = [];
   let attendWhileImmediat = false;
@@ -174,6 +199,121 @@ export function protegerBoucles(code) {
     return j;
   }
 
+  // Fin d'un bloc { ... } qui commence en `debut`
+  function trouverFinBloc(debut) {
+    let profondeur = 0;
+    let j = debut;
+    while (j < n) {
+      const c = code[j];
+      if (c === "{") profondeur++;
+      else if (c === "}") {
+        profondeur--;
+        if (profondeur === 0) return j + 1;
+      } else if (c === '"' || c === "'") {
+        j = sauterChaine(j);
+        continue;
+      } else if (c === "`") {
+        j = sauterTemplate(j);
+        continue;
+      } else if (c === "/" && code[j + 1] === "/") {
+        j = sauterCommentaireLigne(j);
+        continue;
+      } else if (c === "/" && code[j + 1] === "*") {
+        j = sauterCommentaireBloc(j);
+        continue;
+      }
+      j++;
+    }
+    return j;
+  }
+
+  function motClef(mot, j) {
+    return code.startsWith(mot, j) && !estCaractereIdentifiant(code[j + mot.length] || "");
+  }
+
+  // Fin d'une instruction complète sans accolades : gère if/else, boucles imbriquées, try/catch/finally
+  function trouverFinStatement(debut) {
+    let j = sauterEspacesEtCommentaires(debut);
+    if (code[j] === "{") return trouverFinBloc(j);
+
+    if (motClef("if", j)) {
+      j = sauterEspacesEtCommentaires(j + 2);
+      if (code[j] === "(") j = trouverFinParenthèses(j + 1);
+      j = trouverFinStatement(j);
+      const k = sauterEspacesEtCommentaires(j);
+      if (motClef("else", k)) return trouverFinStatement(k + 4);
+      return j;
+    }
+
+    if (motClef("for", j) || motClef("while", j)) {
+      j += motClef("for", j) ? 3 : 5;
+      j = sauterEspacesEtCommentaires(j);
+      if (motClef("await", j)) j = sauterEspacesEtCommentaires(j + 5);
+      if (code[j] === "(") j = trouverFinParenthèses(j + 1);
+      return trouverFinStatement(j);
+    }
+
+    if (motClef("do", j)) {
+      j = trouverFinStatement(j + 2);
+      let k = sauterEspacesEtCommentaires(j);
+      if (motClef("while", k)) {
+        k = sauterEspacesEtCommentaires(k + 5);
+        if (code[k] === "(") k = trouverFinParenthèses(k + 1);
+        const apres = sauterEspacesEtCommentaires(k);
+        return code[apres] === ";" ? apres + 1 : k;
+      }
+      return j;
+    }
+
+    if (motClef("try", j)) {
+      j = trouverFinBloc(sauterEspacesEtCommentaires(j + 3));
+      let k = sauterEspacesEtCommentaires(j);
+      if (motClef("catch", k)) {
+        k = sauterEspacesEtCommentaires(k + 5);
+        if (code[k] === "(") k = sauterEspacesEtCommentaires(trouverFinParenthèses(k + 1));
+        j = trouverFinBloc(k);
+        k = sauterEspacesEtCommentaires(j);
+      }
+      if (motClef("finally", k)) j = trouverFinBloc(sauterEspacesEtCommentaires(k + 7));
+      return j;
+    }
+
+    return trouverFinInstruction(j);
+  }
+
+  // Copie un template littéral en protégeant aussi les boucles écrites dans ses ${ ... }
+  function traiterTemplate(debut) {
+    let sortie = "`";
+    let j = debut + 1;
+    while (j < n) {
+      if (code[j] === "\\") {
+        sortie += code.slice(j, j + 2);
+        j += 2;
+      } else if (code[j] === "$" && code[j + 1] === "{") {
+        let k = j + 2;
+        let accolades = 1;
+        while (k < n) {
+          const c = code[k];
+          if (c === "{") accolades++;
+          else if (c === "}") {
+            accolades--;
+            if (accolades === 0) break;
+          } else if (c === '"' || c === "'") k = sauterChaine(k) - 1;
+          else if (c === "`") k = sauterTemplate(k) - 1;
+          k++;
+        }
+        sortie += "${" + proteger(code.slice(j + 2, k), compteur) + "}";
+        j = k + 1;
+      } else if (code[j] === "`") {
+        return { texte: sortie + "`", fin: j + 1 };
+      } else {
+        sortie += code[j];
+        j++;
+      }
+    }
+    return { texte: sortie, fin: j };
+  }
+
   let dernierNonEspace = "";
 
   while (i < n) {
@@ -226,9 +366,9 @@ export function protegerBoucles(code) {
       continue;
     }
     if (c === "`") {
-      const fin = sauterTemplate(i);
-      resultat += code.slice(i, fin);
-      i = fin;
+      const t = traiterTemplate(i);
+      resultat += t.texte;
+      i = t.fin;
       dernierNonEspace = "val";
       attendWhileImmediat = false;
       continue;
@@ -273,12 +413,12 @@ export function protegerBoucles(code) {
         if (code[i] === "{") {
           attentesDo.push(profondeurAccoladesGlobale);
           profondeurAccoladesGlobale++;
-          resultat += `{ __verifierBoucle(${boucleId++});`;
+          resultat += `{ __verifierBoucle(${compteur.n++});`;
           i++;
         } else {
-          const finInstr = trouverFinInstruction(i);
+          const finInstr = trouverFinStatement(i);
           const corps = code.slice(i, finInstr);
-          resultat += `{ __verifierBoucle(${boucleId++}); ${corps} }`;
+          resultat += `{ __verifierBoucle(${compteur.n++}); ${proteger(corps, compteur)} }`;
           i = finInstr;
           attendWhileImmediat = true;
         }
@@ -309,12 +449,12 @@ export function protegerBoucles(code) {
           i = apresCondition;
           if (code[i] === "{") {
             profondeurAccoladesGlobale++;
-            resultat += `{ __verifierBoucle(${boucleId++});`;
+            resultat += `{ __verifierBoucle(${compteur.n++});`;
             i++;
           } else {
-            const finInstr = trouverFinInstruction(i);
+            const finInstr = trouverFinStatement(i);
             const corps = code.slice(i, finInstr);
-            resultat += `{ __verifierBoucle(${boucleId++}); ${corps} }`;
+            resultat += `{ __verifierBoucle(${compteur.n++}); ${proteger(corps, compteur)} }`;
             i = finInstr;
           }
         }
@@ -339,12 +479,12 @@ export function protegerBoucles(code) {
           i = apresCondition;
           if (code[i] === "{") {
             profondeurAccoladesGlobale++;
-            resultat += `{ __verifierBoucle(${boucleId++});`;
+            resultat += `{ __verifierBoucle(${compteur.n++});`;
             i++;
           } else {
-            const finInstr = trouverFinInstruction(i);
+            const finInstr = trouverFinStatement(i);
             const corps = code.slice(i, finInstr);
-            resultat += `{ __verifierBoucle(${boucleId++}); ${corps} }`;
+            resultat += `{ __verifierBoucle(${compteur.n++}); ${proteger(corps, compteur)} }`;
             i = finInstr;
           }
         }
@@ -362,4 +502,17 @@ export function protegerBoucles(code) {
   }
 
   return resultat;
+}
+
+// Vrai si les attributs d'une balise <script> désignent du JavaScript (pas de type, module, javascript).
+// Les blocs JSON, importmap, templates... ne doivent pas être modifiés.
+export function scriptEstJavaScript(attrs) {
+  const m = attrs.match(/\btype\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+  if (!m) return true;
+  const type = (m[1] ?? m[2] ?? m[3] ?? "").trim().toLowerCase();
+  return (
+    type === "" ||
+    type === "module" ||
+    /^(text|application)\/(x-)?(java|ecma)script$/.test(type)
+  );
 }
