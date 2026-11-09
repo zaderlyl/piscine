@@ -1,7 +1,29 @@
+import {
+  GARDE_BOUCLE_CODE,
+  DELAI_TESTS_MS,
+  MESSAGE_BOUCLE_TROP_LONGUE,
+} from "./boucle-garde.js";
+
 // Construit le bloc <script> de tests injecté dans l'aperçu
 export function construireTests(tests) {
   return `<script>
+    ${GARDE_BOUCLE_CODE}
+    let __erreurInterrompue = false;
+    window.addEventListener("error", (e) => {
+      const msg = e.error?.message || e.message || "";
+      if (msg.includes("trop de temps") || msg.includes("boucles")) {
+        __erreurInterrompue = true;
+        parent.postMessage(
+          {
+            type: "tests",
+            resultats: [{ ok: false, message: "${MESSAGE_BOUCLE_TROP_LONGUE}" }],
+          },
+          "*",
+        );
+      }
+    });
     window.addEventListener("load", async () => {
+      if (__erreurInterrompue) return;
       const resultats = [];
       const $ = (selecteur) => document.querySelector(selecteur);
       const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
@@ -19,11 +41,26 @@ export function construireTests(tests) {
       };
       const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+      const delaiTests = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("${MESSAGE_BOUCLE_TROP_LONGUE}")),
+          ${DELAI_TESTS_MS},
+        ),
+      );
       try {
-        ${tests}
+        await Promise.race([
+          (async () => {
+            ${tests}
+          })(),
+          delaiTests,
+        ]);
       } catch (erreur) {
-        resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
+        const message = erreur.message?.includes("trop de temps")
+          ? erreur.message
+          : "Erreur dans les tests : " + erreur.message;
+        resultats.push({ ok: false, message });
       }
+      if (__erreurInterrompue) return;
       parent.postMessage({ type: "tests", resultats }, "*");
     });
   <\/script>`;
