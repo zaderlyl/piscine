@@ -28,20 +28,12 @@ export function lireEmmetExo(texte) {
   }
 }
 
-// Panneaux déclarés dans l'en-tête : `panneaux: [enonce, depot]` ou `[enonce, editeur, apercu]`
-export function lirePanneaux(texte) {
-  const ligne = texte.match(/^panneaux:\s*\[(.*?)\]/m);
-  if (!ligne) return ["enonce", "editeur", "apercu"];
-  return ligne[1].split(",").map((s) => s.trim().replace(/^['"]|['"]$/g, ""));
-}
-
-export async function chargerExo(fichier) {
+export async function chargerExo(fichier){
   const reponse = await fetch(fichier);
   const texte = (await reponse.text()).replace(/\r\n/g, "\n");
   const exo = lireExo(texte);
-  // propriétés non énumérables : ce ne sont pas des sections de l'exo
+  // propriété non énumérable : ce n'est pas une section de l'exo
   Object.defineProperty(exo, "emmetDebloque", { value: lireEmmetExo(texte) });
-  Object.defineProperty(exo, "panneaux", { value: lirePanneaux(texte) });
-  Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }
+

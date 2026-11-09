@@ -65,7 +65,7 @@ font-family: sans-serif;
 }
 
 .cache {
-  display: none !important;
+  display: none;
 }
 
 #apercu {
@@ -142,110 +142,4 @@ font-family: sans-serif;
 #doc-onglet button.actif {
   background: #fffbe6;
   font-weight: bold;
-}
-
-/* Panneau Git visuel (panneaux: [enonce, depot]) */
-#depot-gauche {
-  flex: 1;
-  overflow: auto;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  font-family: sans-serif;
-}
-
-#depot-droite {
-  flex: 1;
-  overflow: auto;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  font-family: sans-serif;
-}
-
-.depot-graphes {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.carte {
-  border: 1px solid #ddd;
-  padding: 12px 14px;
-  background: #fff;
-}
-
-.carte h2 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-}
-
-#depot-enonce {
-  background: #fffbe6;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-}
-
-#depot-gauche details {
-  margin-top: 8px;
-}
-
-#depot-gauche summary {
-  cursor: pointer;
-  font-weight: bold;
-  color: #333;
-}
-
-#depot-formulaire {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-#depot-commande {
-  flex: 1;
-  min-width: 140px;
-  font-family: monospace;
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-}
-
-#depot-formulaire button {
-  border: 0;
-  background: #eee;
-  padding: 6px 12px;
-  cursor: pointer;
-  font: inherit;
-}
-
-#depot-formulaire button:hover {
-  background: #ddd;
-}
-
-#depot-sortie {
-  background: #F5F5F5;
-  font-family: monospace;
-  padding: 8px 10px;
-  min-height: 40px;
-  margin: 8px 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-#depot-statut {
-  font-family: monospace;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-.bon {
-  color: #2a7a2a;
-}
-
-.mauvais {
-  color: #b00020;
 }
