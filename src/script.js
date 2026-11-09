@@ -14,6 +14,9 @@ import {
   estReussi,
   chargerListeExos,
   exoSuivant,
+  construireExport,
+  telechargerExport,
+  fusionnerProgression,
 } from "./progression.js";
 
 const apercu = document.getElementById("apercu");
@@ -22,6 +25,11 @@ const zones = document.getElementById("zones");
 const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
 const docOnglet = document.getElementById("doc-onglet");
+
+const btnExporter = document.getElementById("btn-exporter");
+const btnImporter = document.getElementById("btn-importer");
+const inputImporter = document.getElementById("input-importer");
+const msgProgression = document.getElementById("msg-progression");
 
 const boutonPhp = document.createElement("button");
 
@@ -35,6 +43,73 @@ const CLE_SUSPENDU = "piscine-apercu-suspendu";
 const FICHIER_EXO = `../exos/${EXO}.md`;
 
 const DELAI_SUSPENDU = 5000;
+
+let enregistrerBrouillonActif = null;
+
+// Gestion de l'exportation et de l'importation de la progression
+let minuteurMsgProgression = null;
+
+function afficherMessageProgression(texte, estErreur = false) {
+  if (!msgProgression) return;
+  msgProgression.textContent = texte;
+  msgProgression.classList.remove("cache", "succes", "erreur");
+  msgProgression.classList.add(estErreur ? "erreur" : "succes");
+  clearTimeout(minuteurMsgProgression);
+  minuteurMsgProgression = setTimeout(() => {
+    msgProgression.classList.add("cache");
+  }, 4000);
+}
+
+// Affiche le message de confirmation après rechargement si présent
+try {
+  const msgEnAttente = sessionStorage.getItem("piscine-message-import");
+  if (msgEnAttente) {
+    sessionStorage.removeItem("piscine-message-import");
+    afficherMessageProgression(msgEnAttente, false);
+  }
+} catch {
+  // sessionStorage inaccessible
+}
+
+if (btnExporter) {
+  btnExporter.addEventListener("click", () => {
+    if (typeof enregistrerBrouillonActif === "function") {
+      enregistrerBrouillonActif();
+    }
+    const exportDonnees = construireExport();
+    telechargerExport(exportDonnees, "progression-piscine.json");
+    afficherMessageProgression("Progression exportée avec succès !");
+  });
+}
+
+if (btnImporter && inputImporter) {
+  btnImporter.addEventListener("click", () => {
+    inputImporter.value = "";
+    inputImporter.click();
+  });
+
+  inputImporter.addEventListener("change", async (e) => {
+    const fichier = e.target.files?.[0];
+    if (!fichier) return;
+
+    try {
+      const texte = await fichier.text();
+      const donnees = JSON.parse(texte);
+      const { nbTotalReussis } = fusionnerProgression(donnees);
+      try {
+        sessionStorage.setItem(
+          "piscine-message-import",
+          `Progression importée avec succès (${nbTotalReussis} exercice(s) validé(s)).`,
+        );
+      } catch {
+        // ignore
+      }
+      location.reload();
+    } catch (erreur) {
+      afficherMessageProgression("Erreur lors de l'import : " + erreur.message, true);
+    }
+  });
+}
 
 // bouton "suivant"
 const boutonSuivant = document.createElement("button");
@@ -123,6 +198,8 @@ if (panneaux.includes("depot")) {
   function enregistrerBrouillon() {
     sauvegarderBrouillon(CLE_BROUILLON, lireContenus());
   }
+
+  enregistrerBrouillonActif = enregistrerBrouillon;
 
   // Affiche index.html dans l'iframe
   function afficherApercu() {
