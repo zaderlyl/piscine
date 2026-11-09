@@ -30,10 +30,5 @@ jobs:
       - name: Valider la structure des exercices
         run: node scripts/valider-exos.js
 
-      - name: Lancer les tests du moteur et panneau Git
-        run: |
-          node src/depot/moteur.test.mjs
-          node src/depot/panneau.test.mjs
-
-      - name: Lancer les tests du tirage et simulateur PTP
-        run: node --test prototypes/ptp/cas-de-test.test.mjs prototypes/ptp/ptp-logique.test.mjs prototypes/ptp/simuler.test.mjs
+      - name: Lancer tous les tests unitaires (*.test.mjs)
+        run: node --test
