@@ -32,8 +32,8 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 **Squelette**
 - [ ] `00` : À quoi sert HTML
 - [ ] `01` : Squelette à la main
-- [ ] `02` : `head` (title, meta)
-- [ ] `03` : Le squelette en un raccourci (débloque `!`)
+- [ ] `02` : Le squelette en un raccourci (débloque `!`)
+- [ ] `03` : `head` (title, meta)
 
 **Texte**
 - [x] `04` : Titres h1 à h6
