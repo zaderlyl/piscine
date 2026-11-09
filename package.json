@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "valider-exos": "node scripts/valider-exos.js"
+    "valider-exos": "node scripts/valider-exos.js",
+    "test:exos": "node scripts/valider-exos.js",
+    "test:depot": "node src/depot/moteur.test.mjs && node src/depot/panneau.test.mjs",
+    "test:ptp": "node --test prototypes/ptp/cas-de-test.test.mjs prototypes/ptp/ptp-logique.test.mjs prototypes/ptp/simuler.test.mjs",
+    "test": "npm run test:exos && npm run test:depot && npm run test:ptp"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"
