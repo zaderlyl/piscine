@@ -56,7 +56,7 @@ export function construireExport(stockage = null) {
   const s = obtenirStockage(stockage);
   if (!s) {
     return {
-      version: 1,
+      version: VERSION_EXPORT,
       dateExport: new Date().toISOString(),
       progression: {},
       brouillons: {},
@@ -92,7 +92,7 @@ export function construireExport(stockage = null) {
   }
 
   return {
-    version: 1,
+    version: VERSION_EXPORT,
     dateExport: new Date().toISOString(),
     progression,
     brouillons,
@@ -100,96 +100,146 @@ export function construireExport(stockage = null) {
   };
 }
 
-// Valide qu'un objet contient une structure de progression exploitable
-export function validerDonneesProgression(donnees) {
+const VERSION_EXPORT = 1;
+const FORMAT_ID_EXO = /^[a-z0-9_-]+(\/[a-z0-9_-]+)+$/i; // ex. html/vanilla/04
+const FORMAT_EMMET = /^[\w.#>+*^$@!:-]{1,64}$/;
+
+function estObjetSimple(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+
+// Nettoie un fichier importé : ne garde que ce qui a la bonne forme, ignore le reste.
+// Retourne { progression, brouillons, emmet } ou lève une erreur claire si rien n'est exploitable.
+export function normaliserDonnees(donnees) {
   if (!donnees || typeof donnees !== "object") {
     throw new Error("Le fichier est vide ou n'est pas un objet JSON valide.");
   }
 
-  // Format standard { version, progression, brouillons }
-  if (donnees.progression && typeof donnees.progression === "object") {
-    return true;
-  }
+  const progression = {};
+  const ajouterReussi = (id, date) => {
+    if (typeof id !== "string" || !FORMAT_ID_EXO.test(id)) return;
+    const dateValide =
+      typeof date === "string" && !Number.isNaN(Date.parse(date)) ? date : null;
+    progression[id] = { reussi: true, date: dateValide };
+  };
 
-  // Tableau d'identifiants ["html/vanilla/00", ...]
+  let formatStandard = false;
   if (Array.isArray(donnees)) {
-    return true;
+    // Tableau d'identifiants ["html/vanilla/00", ...]
+    for (const id of donnees) ajouterReussi(id, null);
+  } else {
+    if (typeof donnees.version === "number" && donnees.version > VERSION_EXPORT) {
+      throw new Error(
+        "Ce fichier vient d'une version plus récente de la piscine : mets l'application à jour avant de l'importer.",
+      );
+    }
+    if (estObjetSimple(donnees.progression)) {
+      // Format standard { version, progression, brouillons, emmet }
+      formatStandard = true;
+      for (const [id, info] of Object.entries(donnees.progression)) {
+        if (estObjetSimple(info) && info.reussi === true) ajouterReussi(id, info.date);
+      }
+    } else if (!("progression" in donnees)) {
+      // Dictionnaire direct { "html/vanilla/00": { reussi: true } }
+      for (const [id, info] of Object.entries(donnees)) {
+        if (estObjetSimple(info) && info.reussi === true) ajouterReussi(id, info.date);
+      }
+    }
   }
 
-  // Dictionnaire direct { "html/vanilla/00": { reussi: true } }
-  const cles = Object.keys(donnees);
-  const estDictionnaireValide =
-    cles.length > 0 &&
-    cles.some(
-      (k) =>
-        k.includes("/") ||
-        (donnees[k] && typeof donnees[k] === "object" && "reussi" in donnees[k]),
-    );
-  if (estDictionnaireValide) {
-    return true;
+  const brouillons = {};
+  if (estObjetSimple(donnees.brouillons)) {
+    for (const [id, fichiers] of Object.entries(donnees.brouillons)) {
+      if (!FORMAT_ID_EXO.test(id) || !estObjetSimple(fichiers)) continue;
+      const propres = {};
+      for (const [nom, contenu] of Object.entries(fichiers)) {
+        if (typeof contenu === "string" && !/[\/]|^\.\.?$/.test(nom)) propres[nom] = contenu;
+      }
+      if (Object.keys(propres).length > 0) brouillons[id] = propres;
+    }
   }
 
-  throw new Error("Le fichier ne contient pas de données de progression valides.");
+  const emmet = Array.isArray(donnees.emmet)
+    ? donnees.emmet.filter((e) => typeof e === "string" && FORMAT_EMMET.test(e))
+    : [];
+
+  const nbElements =
+    Object.keys(progression).length + Object.keys(brouillons).length + emmet.length;
+  if (!formatStandard && nbElements === 0) {
+    throw new Error("Le fichier ne contient pas de données de progression valides.");
+  }
+
+  return { progression, brouillons, emmet };
 }
 
-// Fusionne les données importées dans le stockage local
+// Valide qu'un objet contient une structure de progression exploitable (lève une erreur sinon)
+export function validerDonneesProgression(donnees) {
+  normaliserDonnees(donnees);
+  return true;
+}
+
+// Fusionne les données importées dans le stockage local.
+// Rien n'est écrasé : un exercice déjà validé garde sa date, un brouillon local existant est conservé.
+// Les écritures sont annulées si le stockage refuse l'une d'elles (ex. stockage plein).
 export function fusionnerProgression(donnees, stockage = null) {
   const s = obtenirStockage(stockage);
   if (!s) {
     throw new Error("Espace de stockage local inaccessible.");
   }
 
-  validerDonneesProgression(donnees);
-
-  let sourceProgression = {};
-  if (Array.isArray(donnees)) {
-    for (const id of donnees) {
-      if (typeof id === "string") {
-        sourceProgression[id] = { reussi: true, date: new Date().toISOString() };
-      }
-    }
-  } else if (donnees.progression && typeof donnees.progression === "object") {
-    sourceProgression = donnees.progression;
-  } else {
-    sourceProgression = donnees;
-  }
+  const { progression, brouillons, emmet } = normaliserDonnees(donnees);
 
   const actuelle = lireProgression(s);
   let nbNouveauxExos = 0;
-
-  for (const [nomExo, info] of Object.entries(sourceProgression)) {
-    if (!info || typeof info !== "object") continue;
-    if (info.reussi === true) {
-      if (!actuelle[nomExo] || !actuelle[nomExo].reussi) {
-        nbNouveauxExos++;
-      }
-      actuelle[nomExo] = {
-        reussi: true,
-        date: info.date || actuelle[nomExo]?.date || new Date().toISOString(),
-      };
-    }
+  for (const [id, info] of Object.entries(progression)) {
+    if (actuelle[id]?.reussi) continue;
+    nbNouveauxExos++;
+    actuelle[id] = { reussi: true, date: info.date || new Date().toISOString() };
   }
 
-  s.setItem(CLE_PROGRESSION, JSON.stringify(actuelle));
+  const ecritures = [[CLE_PROGRESSION, JSON.stringify(actuelle)]];
 
   let nbBrouillons = 0;
-  if (donnees.brouillons && typeof donnees.brouillons === "object") {
-    for (const [nomExo, contenu] of Object.entries(donnees.brouillons)) {
-      if (contenu && typeof contenu === "object") {
-        s.setItem("piscine-brouillon:" + nomExo, JSON.stringify(contenu));
-        nbBrouillons++;
-      }
+  let nbBrouillonsConserves = 0;
+  for (const [id, fichiers] of Object.entries(brouillons)) {
+    const cle = "piscine-brouillon:" + id;
+    if (s.getItem(cle) !== null) {
+      nbBrouillonsConserves++;
+      continue;
     }
+    ecritures.push([cle, JSON.stringify(fichiers)]);
+    nbBrouillons++;
   }
 
-  if (Array.isArray(donnees.emmet)) {
+  if (emmet.length > 0) {
+    let emmetActuel = [];
     try {
-      const emmetActuel = JSON.parse(s.getItem("piscine-emmet")) || [];
-      const fusion = Array.from(new Set([...emmetActuel, ...donnees.emmet]));
-      s.setItem("piscine-emmet", JSON.stringify(fusion));
+      const lu = JSON.parse(s.getItem("piscine-emmet"));
+      if (Array.isArray(lu)) emmetActuel = lu;
     } catch {
-      // ignore
+      // emmet local illisible : on repart d'une liste vide
     }
+    ecritures.push([
+      "piscine-emmet",
+      JSON.stringify(Array.from(new Set([...emmetActuel, ...emmet]))),
+    ]);
+  }
+
+  const anciennes = ecritures.map(([cle]) => [cle, s.getItem(cle)]);
+  try {
+    for (const [cle, valeur] of ecritures) s.setItem(cle, valeur);
+  } catch {
+    for (const [cle, ancienne] of anciennes) {
+      try {
+        if (ancienne === null) s.removeItem(cle);
+        else s.setItem(cle, ancienne);
+      } catch {
+        // on fait au mieux pour revenir à l'état précédent
+      }
+    }
+    throw new Error(
+      "Impossible d'enregistrer l'import : l'espace de stockage du navigateur est plein ou bloqué. Rien n'a été modifié.",
+    );
   }
 
   const nbTotalReussis = Object.values(actuelle).filter((e) => e?.reussi).length;
@@ -198,6 +248,7 @@ export function fusionnerProgression(donnees, stockage = null) {
     nbTotalReussis,
     nbNouveauxExos,
     nbBrouillons,
+    nbBrouillonsConserves,
   };
 }
 

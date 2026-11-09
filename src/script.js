@@ -95,11 +95,14 @@ if (btnImporter && inputImporter) {
     try {
       const texte = await fichier.text();
       const donnees = JSON.parse(texte);
-      const { nbTotalReussis } = fusionnerProgression(donnees);
+      const { nbTotalReussis, nbBrouillonsConserves } = fusionnerProgression(donnees);
+      const conserves = nbBrouillonsConserves
+        ? ` ${nbBrouillonsConserves} brouillon(s) déjà présent(s) sur ce poste conservé(s).`
+        : "";
       try {
         sessionStorage.setItem(
           "piscine-message-import",
-          `Progression importée avec succès (${nbTotalReussis} exercice(s) validé(s)).`,
+          `Progression importée avec succès (${nbTotalReussis} exercice(s) validé(s)).${conserves}`,
         );
       } catch {
         // ignore

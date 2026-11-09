@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 import {
   lireProgression,
@@ -9,6 +10,7 @@ import {
   construireExport,
   validerDonneesProgression,
   fusionnerProgression,
+  normaliserDonnees,
 } from "./progression.js";
 
 function creerStockageMock(initial = {}) {
@@ -131,20 +133,112 @@ test("fusionnerProgression : accepte un tableau d'identifiants d'exercices", () 
   assert.equal(estReussi("html/vanilla/01", stockage), true);
 });
 
-test("Intégration DOM : présence des éléments d'export et d'import dans index.html", () => {
-  const dom = new JSDOM(`<!DOCTYPE html>
-    <div id="editeur">
-      <footer id="barre-progression">
-        <button id="btn-exporter" type="button">Exporter ma progression</button>
-        <button id="btn-importer" type="button">Importer</button>
-        <input type="file" id="input-importer" accept=".json,application/json" class="cache">
-        <span id="msg-progression" class="cache"></span>
-      </footer>
-    </div>`);
+test("Intégration DOM : le vrai index.html contient les éléments d'export et d'import", () => {
+  const html = readFileSync(new URL("./index.html", import.meta.url), "utf8");
+  const doc = new JSDOM(html).window.document;
+  assert.ok(doc.querySelector("#barre-progression #btn-exporter"));
+  assert.ok(doc.querySelector("#barre-progression #btn-importer"));
+  const input = doc.querySelector("#barre-progression #input-importer[type=file]");
+  assert.ok(input);
+  assert.match(input.getAttribute("accept"), /json/);
+  assert.ok(doc.querySelector("#barre-progression #msg-progression"));
+});
 
-  const doc = dom.window.document;
-  assert.ok(doc.getElementById("btn-exporter"));
-  assert.ok(doc.getElementById("btn-importer"));
-  assert.ok(doc.getElementById("input-importer"));
-  assert.ok(doc.getElementById("msg-progression"));
+test("fusionnerProgression : un brouillon local existant n'est jamais écrasé", () => {
+  const stockage = creerStockageMock({
+    "piscine-brouillon:html/vanilla/04": { "index.html": "MON TRAVAIL EN COURS" },
+  });
+  const res = fusionnerProgression(
+    {
+      progression: {},
+      brouillons: {
+        "html/vanilla/04": { "index.html": "vieux brouillon importé" },
+        "html/vanilla/05": { "index.html": "nouveau" },
+      },
+    },
+    stockage,
+  );
+  assert.deepEqual(JSON.parse(stockage.getItem("piscine-brouillon:html/vanilla/04")), {
+    "index.html": "MON TRAVAIL EN COURS",
+  });
+  assert.deepEqual(JSON.parse(stockage.getItem("piscine-brouillon:html/vanilla/05")), {
+    "index.html": "nouveau",
+  });
+  assert.equal(res.nbBrouillons, 1);
+  assert.equal(res.nbBrouillonsConserves, 1);
+});
+
+test("fusionnerProgression : conserve la date d'un exercice déjà validé", () => {
+  const stockage = creerStockageMock({
+    "piscine-progression": { "html/vanilla/00": { reussi: true, date: "2026-01-01T00:00:00Z" } },
+  });
+  fusionnerProgression({ progression: { "html/vanilla/00": { reussi: true, date: "2026-05-05T00:00:00Z" } } }, stockage);
+  assert.equal(lireProgression(stockage)["html/vanilla/00"].date, "2026-01-01T00:00:00Z");
+});
+
+test("normaliserDonnees : ignore les entrées mal formées", () => {
+  const r = normaliserDonnees({
+    version: 1,
+    progression: {
+      "html/vanilla/00": { reussi: true, date: "pas une date" },
+      "../../n/importe/quoi": { reussi: true },
+      "__proto__": { reussi: true },
+      "html/vanilla/01": { reussi: "oui" },
+      "html/vanilla/02": 123,
+    },
+    brouillons: {
+      "html/vanilla/00": { "index.html": "ok", "../evil.js": "x", "n.html": 42 },
+      "x": [1, 2],
+      "html/vanilla/09": { "a.html": 42 },
+    },
+    emmet: ["p", "h1", { a: 1 }, 42, null, "<script>"],
+  });
+  assert.deepEqual(Object.keys(r.progression), ["html/vanilla/00"]);
+  assert.equal(r.progression["html/vanilla/00"].date, null);
+  assert.deepEqual(r.brouillons, { "html/vanilla/00": { "index.html": "ok" } });
+  assert.deepEqual(r.emmet, ["p", "h1"]);
+});
+
+test("validerDonneesProgression : rejette les formats trompeurs", () => {
+  assert.throws(() => validerDonneesProgression({ "a/b": 123 }));
+  assert.throws(() => validerDonneesProgression({ progression: [] }));
+  assert.throws(() => validerDonneesProgression([1, {}, null]));
+  assert.throws(() => validerDonneesProgression({ version: 999, progression: {} }), /plus récente/);
+  assert.doesNotThrow(() => validerDonneesProgression({ progression: {} }));
+});
+
+test("fusionnerProgression : stockage plein → erreur claire et aucune modification", () => {
+  const stockage = creerStockageMock({
+    "piscine-progression": { "html/vanilla/00": { reussi: true, date: "2026-01-01T00:00:00Z" } },
+  });
+  const original = stockage.setItem;
+  let appels = 0;
+  stockage.setItem = (k, v) => {
+    if (++appels === 2) throw new DOMException("quota", "QuotaExceededError");
+    return original(k, v);
+  };
+  assert.throws(
+    () =>
+      fusionnerProgression(
+        {
+          progression: { "html/vanilla/01": { reussi: true } },
+          brouillons: { "html/vanilla/01": { "index.html": "x" } },
+        },
+        stockage,
+      ),
+    /Rien n'a été modifié/,
+  );
+  stockage.setItem = original;
+  assert.equal(estReussi("html/vanilla/01", stockage), false);
+  assert.equal(stockage.getItem("piscine-brouillon:html/vanilla/01"), null);
+});
+
+test("fusionnerProgression : clé __proto__ ignorée, compteurs cohérents", () => {
+  const stockage = creerStockageMock();
+  const res = fusionnerProgression(
+    JSON.parse('{"progression":{"__proto__":{"reussi":true},"html/vanilla/00":{"reussi":true}}}'),
+    stockage,
+  );
+  assert.equal(res.nbNouveauxExos, 1);
+  assert.equal(res.nbTotalReussis, 1);
 });
