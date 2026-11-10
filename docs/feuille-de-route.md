@@ -54,10 +54,10 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `15` : Listes imbriquées
 
 **Liens**
-- [ ] `16` : Liens externes
-- [ ] `17` : Ancres dans la page
-- [ ] `18` : Liens vers un deuxième espace
-- [ ] `19` : `mailto`, `tel`, `download`
+- [x] `16` : Liens externes
+- [x] `17` : Ancres dans la page
+- [x] `18` : Liens vers un deuxième espace
+- [x] `19` : `mailto`, `tel`, `download`
 
 **Images**
 - [ ] `20` : Images (`src`, `alt`)
