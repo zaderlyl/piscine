@@ -1,46 +1,25 @@
-const acorn =
-  typeof window !== "undefined"
-    ? await import("https://esm.sh/acorn@8.12.1")
-    : null;
+import * as acorn from "https://esm.sh/acorn@8.12.1";
+import { determinerType } from "./type-donnees.js";
 
 // Panneau « Variables » : pour chaque variable déclarée au niveau du script,
 // affiche son nom, sa valeur, son type de données et si elle est connectée (lue) quelque part.
 
-function getPanneau(cible) {
-  if (cible) return cible;
-  if (typeof document !== "undefined") {
-    return document.getElementById("variables");
-  }
-  return null;
-}
-
-// Détermine le type de données JavaScript d'une valeur
-export function determinerType(v) {
-  if (v === null) return "null";
-  if (Array.isArray(v)) return "array";
-  return typeof v;
-}
+const panneau = document.getElementById("variables");
 
 // Code ajouté au début du script de l'élève, dans l'aperçu.
-// Il envoie chaque valeur et son type de données au parent avec postMessage.
+// Il envoie chaque valeur et son type au parent avec postMessage.
 const AIDE_APERCU = `
 window.__visu = (nom, valeur) => {
+  const determinerType = ${determinerType.toString().replace(/^function\s+\w+/, "function")};
   const formater = (v) => {
     if (v === undefined) return "undefined";
     if (typeof v === "function") return "fonction";
     try { return JSON.stringify(v) ?? String(v); } catch { return String(v); }
   };
-  const determinerType = (v) => {
-    if (v === null) return "null";
-    if (Array.isArray(v)) return "array";
-    return typeof v;
-  };
-  parent.postMessage({
-    type: "variable",
-    nom,
-    valeur: formater(valeur),
-    typeDonnees: determinerType(valeur)
-  }, "*");
+  parent.postMessage(
+    { type: "variable", nom, valeur: formater(valeur), typeDonnees: determinerType(valeur) },
+    "*"
+  );
 };
 `;
 
@@ -70,9 +49,6 @@ function lectures(noeud, noms) {
 // Analyse le script de l'élève.
 // Renvoie le code à exécuter dans l'aperçu, la liste des variables et une erreur éventuelle.
 export function analyserScript(code) {
-  if (!acorn) {
-    return { code: AIDE_APERCU + code, variables: [], erreur: "Acorn non disponible" };
-  }
   let programme;
   try {
     programme = acorn.parse(code, {
@@ -137,67 +113,56 @@ export function analyserScript(code) {
 
 // Dessine une carte par variable, en attendant les valeurs
 // balisePresente : false si index.html ne contient pas <script src="script.js">
-export function afficherVariables(analyse, balisePresente = true, conteneur = null) {
-  const panneauEl = getPanneau(conteneur);
-  if (!panneauEl) return;
-  panneauEl.replaceChildren();
-
-  const doc = panneauEl.ownerDocument || (typeof document !== "undefined" ? document : null);
-  if (!doc) return;
+export function afficherVariables(analyse, balisePresente = true) {
+  panneau.replaceChildren();
 
   if (analyse.erreur) {
-    const message = doc.createElement("p");
+    const message = document.createElement("p");
     message.className = "message";
     message.textContent = "Code incomplet : le panneau attend un script valide.";
-    panneauEl.append(message);
+    panneau.append(message);
     return;
   }
 
   if (!balisePresente && analyse.variables.length) {
-    const message = doc.createElement("p");
+    const message = document.createElement("p");
     message.className = "message";
     message.textContent =
       "Les valeurs n'apparaissent pas : ajoute <script src=\"script.js\"></script> dans index.html.";
-    panneauEl.append(message);
+    panneau.append(message);
   }
 
   for (const variable of analyse.variables) {
-    const carte = doc.createElement("div");
+    const carte = document.createElement("div");
     carte.className = "variable " + (variable.connectee ? "connectee" : "non-connectee");
     carte.dataset.nom = variable.nom;
 
-    const nom = doc.createElement("strong");
+    const nom = document.createElement("strong");
     nom.textContent = variable.nom;
 
-    const valeur = doc.createElement("span");
+    const valeur = document.createElement("span");
     valeur.className = "valeur";
     valeur.textContent = "—";
 
-    const type = doc.createElement("span");
+    const type = document.createElement("span");
     type.className = "type";
 
-    const etat = doc.createElement("small");
+    const etat = document.createElement("small");
     etat.textContent =
       (variable.connectee ? "connectée" : "non connectée") + " · ligne " + variable.ligne;
 
-    carte.append(nom, " = ", valeur, type, etat);
-    panneauEl.append(carte);
+    carte.append(nom, " = ", valeur, type, " ", etat);
+    panneau.append(carte);
   }
 }
 
-// Met à jour la valeur et le type affichés quand l'aperçu envoie une nouvelle valeur
-export function ecouterValeurs(apercu, conteneur = null) {
+// Met à jour la valeur affichée quand l'aperçu envoie une nouvelle valeur
+export function ecouterValeurs(apercu) {
   window.addEventListener("message", (e) => {
-    if (e.source !== apercu.contentWindow || e.data?.type !== "variable") return;
-    const panneauEl = getPanneau(conteneur);
-    if (!panneauEl) return;
-    const carte = panneauEl.querySelector(`[data-nom="${e.data.nom}"]`);
+    if (e.source !== apercu.contentWindow || e.data.type !== "variable") return;
+    const carte = panneau.querySelector(`[data-nom="${e.data.nom}"]`);
     if (!carte) return;
     carte.querySelector(".valeur").textContent = e.data.valeur;
-    const badgeType = carte.querySelector(".type");
-    if (badgeType && e.data.typeDonnees) {
-      badgeType.textContent = e.data.typeDonnees;
-      badgeType.dataset.type = e.data.typeDonnees;
-    }
+    carte.querySelector(".type").textContent = e.data.typeDonnees ?? "";
   });
 }
