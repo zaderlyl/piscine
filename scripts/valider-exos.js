@@ -125,7 +125,39 @@ function blocDeCode(section) {
 // Même rôle que construireTests() dans src/script.js : $, $$, assert, wait, click, type.
 const DELAI_TESTS = 5000; // ms, pour qu'un test qui attend ne bloque pas le script
 async function jouerTestsHtml(solution, tests) {
-  const dom = new JSDOM(solution, { runScripts: "outside-only", pretendToBeVisual: true });
+  const dom = new JSDOM(solution, {
+    runScripts: "dangerously",
+    pretendToBeVisual: true,
+    url: "http://localhost/",
+    beforeParse(window) {
+      if (!window.localStorage) {
+        const store = new Map();
+        window.localStorage = {
+          getItem: (k) => (store.has(k) ? store.get(k) : null),
+          setItem: (k, v) => store.set(k, String(v)),
+          removeItem: (k) => store.delete(k),
+          clear: () => store.clear(),
+        };
+      }
+      if (!window.Audio) {
+        window.Audio = class Audio {
+          play() {
+            return Promise.resolve();
+          }
+        };
+      }
+      if (!window.IntersectionObserver) {
+        window.IntersectionObserver = class IntersectionObserver {
+          constructor(callback) {
+            this.callback = callback;
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        };
+      }
+    },
+  });
   const fenetre = dom.window;
   const chargement = new Promise((resolve) => fenetre.addEventListener("load", resolve));
   await chargement;
