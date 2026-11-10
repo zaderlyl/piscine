@@ -40,9 +40,9 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `05` : Paragraphes, `hr` (débloque `lorem`)
 - [ ] `06` : Gras et italique
 - [ ] `07` : Titre en gras ou en italique : qui contient qui ?
-- [ ] `08` : Autres balises de texte
-- [ ] `09` : Balises de sens (`abbr`, `cite`, `code`…)
-- [ ] `10` : Reproduire un modèle de texte
+- [x] `08` : Autres balises de texte
+- [x] `09` : Balises de sens (`abbr`, `cite`, `code`…)
+- [x] `10` : Reproduire un modèle de texte
 
 **Couleurs**
 - [ ] `11` : Noms, hexadécimal, `rgb`
