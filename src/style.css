@@ -64,6 +64,22 @@ font-family: sans-serif;
   inset: 0;
 }
 
+.cm-editor {
+  height: 100%;
+}
+
+.cm-gutters {
+  background-color: #fafafa;
+  color: #999;
+  border-right: 1px solid #ddd;
+}
+
+.cm-gutterElement {
+  padding: 0 8px 0 6px;
+  min-width: 20px;
+  text-align: right;
+}
+
 .cache {
   display: none !important;
 }
