@@ -66,9 +66,9 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `23` : Zones cliquables (`map`, `area`)
 
 **Tableaux**
-- [ ] `24` : Tableau simple (débloque `table>tr*3>td*3`)
-- [ ] `25` : Tableau complet
-- [ ] `26` : Cellules fusionnées
+- [x] `24` : Tableau simple (débloque `table>tr*3>td*3`)
+- [x] `25` : Tableau complet
+- [x] `26` : Cellules fusionnées
 
 **Structure**
 - [ ] `27` : `div` et `span`
