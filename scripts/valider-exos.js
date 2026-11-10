@@ -1,7 +1,9 @@
 // Vérifie que les exos sont bien formés, avant fusion (README §11).
 // Usage : node scripts/valider-exos.js [dossier]   (par défaut : exos/)
 //
-// Trois façons de valider un exo, selon son module :
+// Quatre façons de valider un exo, selon son module :
+// - exos/sql/requetes : on lit « Base » et « Solutions » avec lireSql() et on exécute chaque solution
+//   sur la base de départ (il faut le paquet sql.js, sinon avertissement).
 // - exos/sql/schema : pas de section « Tests » ni de solution. On lit la section « Schéma »
 //   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
@@ -14,7 +16,10 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
+import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
+import { lireSql } from "../src/sql/lecture.js";
+import { executerRequete } from "../src/sql/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
@@ -224,6 +229,40 @@ function verifierSchemaSql(sections) {
   return erreurs;
 }
 
+// Règle « requetes » : Énoncé, Base et Solutions lisibles, chaque solution s'exécute sans erreur
+async function verifierRequetesSql(sections) {
+  const erreurs = [];
+  const avertissements = [];
+  for (const nom of ["Énoncé", "Base", "Solutions"]) {
+    if (!trouver(sections, nom)) erreurs.push({ section: "—", ligne: 1, message: `section « ${nom} » manquante` });
+  }
+  if (erreurs.length > 0) return { erreurs, avertissements };
+
+  const texte = (nom) => trouver(sections, nom).corps.map((l) => l.texte).join("\n");
+  let sql;
+  try {
+    sql = lireSql({ Base: texte("Base"), Solutions: texte("Solutions") });
+  } catch (erreur) {
+    erreurs.push({ section: "Base / Solutions", ligne: trouver(sections, "Base").ligne, message: erreur.message });
+    return { erreurs, avertissements };
+  }
+
+  let SQL;
+  try {
+    SQL = await createRequire(import.meta.url)("sql.js")();
+  } catch {
+    avertissements.push("solutions non exécutées (il faut le paquet sql.js)");
+    return { erreurs, avertissements };
+  }
+  sql.solutions.forEach((solution, i) => {
+    const r = executerRequete(SQL, sql.base, solution);
+    if (r.erreur) {
+      erreurs.push({ section: "Solutions", ligne: trouver(sections, "Solutions").ligne, message: `la solution ${i + 1} échoue : ${r.erreur}` });
+    }
+  });
+  return { erreurs, avertissements };
+}
+
 // Règle « etapes » : Énoncé, Étapes (format et conditions valides), Solution qui coche toutes les étapes
 function verifierEtapes(sections, sansDepot) {
   const erreurs = [];
@@ -307,6 +346,10 @@ async function validerFichier(chemin) {
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
   if (module === "sql/schema") {
     erreurs.push(...verifierSchemaSql(sections));
+  } else if (module === "sql/requetes") {
+    const resultat = await verifierRequetesSql(sections);
+    erreurs.push(...resultat.erreurs);
+    avertissements.push(...resultat.avertissements);
   } else if (module === "git/visuel") {
     erreurs.push(...verifierEtapes(sections, front.valeurs.depot === "aucun"));
   } else {

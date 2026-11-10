@@ -19,5 +19,6 @@
   "sql/schema/01",
   "sql/schema/02",
   "sql/schema/03",
-  "sql/schema/04"
+  "sql/schema/04",
+  "sql/requetes/01"
 ]
