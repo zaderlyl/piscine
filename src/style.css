@@ -107,6 +107,21 @@ font-family: sans-serif;
   color: #1565c0;
 }
 
+.variable .type {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 0.8em;
+  border-radius: 3px;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #e0e0e0;
+}
+
+.variable .type:empty {
+  display: none;
+}
+
 .variable small {
   margin-left: 6px;
   color: #777;
