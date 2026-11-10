@@ -104,6 +104,7 @@ if (panneaux.includes("depot")) {
   // HTML / CSS / JS / PHP classique
   let minuteurTests = null;
   let minuteur = null;
+  let phpEnCours = false;
   let testsExo = lireCode(exo["Tests"]);
 
   function arreterApercu() {
@@ -221,24 +222,30 @@ if (panneaux.includes("depot")) {
   });
 
   async function lancerPhp() {
-    panneauResultats.textContent = "Exécution en cours...";
-    const { sortie, resultats } = await executerPhp(
-      editeurs["index.php"].state.doc.toString(),
-      testsExo,
-    );
+    if (phpEnCours) return; // ignore les clics pendant une exécution
+    phpEnCours = true;
+    try {
+      panneauResultats.textContent = "Exécution en cours...";
+      const { sortie, resultats } = await executerPhp(
+        editeurs["index.php"].state.doc.toString(),
+        testsExo,
+      );
 
-    const echecs = resultats.filter((r) => !r.ok);
-    panneauResultats.textContent =
-      sortie +
-      "\n\n" +
-      (echecs.length
-        ? echecs.map((r) => "❌ " + r.message).join("\n")
-        : "✅ Tous les tests passent");
-    if (!echecs.length && resultats.length) {
-      validerExo();
+      const echecs = resultats.filter((r) => !r.ok);
+      panneauResultats.textContent =
+        sortie +
+        "\n\n" +
+        (echecs.length
+          ? echecs.map((r) => "❌ " + r.message).join("\n")
+          : "✅ Tous les tests passent");
+      if (!echecs.length && resultats.length) {
+        validerExo();
+      }
+
+      clearTimeout(minuteurTests);
+      afficherDansApercu(apercu, sortie);
+    } finally {
+      phpEnCours = false;
     }
-
-    clearTimeout(minuteurTests);
-    afficherDansApercu(apercu, sortie);
   }
 }
