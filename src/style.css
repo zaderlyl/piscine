@@ -249,3 +249,45 @@ font-family: sans-serif;
 .mauvais {
   color: #b00020;
 }
+
+
+#barre-progression {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f8f8f8;
+  border-top: 1px solid #ddd;
+  font-family: sans-serif;
+  font-size: 12px;
+  flex: none;
+}
+
+#barre-progression button {
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#barre-progression button:hover {
+  background: #eee;
+  border-color: #bbb;
+}
+
+#msg-progression {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#msg-progression.succes {
+  color: #2e7d32;
+}
+
+#msg-progression.erreur {
+  color: #c62828;
+}
