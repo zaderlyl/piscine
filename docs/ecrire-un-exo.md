@@ -53,6 +53,7 @@ if (age >= 18) console.log("majeur");
 | `## Indice` | Un coup de pouce, sans donner la solution. |
 | `## Tests` | Code JS exécuté dans l'aperçu, dans un bloc de code. |
 | `## Solution: <fichier>` | Solution de référence pour ce fichier, dans un bloc de code. |
+| `## Schéma` | Exos de schéma SQL seulement (voir plus bas). Remplace Tests et Solution. |
 
 Tout le texte est du Markdown : gras, listes, code avec des backticks.
 
@@ -79,6 +80,29 @@ for (let i = 1; i <= 6; i++) {
 ```
 
 Règles : un message clair par test (l'élève le lit), et le code des tests ne doit jamais boucler.
+
+## Exos de schéma SQL
+
+Dans `exos/sql/schema/`, l'élève complète des tables avec des listes déroulantes, sans écrire de code. Front matter : `panneaux: [enonce, schema]`. Il n'y a ni `## Tests` ni `## Solution` : la section `## Schéma` contient tout.
+
+```
+## Schéma
+table: commandes
+colonnes: id  produit  client_id
+cles: ?[primaire|étrangère|aucune]  ?[primaire|étrangère|aucune]  ?[primaire|étrangère|aucune]
+lignes:
+- 10 | Clavier | 2
+- 11 | Souris | 1
+reponses: primaire, aucune, étrangère
+```
+
+- `table:` donne le nom de la table. Pour plusieurs tables, écris plusieurs blocs, chacun commençant par `table:`.
+- Chaque ligne `nom: ...` avant `lignes:` est une rangée d'en-tête (colonnes, types, clés…). Un élément est soit un mot fixe, soit un trou `?[choix1|choix2|…]`.
+- `lignes:` est suivi des lignes de données, une par `- a | b | c`.
+- `reponses:` donne la bonne réponse de chaque trou, dans l'ordre de lecture (table par table, rangée par rangée, de gauche à droite). Elle peut être omise pour une table sans trou.
+- Pour les rangées nommées `colonnes`, `types` ou `cles`, l'élève reçoit un conseil adapté s'il se trompe.
+
+`node scripts/valider-exos.js` vérifie que le schéma est lisible et que chaque réponse est dans les choix de son trou.
 
 ## Les règles à respecter
 
