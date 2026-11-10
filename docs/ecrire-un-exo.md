@@ -54,6 +54,7 @@ if (age >= 18) console.log("majeur");
 | `## Tests` | Code JS exécuté dans l'aperçu, dans un bloc de code. |
 | `## Solution: <fichier>` | Solution de référence pour ce fichier, dans un bloc de code. |
 | `## Schéma` | Exos de schéma SQL seulement (voir plus bas). Remplace Tests et Solution. |
+| `## Base` / `## Solutions` | Exos de requêtes SQL seulement (voir plus bas). Remplacent Tests et Solution. |
 
 Tout le texte est du Markdown : gras, listes, code avec des backticks.
 
@@ -103,6 +104,31 @@ reponses: primaire, aucune, étrangère
 - Pour les rangées nommées `colonnes`, `types` ou `cles`, l'élève reçoit un conseil adapté s'il se trompe.
 
 `node scripts/valider-exos.js` vérifie que le schéma est lisible et que chaque réponse est dans les choix de son trou.
+
+## Exos de requêtes SQL
+
+Dans `exos/sql/requetes/`, l'élève écrit une requête dans un éditeur, l'exécute pour voir le résultat, puis la vérifie. Front matter : `panneaux: [enonce, sql]`. Pas de `## Tests` ni de `## Solution`.
+
+````
+## Base
+```sql
+CREATE TABLE eleves (id INTEGER, nom TEXT);
+INSERT INTO eleves VALUES (1, 'Alice'), (2, 'Bruno');
+```
+
+## Solutions
+```sql
+SELECT nom FROM eleves;
+```
+```sql
+SELECT eleves.nom FROM eleves;
+```
+````
+
+- `## Base` : un seul bloc de code, exécuté pour créer la base de départ. Elle repart de zéro à chaque exécution.
+- `## Solutions` : un bloc de code par requête acceptée. Mets plusieurs solutions quand le palier ou le projet en accepte plusieurs écritures.
+- La vérification compare le **texte** de la requête de l'élève à chaque solution. Sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces, retours à la ligne, commentaires `--` et `;` final.
+- `node scripts/valider-exos.js` exécute chaque solution sur la base (il faut le paquet `sql.js` installé, sinon un avertissement s'affiche).
 
 ## Les règles à respecter
 
