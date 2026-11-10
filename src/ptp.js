@@ -127,6 +127,13 @@ export function afficherPtpUI(conteneur = document.body, onMiseAJour = null) {
   const s = chargerEtat();
   const moi = obtenirMonId();
   const e = s.eleves[moi];
+  const ech = e?.echangeId ? s.echanges[e.echangeId] : null;
+
+  // Le battement (toutes les 10 s) et les autres onglets redemandent l'affichage :
+  // on ne reconstruit que si l'échange a changé, sinon le code en cours de saisie serait effacé.
+  const signature = JSON.stringify([e?.etat, e?.exoEnAttente, e?.message, ech?.id, ech?.etat, ech?.code, ech?.correcteur]);
+  if (modal.dataset.signature === signature) return;
+  modal.dataset.signature = signature;
 
   if (!e || (!e.exoEnAttente && e.etat === "libre")) {
     modal.classList.add("cache");
@@ -143,8 +150,6 @@ export function afficherPtpUI(conteneur = document.body, onMiseAJour = null) {
   const titre = document.createElement("h3");
   titre.textContent = "Échange entre pairs (PTP)";
   boite.append(titre);
-
-  const ech = e.echangeId ? s.echanges[e.echangeId] : null;
 
   // Cas 1 : En recherche d'un correcteur
   if (e.etat === "en_recherche" || (ech && ech.etat === "recherche")) {
@@ -187,22 +192,8 @@ export function afficherPtpUI(conteneur = document.body, onMiseAJour = null) {
       const codeSpan = document.createElement("div");
       codeSpan.className = "ptp-code";
       codeSpan.textContent = ech.code || "------";
-
-      const pSaisie = document.createElement("p");
-      pSaisie.textContent = "Ou valide le code saisi par ton correcteur :";
-      const inputCode = document.createElement("input");
-      inputCode.type = "text";
-      inputCode.maxLength = 6;
-      inputCode.placeholder = "Code 6 chiffres";
-      const btnValider = document.createElement("button");
-      btnValider.textContent = "Valider";
-      btnValider.addEventListener("click", async () => {
-        await avecEtat((etat, id, now) => P.saisirCode(etat, id, inputCode.value, now));
-        onMiseAJour?.();
-        afficherPtpUI(conteneur, onMiseAJour);
-      });
-
-      boite.append(p, codeSpan, pSaisie, inputCode, " ", btnValider);
+      // Seul le correcteur saisit le code : c'est la preuve qu'il est venu voir l'élève.
+      boite.append(p, codeSpan);
     } else if (ech.correcteur === moi) {
       const p = document.createElement("p");
       p.textContent = `Rends-toi auprès de ${s.eleves[ech.eleve]?.prenom || "l'élève"}, demande-lui son code à 6 chiffres :`;
@@ -213,15 +204,16 @@ export function afficherPtpUI(conteneur = document.body, onMiseAJour = null) {
       const btnValider = document.createElement("button");
       btnValider.className = "principal";
       btnValider.textContent = "Valider le code";
+      const retour = document.createElement("p");
+      retour.className = "ptp-retour";
       btnValider.addEventListener("click", async () => {
-        await avecEtat((etat, id, now) => {
-          // Valide le code pour l'échange de l'élève
-          P.saisirCode(etat, ech.eleve, inputCode.value, now);
-        });
+        // Valide le code pour l'échange de l'élève
+        const r = await avecEtat((etat, id, now) => P.saisirCode(etat, ech.eleve, inputCode.value, now));
+        retour.textContent = r?.ok ? "" : r?.raison || "Code refusé.";
         onMiseAJour?.();
         afficherPtpUI(conteneur, onMiseAJour);
       });
-      boite.append(p, inputCode, " ", btnValider);
+      boite.append(p, inputCode, " ", btnValider, retour);
     }
   }
   // Cas 4 : En cours de correction (Avis du correcteur)
@@ -252,6 +244,26 @@ export function afficherPtpUI(conteneur = document.body, onMiseAJour = null) {
       p.textContent = `Correction en cours avec ${s.eleves[ech.correcteur]?.prenom || "ton correcteur"}...`;
       boite.append(p);
     }
+  }
+  // Cas 5 : le correcteur n'est pas venu à temps, le prof est prévenu
+  else if (ech && ech.etat === "appel_prof") {
+    const p = document.createElement("p");
+    p.textContent = "Le correcteur n'est pas venu à temps : le prof a été prévenu et va passer.";
+    boite.append(p);
+  }
+  // Cas 6 : échange annulé ou correcteur parti, l'exo suivant reste bloqué : on relance
+  else if (e.exoEnAttente) {
+    const p = document.createElement("p");
+    p.textContent = e.message || "L'échange n'a pas encore eu lieu : l'exo suivant reste bloqué.";
+    const relancerBtn = document.createElement("button");
+    relancerBtn.className = "principal";
+    relancerBtn.textContent = "Relancer la recherche";
+    relancerBtn.addEventListener("click", async () => {
+      await avecEtat((etat, id, now, rng) => P.relancer(etat, id, now, rng));
+      onMiseAJour?.();
+      afficherPtpUI(conteneur, onMiseAJour);
+    });
+    boite.append(p, relancerBtn);
   }
 
   modal.append(boite);

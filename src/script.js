@@ -142,10 +142,15 @@ boutonSuivant.addEventListener("click", () => {
 const exo = await chargerExo(FICHIER_EXO);
 
 // validation + exo suivant + tirage PTP
+// Les tests repassent à chaque frappe : on ne prévient le PTP qu'à la première réussite de l'exo,
+// sinon chaque frappe compterait comme un nouvel exo validé (et relancerait le tirage).
+let ptpPrevenu = estReussi(EXO);
 async function validerExo() {
   marquerReussi(EXO);
-  const eligible = exo.ptp !== "non";
-  await notifierValidationExo(EXO, eligible);
+  if (!ptpPrevenu) {
+    ptpPrevenu = true;
+    await notifierValidationExo(EXO, exo.ptp !== "non");
+  }
   afficherSuivant();
   afficherPtpUI(document.body, () => afficherSuivant());
 }
