@@ -11,6 +11,8 @@
 // - Une ligne « nom: ... » avant « lignes: » est une rangée d'en-tête (colonnes, types, clés...).
 //   Chaque élément est un mot fixe, ou un trou `?[choix1|choix2|...]`.
 // - « reponses: » donne la bonne réponse de chaque trou, dans l'ordre de lecture.
+// - Plusieurs tables : écrire plusieurs blocs, chacun commençant par « table: » (voir lireSchemas).
+//   Dans ce cas, « reponses: » peut être omise pour une table sans trou.
 // Une erreur claire est levée si le schéma est mal écrit.
 
 const ELEMENT = /\?\[([^\]]*)\]|\S+/g;
@@ -84,4 +86,21 @@ export function lireSchema(section) {
   });
 
   return schema;
+}
+
+// Lit une section qui contient une ou plusieurs tables (un bloc par ligne « table: »).
+// Renvoie un tableau de schémas, dans l'ordre d'écriture.
+export function lireSchemas(section) {
+  const blocs = [];
+  for (const ligne of section.split("\n")) {
+    if (/^\s*table\s*:/i.test(ligne)) blocs.push([]);
+    else if (blocs.length === 0 && ligne.trim()) blocs.push([]);
+    else if (blocs.length === 0) continue;
+    blocs[blocs.length - 1].push(ligne);
+  }
+  return blocs.map((lignes) => {
+    const texte = lignes.join("\n");
+    const sansTrou = !texte.includes("?[") && !/^\s*r[ée]ponses\s*:/im.test(texte);
+    return lireSchema(sansTrou ? texte + "\nreponses:" : texte);
+  });
 }

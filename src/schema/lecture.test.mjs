@@ -68,3 +68,27 @@ test("lireSchema refuse un schéma sans table, sans en-tête ou sans réponses",
 test("lireSchema refuse une ligne illisible", () => {
   assert.throws(() => lireSchema("table: t\n???"), /illisible/);
 });
+
+test("lireSchemas lit plusieurs tables, la table sans trou n'a pas besoin de reponses", async () => {
+  const { lireSchemas } = await import("./lecture.js");
+  const s = lireSchemas(`
+table: clients
+colonnes: id nom
+lignes:
+- 1 | Alice
+table: commandes
+colonnes: id ?[client_id|nom]
+lignes:
+- 10 | 1
+reponses: client_id
+`);
+  assert.equal(s.length, 2);
+  assert.equal(s[0].table, "clients");
+  assert.equal(s[0].trous, 0);
+  assert.equal(s[1].trous, 1);
+});
+
+test("lireSchemas signale une section sans table", async () => {
+  const { lireSchemas } = await import("./lecture.js");
+  assert.throws(() => lireSchemas("colonnes: a b"), /table/);
+});

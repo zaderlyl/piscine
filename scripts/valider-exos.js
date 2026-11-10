@@ -3,7 +3,7 @@
 //
 // Trois façons de valider un exo, selon son module :
 // - exos/sql/schema : pas de section « Tests » ni de solution. On lit la section « Schéma »
-//   avec lireSchema() et on vérifie que chaque réponse est dans les choix de son trou.
+//   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
@@ -14,7 +14,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
-import { lireSchema } from "../src/schema/lecture.js";
+import { lireSchemas } from "../src/schema/lecture.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
@@ -216,7 +216,7 @@ function verifierSchemaSql(sections) {
   const schema = trouver(sections, "Schéma");
   if (schema) {
     try {
-      lireSchema(schema.corps.map((l) => l.texte).join("\n"));
+      lireSchemas(schema.corps.map((l) => l.texte).join("\n"));
     } catch (erreur) {
       erreurs.push({ section: "Schéma", ligne: schema.ligne, message: erreur.message });
     }

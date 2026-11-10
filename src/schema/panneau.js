@@ -1,31 +1,14 @@
-import { lireSchema } from "./lecture.js";
+import { lireSchemas } from "./lecture.js";
 import { verifierSchema } from "./verification.js";
 
-// Dessine une table avec des cases à choisir dans une liste, et un bouton « Vérifier ».
-// section : texte de la section « ## Schéma » de l'exo. onSucces() est appelée quand tout est juste.
-export function monterPanneauSchema({ conteneur, section, onSucces }) {
-  conteneur.innerHTML = "";
-  conteneur.classList.add("schema");
-
-  let schema;
-  try {
-    schema = lireSchema(section || "");
-  } catch (erreur) {
-    const p = document.createElement("p");
-    p.className = "schema-erreur";
-    p.textContent = "Schéma illisible : " + erreur.message;
-    conteneur.append(p);
-    return null;
-  }
-
+// Dessine une table ; ajoute ses menus déroulants (trous) à `selects`, dans l'ordre de lecture.
+function construireTable(schema, selects) {
   const table = document.createElement("table");
   table.className = "schema-table";
 
   const legende = document.createElement("caption");
   legende.textContent = schema.table;
   table.append(legende);
-
-  const selects = [];
 
   const entete = document.createElement("thead");
   for (const rangee of schema.entetes) {
@@ -63,6 +46,29 @@ export function monterPanneauSchema({ conteneur, section, onSucces }) {
   }
   table.append(corps);
 
+  return table;
+}
+
+// section : texte de la section « ## Schéma » de l'exo. onSucces() est appelée quand tout est juste.
+// Dessine les tables avec des cases à choisir dans une liste, et un bouton « Vérifier ».
+export function monterPanneauSchema({ conteneur, section, onSucces }) {
+  conteneur.innerHTML = "";
+  conteneur.classList.add("schema");
+
+  let schemas;
+  try {
+    schemas = lireSchemas(section || "");
+  } catch (erreur) {
+    const p = document.createElement("p");
+    p.className = "schema-erreur";
+    p.textContent = "Schéma illisible : " + erreur.message;
+    conteneur.append(p);
+    return null;
+  }
+
+  const selects = [];
+  const tables = schemas.map((schema) => construireTable(schema, selects));
+
   const bouton = document.createElement("button");
   bouton.type = "button";
   bouton.className = "schema-verifier";
@@ -73,10 +79,14 @@ export function monterPanneauSchema({ conteneur, section, onSucces }) {
   messages.setAttribute("aria-live", "polite");
 
   function verifier() {
-    const { reussi, resultats } = verifierSchema(
-      schema,
-      selects.map((s) => s.value),
-    );
+    const valeurs = selects.map((s) => s.value);
+    let debut = 0;
+    const resultats = [];
+    for (const schema of schemas) {
+      resultats.push(...verifierSchema(schema, valeurs.slice(debut, debut + schema.trous)).resultats);
+      debut += schema.trous;
+    }
+    const reussi = resultats.every((r) => r.ok);
     messages.innerHTML = "";
     resultats.forEach((r, i) => {
       selects[i].classList.toggle("juste", r.ok);
@@ -97,6 +107,6 @@ export function monterPanneauSchema({ conteneur, section, onSucces }) {
   }
 
   bouton.addEventListener("click", verifier);
-  conteneur.append(table, bouton, messages);
+  conteneur.append(...tables, bouton, messages);
   return { verifier };
 }
