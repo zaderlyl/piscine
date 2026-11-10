@@ -18,6 +18,12 @@ import {
   telechargerExport,
   fusionnerProgression,
 } from "./progression.js";
+import {
+  initialiserPtp,
+  notifierValidationExo,
+  ptpBloqueSuivant,
+  afficherPtpUI,
+} from "./ptp.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -123,7 +129,8 @@ onglets.append(boutonSuivant);
 const suivant = exoSuivant(EXO, await chargerListeExos());
 
 function afficherSuivant() {
-  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));
+  const bloquePtp = ptpBloqueSuivant();
+  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO) && !bloquePtp));
 }
 
 boutonSuivant.addEventListener("click", () => {
@@ -132,10 +139,15 @@ boutonSuivant.addEventListener("click", () => {
   location.search = params.toString();
 });
 
-// validation + exo suivant
-function validerExo() {
+const exo = await chargerExo(FICHIER_EXO);
+
+// validation + exo suivant + tirage PTP
+async function validerExo() {
   marquerReussi(EXO);
+  const eligible = exo.ptp !== "non";
+  await notifierValidationExo(EXO, eligible);
   afficherSuivant();
+  afficherPtpUI(document.body, () => afficherSuivant());
 }
 
 // Barres pour agrandir ou réduire les colonnes
@@ -146,7 +158,6 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
   max: () => window.innerWidth - 200,
 });
 
-const exo = await chargerExo(FICHIER_EXO);
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
 
 if (panneaux.includes("depot")) {
@@ -322,3 +333,10 @@ if (panneaux.includes("depot")) {
     afficherDansApercu(apercu, sortie);
   }
 }
+
+// Initialisation PTP
+initialiserPtp(() => {
+  afficherSuivant();
+  afficherPtpUI(document.body, () => afficherSuivant());
+});
+afficherPtpUI(document.body, () => afficherSuivant());
