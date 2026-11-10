@@ -1,5 +1,6 @@
 import { lireCode, chargerExo } from "./exo.js";
 import { assemblerPage, afficherDansApercu } from "./apercu.js";
+import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
 import { executerPhp } from "./php.js";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
@@ -209,7 +210,8 @@ if (panneaux.includes("depot")) {
     if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
     const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
     afficherVariables(analyse, balisePresente);
-    afficherDansApercu(apercu, code);
+    // localStorage est interdit dans l'iframe isolée : on y place un faux, gardé par exo
+    afficherDansApercu(apercu, injecterStockage(code, lireStockageApercu(EXO)));
     clearTimeout(minuteurTests);
     minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
   }
@@ -284,6 +286,12 @@ if (panneaux.includes("depot")) {
     variable: "--h-variables",
     min: 60,
     max: () => window.innerHeight * 0.3,
+  });
+
+  // Enregistre le localStorage de l'aperçu (voir stockage-apercu.js)
+  window.addEventListener("message", (e) => {
+    if (e.source !== apercu.contentWindow || e.data?.type !== "stockage") return;
+    ecrireStockageApercu(EXO, e.data.donnees);
   });
 
   // Affiche les résultats envoyés par l'aperçu
