@@ -1,14 +1,26 @@
 import { analyserScript } from "./visualiseur-variables.js";
 import { injecterTests } from "./tests.js";
+import { protegerBoucles, scriptEstJavaScript } from "./boucle-garde.js";
+
+export { protegerBoucles };
 
 let urlApercu = null;
 
 // Assemble la page : injecte le CSS et le JS dans index.html, puis les tests.
 // contenus = { "index.html": "...", "style.css": "...", ... }
 export function assemblerPage(contenus, tests) {
-  let code = contenus["index.html"];
+  let code = contenus["index.html"] || "";
   let analyse = analyserScript("");
   let balisePresente = false;
+
+  // Protège les boucles dans les éventuels scripts inline de index.html
+  code = code.replace(
+    /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi,
+    (tout, attrs, contenuScript) =>
+      scriptEstJavaScript(attrs)
+        ? `<script${attrs}>${protegerBoucles(contenuScript)}<\/script>`
+        : tout,
+  );
 
   for (const [nom, contenu] of Object.entries(contenus)) {
     if (nom === "index.html") continue;
@@ -20,16 +32,18 @@ export function assemblerPage(contenus, tests) {
       code = code.replace(lien, () => `<style>${contenu}</style>`);
     } else if (extension === "js") {
       analyse = analyserScript(contenu);
+      const codeProtege = protegerBoucles(analyse.code);
       const balise = new RegExp(
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
       // Sans cette balise dans index.html, le script de l'élève ne tourne pas : on le dit au panneau
       balisePresente = code.search(balise) !== -1;
-      code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
+      code = code.replace(balise, () => `<script>${codeProtege}<\/script>`);
     }
   }
-  return { code: injecterTests(code, tests), analyse, balisePresente };
+  const testsProteges = tests ? protegerBoucles(tests) : "";
+  return { code: injecterTests(code, testsProteges), analyse, balisePresente };
 }
 
 // Affiche du HTML dans l'iframe (libère l'ancienne adresse)

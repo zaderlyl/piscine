@@ -22,7 +22,7 @@ const theme = EditorView.theme({
 // Crée un éditeur et un onglet par fichier.
 // brouillon = { fichier: texte } ; surChangement(vue) est appelée à chaque modification.
 // Renvoie { editeurs, afficherFichier }.
-export function creerEditeurs({ zones, onglets, brouillon, surChangement }) {
+export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPhp = false }) {
   const editeurs = {};
   const zonesParNom = {};
   const boutons = {};
@@ -33,13 +33,14 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement }) {
 
   // visibilité et cache fichier
   function afficherFichier(nom) {
-    for (const n in fichier) {
+    for (const n in zonesParNom) {
       zonesParNom[n].classList.toggle("cache", n !== nom);
       boutons[n].classList.toggle("actif", n === nom);
     }
   }
 
   for (const [nom, langage] of Object.entries(fichier)) {
+    if (nom === "index.php" && !avecPhp) continue;
     const zone = document.createElement("div");
     zone.className = "zone cache";
     zones.append(zone);
