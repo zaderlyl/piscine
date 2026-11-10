@@ -71,9 +71,9 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `26` : Cellules fusionnées
 
 **Structure**
-- [ ] `27` : `div` et `span`
-- [ ] `28` : `header`, `nav`, `main`, `section`, `article`, `footer`
-- [ ] `29` : Cadres `iframe` et `frameset` (historique, à tester)
+- [x] `27` : `div` et `span`
+- [x] `28` : `header`, `nav`, `main`, `section`, `article`, `footer`
+- [x] `29` : Cadres `iframe` et `frameset` (historique, à tester)
 
 **Formulaires**
 - [ ] `30` : `form`, `input`, `label`
