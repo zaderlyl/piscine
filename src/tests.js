@@ -1,7 +1,34 @@
+import {
+  GARDE_BOUCLE_CODE,
+  DELAI_TESTS_MS,
+  MESSAGE_BOUCLE_TROP_LONGUE,
+} from "./boucle-garde.js";
+
 // Construit le bloc <script> de tests injecté dans l'aperçu
 export function construireTests(tests) {
   return `<script>
-    const executerTests = async () => {
+    ${GARDE_BOUCLE_CODE}
+    let __erreurInterrompue = false;
+    const __signalerBoucle = () => {
+      if (__erreurInterrompue) return;
+      __erreurInterrompue = true;
+      parent.postMessage(
+        {
+          type: "tests",
+          resultats: [{ ok: false, message: "${MESSAGE_BOUCLE_TROP_LONGUE}" }],
+        },
+        "*",
+      );
+    };
+    // L'erreur du garde est reconnue à son marqueur, pas à son texte : une erreur de l'élève
+    // qui parlerait de « boucles » ne sera pas prise pour une boucle infinie.
+    window.addEventListener("error", (e) => {
+      if (e.error && e.error.garde === true) __signalerBoucle();
+    });
+    window.addEventListener("load", async () => {
+      // Le garde a pu se déclencher sans que l'erreur remonte (try/catch de l'élève)
+      if (window.__gardeDeclenche) __signalerBoucle();
+      if (__erreurInterrompue) return;
       const resultats = [];
       const $ = (selecteur) => document.querySelector(selecteur);
       const $$ = (selecteur) => [...document.querySelectorAll(selecteur)];
@@ -19,19 +46,31 @@ export function construireTests(tests) {
       };
       const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+      // Code de script.js tel que l'élève l'a écrit (posé par analyserScript), pour les tests sur le code
       const code = window.__code ?? "";
+      const delaiTests = new Promise((_, reject) =>
+        setTimeout(
+          () => reject({ garde: true }),
+          ${DELAI_TESTS_MS},
+        ),
+      );
       try {
-        ${tests}
+        await Promise.race([
+          (async () => {
+            ${tests}
+          })(),
+          delaiTests,
+        ]);
       } catch (erreur) {
-        resultats.push({ ok: false, message: "Erreur dans les tests : " + erreur.message });
+        const message = erreur && erreur.garde
+          ? "${MESSAGE_BOUCLE_TROP_LONGUE}"
+          : "Erreur dans les tests : " + (erreur && erreur.message);
+        resultats.push({ ok: false, message });
       }
+      if (window.__gardeDeclenche) __signalerBoucle();
+      if (__erreurInterrompue) return;
       parent.postMessage({ type: "tests", resultats }, "*");
-    };
-    if (document.readyState === "complete") {
-      executerTests();
-    } else {
-      window.addEventListener("load", executerTests);
-    }
+    });
   <\/script>`;
 }
 

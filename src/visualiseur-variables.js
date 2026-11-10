@@ -1,20 +1,25 @@
 import * as acorn from "https://esm.sh/acorn@8.12.1";
+import { determinerType } from "./type-donnees.js";
 
 // Panneau « Variables » : pour chaque variable déclarée au niveau du script,
-// affiche son nom, sa valeur et si elle est connectée (lue) quelque part.
+// affiche son nom, sa valeur, son type de données et si elle est connectée (lue) quelque part.
 
 const panneau = document.getElementById("variables");
 
 // Code ajouté au début du script de l'élève, dans l'aperçu.
-// Il envoie chaque valeur au parent avec postMessage.
+// Il envoie chaque valeur et son type au parent avec postMessage.
 const AIDE_APERCU = `
 window.__visu = (nom, valeur) => {
+  const determinerType = ${determinerType.toString().replace(/^function\s+\w+/, "function")};
   const formater = (v) => {
     if (v === undefined) return "undefined";
     if (typeof v === "function") return "fonction";
     try { return JSON.stringify(v) ?? String(v); } catch { return String(v); }
   };
-  parent.postMessage({ type: "variable", nom, valeur: formater(valeur) }, "*");
+  parent.postMessage(
+    { type: "variable", nom, valeur: formater(valeur), typeDonnees: determinerType(valeur) },
+    "*"
+  );
 };
 `;
 
@@ -140,11 +145,14 @@ export function afficherVariables(analyse, balisePresente = true) {
     valeur.className = "valeur";
     valeur.textContent = "—";
 
+    const type = document.createElement("span");
+    type.className = "type";
+
     const etat = document.createElement("small");
     etat.textContent =
       (variable.connectee ? "connectée" : "non connectée") + " · ligne " + variable.ligne;
 
-    carte.append(nom, " = ", valeur, " ", etat);
+    carte.append(nom, " = ", valeur, type, " ", etat);
     panneau.append(carte);
   }
 }
@@ -156,5 +164,6 @@ export function ecouterValeurs(apercu) {
     const carte = panneau.querySelector(`[data-nom="${e.data.nom}"]`);
     if (!carte) return;
     carte.querySelector(".valeur").textContent = e.data.valeur;
+    carte.querySelector(".type").textContent = e.data.typeDonnees ?? "";
   });
 }

@@ -1,5 +1,8 @@
 import { analyserScript } from "./visualiseur-variables.js";
 import { injecterTests } from "./tests.js";
+import { protegerBoucles, scriptEstJavaScript } from "./boucle-garde.js";
+
+export { protegerBoucles };
 
 let urlApercu = null;
 
@@ -9,6 +12,15 @@ export function assemblerPage(contenus, tests) {
   let code = contenus["index.html"] || "";
   let analyse = analyserScript("");
   let balisePresente = false;
+
+  // Protège les boucles dans les éventuels scripts inline de index.html
+  code = code.replace(
+    /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi,
+    (tout, attrs, contenuScript) =>
+      scriptEstJavaScript(attrs)
+        ? `<script${attrs}>${protegerBoucles(contenuScript)}<\/script>`
+        : tout,
+  );
 
   for (const [nom, contenu] of Object.entries(contenus)) {
     if (nom === "index.html") continue;
@@ -24,22 +36,24 @@ export function assemblerPage(contenus, tests) {
       }
     } else if (extension === "js") {
       analyse = analyserScript(contenu);
+      const codeProtege = protegerBoucles(analyse.code);
       const balise = new RegExp(
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
       balisePresente = code.search(balise) !== -1;
       if (balisePresente) {
-        code = code.replace(balise, () => `<script>${analyse.code}<\/script>`);
+        code = code.replace(balise, () => `<script>${codeProtege}<\/script>`);
       } else if (contenu.trim()) {
-        // En mode exercice JS (ou si index.html ne contient pas la balise),
-        // on injecte automatiquement le script pour que le code tourne et que les tests passent
-        code += `<script>${analyse.code}<\/script>`;
+        // Exos JS : index.html peut rester vide, on ajoute alors le script nous-mêmes
+        // pour que le code tourne et que les tests passent
+        code += `<script>${codeProtege}<\/script>`;
         balisePresente = true;
       }
     }
   }
-  return { code: injecterTests(code, tests), analyse, balisePresente };
+  const testsProteges = tests ? protegerBoucles(tests) : "";
+  return { code: injecterTests(code, testsProteges), analyse, balisePresente };
 }
 
 // Affiche du HTML dans l'iframe (libère l'ancienne adresse)
