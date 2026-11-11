@@ -93,6 +93,12 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `40` : Palier : une page complète à cahier des charges
 - [ ] `41` : Projet : page personnelle
 
+### Module PHP (Sessions et Sécurité)
+- [x] `03` : Cookies HTTP sécurisés (`setcookie` avec flags `httponly`, `secure`, `samesite`) et sessions serveur (`session_start`, `$_SESSION`)
+- [x] `04` : Authentification sécurisée complète : hachage (`password_hash`, `password_verify`), régénération de session (`session_regenerate_id(true)`) et protection de page
+- [x] `05` : Traitement de formulaires `$_POST`, assainissement XSS contextuel (`htmlspecialchars`), pattern PRG (Post-Redirect-Get) et messages flash en session
+- [x] `06` : Protection anti-CSRF : génération de jeton aléatoire en session, vérification avec `hash_equals()`
+- [x] `07` : Téléversement sécurisé de fichiers (`$_FILES`) : taille maximale, contrôle du type MIME réel (`mime_content_type`) et renommage
 ### Module JavaScript (DOM et Événements)
 - [x] `13` : Sélection d'éléments (`querySelector` et `querySelectorAll`)
 - [x] `14` : Manipulation de texte, classes CSS (`classList`) et attributs `dataset`
