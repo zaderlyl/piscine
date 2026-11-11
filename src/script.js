@@ -1,5 +1,6 @@
 import { lireCode, chargerExo } from "./exo.js";
 import { assemblerPage, afficherDansApercu } from "./apercu.js";
+import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
 import { executerPhp } from "./php.js?v=2";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
@@ -209,7 +210,8 @@ if (panneaux.includes("depot")) {
     if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
     const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
     afficherVariables(analyse, balisePresente);
-    afficherDansApercu(apercu, code);
+    // localStorage est interdit dans l'iframe isolée : on y place un faux, gardé par exo
+    afficherDansApercu(apercu, injecterStockage(code, lireStockageApercu(EXO)));
     clearTimeout(minuteurTests);
     minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
   }
@@ -261,7 +263,13 @@ if (panneaux.includes("depot")) {
   }
 
   afficherSuivant();
-  afficherFichier(EXO.startsWith("php/") ? "index.php" : "index.html");
+  // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
+  const fichierParDefaut = EXO.startsWith("js/") || exo["Solution: script.js"]
+    ? "script.js"
+    : EXO.startsWith("php/") || exo["Solution: index.php"]
+      ? "index.php"
+      : "index.html";
+  afficherFichier(fichierParDefaut);
 
   if (localStorage.getItem(CLE_SUSPENDU)) {
     localStorage.removeItem(CLE_SUSPENDU);
@@ -288,6 +296,12 @@ if (panneaux.includes("depot")) {
     max: () => window.innerHeight * 0.3,
   });
 
+  // Enregistre le localStorage de l'aperçu (voir stockage-apercu.js)
+  window.addEventListener("message", (e) => {
+    if (e.source !== apercu.contentWindow || e.data?.type !== "stockage") return;
+    ecrireStockageApercu(EXO, e.data.donnees);
+  });
+
   // Affiche les résultats envoyés par l'aperçu
   window.addEventListener("message", (e) => {
     if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
@@ -302,25 +316,34 @@ if (panneaux.includes("depot")) {
     }
   });
 
+  let executionPhpEnCours = false;
   async function lancerPhp() {
-    panneauResultats.textContent = "Exécution en cours...";
-    const { sortie, resultats } = await executerPhp(
-      editeurs["index.php"].state.doc.toString(),
-      testsExo,
-    );
+    if (executionPhpEnCours) return;
+    executionPhpEnCours = true;
+    boutonPhp.disabled = true;
+    try {
+      panneauResultats.textContent = "Exécution en cours...";
+      const { sortie, resultats } = await executerPhp(
+        editeurs["index.php"].state.doc.toString(),
+        testsExo,
+      );
 
-    const echecs = resultats.filter((r) => !r.ok);
-    panneauResultats.textContent =
-      sortie +
-      "\n\n" +
-      (echecs.length
-        ? echecs.map((r) => "❌ " + r.message).join("\n")
-        : "✅ Tous les tests passent");
-    if (!echecs.length && resultats.length) {
-      validerExo();
+      const echecs = resultats.filter((r) => !r.ok);
+      panneauResultats.textContent =
+        sortie +
+        "\n\n" +
+        (echecs.length
+          ? echecs.map((r) => "❌ " + r.message).join("\n")
+          : "✅ Tous les tests passent");
+      if (!echecs.length && resultats.length) {
+        validerExo();
+      }
+
+      clearTimeout(minuteurTests);
+      afficherDansApercu(apercu, sortie);
+    } finally {
+      executionPhpEnCours = false;
+      boutonPhp.disabled = false;
     }
-
-    clearTimeout(minuteurTests);
-    afficherDansApercu(apercu, sortie);
   }
 }
