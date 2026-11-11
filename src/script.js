@@ -261,7 +261,13 @@ if (panneaux.includes("depot")) {
   }
 
   afficherSuivant();
-  afficherFichier(EXO.startsWith("php/") ? "index.php" : "index.html");
+  // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
+  const fichierParDefaut = EXO.startsWith("js/") || exo["Solution: script.js"]
+    ? "script.js"
+    : EXO.startsWith("php/") || exo["Solution: index.php"]
+      ? "index.php"
+      : "index.html";
+  afficherFichier(fichierParDefaut);
 
   if (localStorage.getItem(CLE_SUSPENDU)) {
     localStorage.removeItem(CLE_SUSPENDU);
