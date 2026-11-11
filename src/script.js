@@ -300,25 +300,34 @@ if (panneaux.includes("depot")) {
     }
   });
 
+  let executionPhpEnCours = false;
   async function lancerPhp() {
-    panneauResultats.textContent = "Exécution en cours...";
-    const { sortie, resultats } = await executerPhp(
-      editeurs["index.php"].state.doc.toString(),
-      testsExo,
-    );
+    if (executionPhpEnCours) return;
+    executionPhpEnCours = true;
+    boutonPhp.disabled = true;
+    try {
+      panneauResultats.textContent = "Exécution en cours...";
+      const { sortie, resultats } = await executerPhp(
+        editeurs["index.php"].state.doc.toString(),
+        testsExo,
+      );
 
-    const echecs = resultats.filter((r) => !r.ok);
-    panneauResultats.textContent =
-      sortie +
-      "\n\n" +
-      (echecs.length
-        ? echecs.map((r) => "❌ " + r.message).join("\n")
-        : "✅ Tous les tests passent");
-    if (!echecs.length && resultats.length) {
-      validerExo();
+      const echecs = resultats.filter((r) => !r.ok);
+      panneauResultats.textContent =
+        sortie +
+        "\n\n" +
+        (echecs.length
+          ? echecs.map((r) => "❌ " + r.message).join("\n")
+          : "✅ Tous les tests passent");
+      if (!echecs.length && resultats.length) {
+        validerExo();
+      }
+
+      clearTimeout(minuteurTests);
+      afficherDansApercu(apercu, sortie);
+    } finally {
+      executionPhpEnCours = false;
+      boutonPhp.disabled = false;
     }
-
-    clearTimeout(minuteurTests);
-    afficherDansApercu(apercu, sortie);
   }
 }
