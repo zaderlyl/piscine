@@ -19,6 +19,12 @@ import {
   telechargerExport,
   fusionnerProgression,
 } from "./progression.js";
+import {
+  initialiserPtp,
+  notifierValidationExo,
+  ptpBloqueSuivant,
+  afficherPtpUI,
+} from "./ptp.js";
 
 const apercu = document.getElementById("apercu");
 const onglets = document.getElementById("onglets");
@@ -124,7 +130,8 @@ onglets.append(boutonSuivant);
 const suivant = exoSuivant(EXO, await chargerListeExos());
 
 function afficherSuivant() {
-  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO)));
+  const bloquePtp = ptpBloqueSuivant();
+  boutonSuivant.classList.toggle("cache", !(suivant && estReussi(EXO) && !bloquePtp));
 }
 
 boutonSuivant.addEventListener("click", () => {
@@ -133,10 +140,20 @@ boutonSuivant.addEventListener("click", () => {
   location.search = params.toString();
 });
 
-// validation + exo suivant
-function validerExo() {
+const exo = await chargerExo(FICHIER_EXO);
+
+// validation + exo suivant + tirage PTP
+// Les tests repassent à chaque frappe : on ne prévient le PTP qu'à la première réussite de l'exo,
+// sinon chaque frappe compterait comme un nouvel exo validé (et relancerait le tirage).
+let ptpPrevenu = estReussi(EXO);
+async function validerExo() {
   marquerReussi(EXO);
+  if (!ptpPrevenu) {
+    ptpPrevenu = true;
+    await notifierValidationExo(EXO, exo.ptp !== "non");
+  }
   afficherSuivant();
+  afficherPtpUI(document.body, () => afficherSuivant());
 }
 
 // Barres pour agrandir ou réduire les colonnes
@@ -147,7 +164,6 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
   max: () => window.innerWidth - 200,
 });
 
-const exo = await chargerExo(FICHIER_EXO);
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
 
 if (panneaux.includes("depot")) {
@@ -347,3 +363,10 @@ if (panneaux.includes("depot")) {
     }
   }
 }
+
+// Initialisation PTP
+initialiserPtp(() => {
+  afficherSuivant();
+  afficherPtpUI(document.body, () => afficherSuivant());
+});
+afficherPtpUI(document.body, () => afficherSuivant());
