@@ -93,6 +93,17 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `40` : Palier : une page complète à cahier des charges
 - [ ] `41` : Projet : page personnelle
 
+### Module JavaScript (DOM et Événements)
+- [x] `13` : Sélection d'éléments (`querySelector` et `querySelectorAll`)
+- [x] `14` : Manipulation de texte, classes CSS (`classList`) et attributs `dataset`
+- [x] `15` : Écouteurs d'événements avec `addEventListener` et l'objet événement (`e`)
+- [x] `16` : Délégation d'événements pour les listes dynamiques (`e.target`)
+- [x] `17` : Rendu dynamique avec la balise `<template>` et clonage propre (`cloneNode(true)`)
+- [x] `18` : Sauvegarde locale sans serveur avec `localStorage` (score ou préférence)
+- [x] `19` : Bruitages légers avec l'API HTML5 Audio (`new Audio().play()`)
+- [x] `20` : Animations d'apparition avec `IntersectionObserver`
+- [x] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+
 L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
 ## Ensuite
