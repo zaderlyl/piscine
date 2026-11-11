@@ -1,7 +1,7 @@
 import { lireCode, chargerExo } from "./exo.js";
 import { assemblerPage, afficherDansApercu } from "./apercu.js";
 import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
-import { executerPhp } from "./php.js";
+import { executerPhp } from "./php.js?v=2";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
@@ -244,6 +244,8 @@ if (panneaux.includes("depot")) {
         },
       });
     }
+    // Un exo PHP se teste avec « Exécuter PHP » : on le lance directement
+    if (exo["Solution: index.php"]) lancerPhp();
   }
 
   // Mode auteur ( acces via ?auteur ) bouton pour verif solution
