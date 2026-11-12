@@ -9,12 +9,14 @@ import { debloquerEmmet } from "./emmet.js";
 import { monterPanneauDepot } from "./depot.js";
 import { monterPanneauSchema } from "./schema/panneau.js";
 import { monterPanneauSql } from "./sql/panneau.js";
+import { creerMenuNavigation } from "./navigation.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
 import {
   marquerReussi,
   estReussi,
+  lireProgression,
   chargerListeExos,
   exoSuivant,
   construireExport,
@@ -129,7 +131,17 @@ boutonSuivant.textContent = "Exo suivant →";
 boutonSuivant.classList.add("cache");
 onglets.append(boutonSuivant);
 
-const suivant = exoSuivant(EXO, await chargerListeExos());
+const listeExos = await chargerListeExos();
+const suivant = exoSuivant(EXO, listeExos);
+
+// menu de navigation entre les exos
+const menuNavigation = creerMenuNavigation({
+  conteneur: document.getElementById("navigation-exos"),
+  exoCourant: EXO,
+  listeExos,
+  lireProgressionFn: lireProgression,
+  estAuteur: new URLSearchParams(location.search).has("auteur"),
+});
 
 function afficherSuivant() {
   const bloquePtp = ptpBloqueSuivant();
@@ -155,6 +167,7 @@ async function validerExo() {
     await notifierValidationExo(EXO, exo.ptp !== "non");
   }
   afficherSuivant();
+  menuNavigation.mettreAJour();
   afficherPtpUI(document.body, () => afficherSuivant());
 }
 
