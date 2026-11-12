@@ -65,6 +65,8 @@ export async function chargerExo(fichier) {
   Object.defineProperty(exo, "ptp", { value: lirePtp(texte) });
   Object.defineProperty(exo, "verification", { value: lireVerification(texte) });
   Object.defineProperty(exo, "type", { value: lireType(texte) });
+  // page HTML cachée d'un exo JS DOM (section « Page »), vide si l'exo n'en a pas
+  Object.defineProperty(exo, "page", { value: lireCode(exo["Page"] ?? "") });
   Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }
