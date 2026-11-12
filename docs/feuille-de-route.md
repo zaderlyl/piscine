@@ -32,8 +32,8 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 **Squelette**
 - [ ] `00` : À quoi sert HTML
 - [ ] `01` : Squelette à la main
-- [ ] `02` : `head` (title, meta)
-- [ ] `03` : Le squelette en un raccourci (débloque `!`)
+- [ ] `02` : Le squelette en un raccourci (débloque `!`)
+- [ ] `03` : `head` (title, meta)
 
 **Texte**
 - [x] `04` : Titres h1 à h6
@@ -92,6 +92,24 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `39` : Attributs globaux
 - [ ] `40` : Palier : une page complète à cahier des charges
 - [ ] `41` : Projet : page personnelle
+
+### Module JavaScript (DOM et Événements)
+- [x] `13` : Sélection d'éléments (`querySelector` et `querySelectorAll`)
+- [x] `14` : Manipulation de texte, classes CSS (`classList`) et attributs `dataset`
+- [x] `15` : Écouteurs d'événements avec `addEventListener` et l'objet événement (`e`)
+- [x] `16` : Délégation d'événements pour les listes dynamiques (`e.target`)
+- [x] `17` : Rendu dynamique avec la balise `<template>` et clonage propre (`cloneNode(true)`)
+- [x] `18` : Sauvegarde locale sans serveur avec `localStorage` (score ou préférence)
+- [x] `19` : Bruitages légers avec l'API HTML5 Audio (`new Audio().play()`)
+- [x] `20` : Animations d'apparition avec `IntersectionObserver`
+- [x] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+
+### Module PHP (Sessions et Sécurité)
+- [x] `03` : Cookies HTTP sécurisés (`setcookie` avec flags `httponly`, `secure`, `samesite`) et sessions serveur (`session_start`, `$_SESSION`)
+- [x] `04` : Authentification sécurisée complète : hachage (`password_hash`, `password_verify`), régénération de session (`session_regenerate_id(true)`) et protection de page
+- [x] `05` : Traitement de formulaires `$_POST`, assainissement XSS contextuel (`htmlspecialchars`), pattern PRG (Post-Redirect-Get) et messages flash en session
+- [x] `06` : Protection anti-CSRF : génération de jeton aléatoire en session, vérification avec `hash_equals()`
+- [x] `07` : Téléversement sécurisé de fichiers (`$_FILES`) : taille maximale, contrôle du type MIME réel (`mime_content_type`) et renommage
 
 L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
