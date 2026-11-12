@@ -35,6 +35,12 @@ export function lirePanneaux(texte) {
   return ligne[1].split(",").map((s) => s.trim().replace(/^['"]|['"]$/g, ""));
 }
 
+// Propriété PTP dans l'en-tête : `ptp: oui | non | simple | riche` (défaut : oui)
+export function lirePtp(texte) {
+  const ligne = texte.match(/^ptp:\s*(oui|non|simple|riche)/m);
+  return ligne ? ligne[1] : "oui";
+}
+
 export async function chargerExo(fichier) {
   const reponse = await fetch(fichier);
   const texte = (await reponse.text()).replace(/\r\n/g, "\n");
@@ -42,6 +48,7 @@ export async function chargerExo(fichier) {
   // propriétés non énumérables : ce ne sont pas des sections de l'exo
   Object.defineProperty(exo, "emmetDebloque", { value: lireEmmetExo(texte) });
   Object.defineProperty(exo, "panneaux", { value: lirePanneaux(texte) });
+  Object.defineProperty(exo, "ptp", { value: lirePtp(texte) });
   Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }

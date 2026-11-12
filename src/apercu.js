@@ -29,7 +29,11 @@ export function assemblerPage(contenus, tests) {
 
     if (extension === "css") {
       const lien = new RegExp(`<link[^>]*href=["']${echapper}["'][^>]*>`, "g");
-      code = code.replace(lien, () => `<style>${contenu}</style>`);
+      if (code.search(lien) !== -1) {
+        code = code.replace(lien, () => `<style>${contenu}</style>`);
+      } else if (contenu.trim()) {
+        code += `<style>${contenu}</style>`;
+      }
     } else if (extension === "js") {
       analyse = analyserScript(contenu);
       const codeProtege = protegerBoucles(analyse.code);
@@ -37,9 +41,15 @@ export function assemblerPage(contenus, tests) {
         `<script[^>]*src=["']${echapper}["'][^>]*>\\s*</script>`,
         "g",
       );
-      // Sans cette balise dans index.html, le script de l'élève ne tourne pas : on le dit au panneau
       balisePresente = code.search(balise) !== -1;
-      code = code.replace(balise, () => `<script>${codeProtege}<\/script>`);
+      if (balisePresente) {
+        code = code.replace(balise, () => `<script>${codeProtege}<\/script>`);
+      } else if (contenu.trim()) {
+        // Exos JS : index.html peut rester vide, on ajoute alors le script nous-mêmes
+        // pour que le code tourne et que les tests passent
+        code += `<script>${codeProtege}<\/script>`;
+        balisePresente = true;
+      }
     }
   }
   const testsProteges = tests ? protegerBoucles(tests) : "";
