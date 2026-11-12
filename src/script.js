@@ -3,11 +3,12 @@ import { assemblerPage, afficherDansApercu } from "./apercu.js";
 import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
 import { executerPhp } from "./php.js?v=2";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
-import { creerEditeurs } from "./editeur.js";
+import { creerEditeurs, creerEditeurSql } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 import { debloquerEmmet } from "./emmet.js";
 import { monterPanneauDepot } from "./depot.js";
 import { monterPanneauSchema } from "./schema/panneau.js";
+import { monterPanneauSql } from "./sql/panneau.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -213,6 +214,44 @@ if (panneaux.includes("depot")) {
   monterPanneauSchema({
     conteneur: conteneurSchema,
     section: exo["Schéma"],
+    onSucces: validerExo,
+  });
+
+  afficherSuivant();
+} else if (panneaux.includes("sql")) {
+  // Exo de requêtes SQL : énoncé et éditeur à gauche, résultat à droite
+  apercu.classList.add("cache");
+  document.getElementById("separateur-a").classList.add("cache");
+  document.getElementById("variables").classList.add("cache");
+  document.getElementById("separateur-b").classList.add("cache");
+  panneauResultats.classList.add("cache");
+
+  afficherPanneauDoc(exo, panneauEnonce, docOnglet);
+
+  const zoneSql = document.createElement("div");
+  zoneSql.className = "zone";
+  zones.append(zoneSql);
+
+  let minuteurSql = null;
+  const editeurSql = creerEditeurSql({
+    parent: zoneSql,
+    doc: lireBrouillon(CLE_BROUILLON)["requete.sql"],
+    surChangement(vue) {
+      clearTimeout(minuteurSql);
+      minuteurSql = setTimeout(
+        () => sauvegarderBrouillon(CLE_BROUILLON, { "requete.sql": vue.state.doc.toString() }),
+        1000,
+      );
+    },
+  });
+
+  const conteneurSql = document.createElement("div");
+  document.getElementById("droite").append(conteneurSql);
+
+  monterPanneauSql({
+    conteneur: conteneurSql,
+    exo,
+    lireRequete: () => editeurSql.state.doc.toString(),
     onSucces: validerExo,
   });
 

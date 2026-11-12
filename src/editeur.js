@@ -3,6 +3,7 @@ import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
+import { sql } from "https://esm.sh/@codemirror/lang-sql@6.8.0";
 import { emmetTab } from "./emmet.js";
 
 // un éditeur par fichier, avec son langage
@@ -66,4 +67,20 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPh
   }
 
   return { editeurs, afficherFichier };
+}
+
+// Éditeur SQL seul (exos de requêtes). surChangement() est appelée à chaque modification.
+export function creerEditeurSql({ parent, doc, surChangement }) {
+  return new EditorView({
+    doc: doc || "",
+    extensions: [
+      basicSetup,
+      sql(),
+      theme,
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged && surChangement) surChangement(update.view);
+      }),
+    ],
+    parent,
+  });
 }
