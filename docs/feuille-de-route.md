@@ -164,12 +164,48 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 ---
 
-### Module PHP (Sessions et Sécurité)
-- [x] `03` : Cookies HTTP sécurisés (`setcookie` avec flags `httponly`, `secure`, `samesite`) et sessions serveur (`session_start`, `$_SESSION`)
-- [x] `04` : Authentification sécurisée complète : hachage (`password_hash`, `password_verify`), régénération de session (`session_regenerate_id(true)`) et protection de page
-- [x] `05` : Traitement de formulaires `$_POST`, assainissement XSS contextuel (`htmlspecialchars`), pattern PRG (Post-Redirect-Get) et messages flash en session
-- [x] `06` : Protection anti-CSRF : génération de jeton aléatoire en session, vérification avec `hash_equals()`
-- [x] `07` : Téléversement sécurisé de fichiers (`$_FILES`) : taille maximale, contrôle du type MIME réel (`mime_content_type`) et renommage
+### Module PHP & Architecture Web (R1.13, R2.13, R2.14)
+
+Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](programme-par-langage.md).
+
+**1. Fondamentaux, Typage strict & Templating serveur**
+- [x] `00` : Premier script, `declare(strict_types=1)` dès le départ, balises `<?php ?>`, types et concaténation
+- [x] `01` : Structures de contrôle (`if`, `else`, ternaire), boucles (`while`, `for`, `foreach`) et tableaux associatifs
+- [x] `02` : Fonctions typées, gestion moderne du temps (`DateTimeImmutable`, fuseau horaire) et templating (`require_once`)
+
+**2. Sessions, Cookies & Authentification sécurisée (R2.13)**
+*Les sessions sont apprises ici afin d'être disponibles pour le token CSRF au module suivant.*
+- [x] `03` : Cookies HTTP sécurisés (`setcookie`, `httponly`, `secure`) et sessions serveur (`session_start`, `$_SESSION`)
+- [x] `04` : Authentification complète : hachage (`password_hash`, `password_verify`), régénération (`session_regenerate_id(true)`) et protection de page
+
+**3. Formulaires sécurisés, Uploads & Pattern PRG (R2.13)**
+- [x] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel, pattern PRG (Post-Redirect-Get) et messages flash en session (`$_SESSION['flash']`)
+- [x] `06` : Protection CSRF : génération de token en session, vérification avec `hash_equals()` et conservation des données
+- [x] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel, renommage et stockage sécurisé (hors racine web ou `.htaccess`)
+
+**4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
+*Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant la persistance.*
+- [ ] `08` : Classes PHP 8, constructeur avec promotion de propriétés, typage strict et instanciation `new`
+- [ ] `09` : Encapsulation (`public`, `private`, accesseurs) et héritage (`extends`, `parent::__construct()`)
+- [ ] `10` : Autoloading de classes sans dépendance avec `spl_autoload_register()` (fin de la forêt de `require_once`)
+
+**5. Base de données avec PDO, Relations SQL & Transactions (R2.13, R2.14)**
+*Sécurisation des identifiants (config.local.php + .gitignore), try/catch et requêtes préparées systématiques.*
+- [ ] `11` : Configuration locale et connexion sécurisée `PDO` enrobée dans un `try / catch`
+- [ ] `12` : Requêtes préparées PDO (`prepare`, `execute`) et opérations CRUD fondamentales
+- [ ] `13` : Pagination SQL : clauses `LIMIT` et `OFFSET` avec typage obligatoire (`bindValue(..., PDO::PARAM_INT)`) et décompte `COUNT(*)`
+- [ ] `14` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éliminer l'anti-pattern des requêtes N+1
+- [ ] `15` : Transactions PDO (`beginTransaction`, `commit`, `rollBack`) pour l'intégrité des opérations multi-tables
+
+**6. Architecture MVC & Routage (R2.13, SAÉ)**
+- [ ] `16` : Séparation des responsabilités : isoler Modèle (classes PDO), Vue (HTML) et Contrôleur
+- [ ] `17` : Point d'entrée unique `index.php`, routage par action et fallback 404 obligatoire (`http_response_code(404)` et vue dédiée)
+
+**7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)**
+- [ ] `18` : Réception de requêtes JSON du client JS via le flux brut `php://input` (contournement du piège de `$_POST` vide)
+- [ ] `19` : Renvoyer du JSON avec `json_encode()`, codes HTTP réels (`http_response_code`) et gestion du CORS avec requêtes Preflight `OPTIONS`
+
+---
 
 L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
