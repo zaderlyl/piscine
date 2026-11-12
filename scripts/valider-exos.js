@@ -19,12 +19,14 @@ import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js"
 import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
 import { lireSql } from "../src/sql/lecture.js";
+import { verifierResultat } from "../src/sql/verification.js";
 import { executerRequete } from "../src/sql/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
 const TYPES = ["intro", "classique", "palier", "projet"];
 const VALEURS_PTP = ["oui", "non", "simple", "riche"];
+const VALEURS_VERIFICATION = ["texte", "resultat"];
 
 // Les conditions acceptées par condition() dans src/depot/moteur.js.
 // À garder synchronisé avec ce fichier : une condition inconnue ne se coche jamais.
@@ -114,6 +116,9 @@ function verifierFront(front) {
   }
   if (front.valeurs.ptp && !VALEURS_PTP.includes(front.valeurs.ptp)) {
     erreurs.push({ section: "Front matter", ligne: front.ligne, message: `ptp « ${front.valeurs.ptp} » inconnu (attendu : ${VALEURS_PTP.join(", ")})` });
+  }
+  if (front.valeurs.verification && !VALEURS_VERIFICATION.includes(front.valeurs.verification)) {
+    erreurs.push({ section: "Front matter", ligne: front.ligne, message: `verification « ${front.valeurs.verification} » inconnue (attendu : ${VALEURS_VERIFICATION.join(", ")})` });
   }
   return erreurs;
 }
@@ -267,8 +272,10 @@ function verifierSchemaSql(sections) {
   return erreurs;
 }
 
-// Règle « requetes » : Énoncé, Base et Solutions lisibles, chaque solution s'exécute sans erreur
-async function verifierRequetesSql(sections) {
+// Règle « requetes » : Énoncé, Base et Solutions lisibles, chaque solution s'exécute sans erreur.
+// En mode `verification: resultat`, une solution doit aussi renvoyer au moins une ligne et être
+// acceptée par la vérification (sinon une requête vide passerait).
+async function verifierRequetesSql(sections, verification = "texte") {
   const erreurs = [];
   const avertissements = [];
   for (const nom of ["Énoncé", "Base", "Solutions"]) {
@@ -296,6 +303,13 @@ async function verifierRequetesSql(sections) {
     const r = executerRequete(SQL, sql.base, solution);
     if (r.erreur) {
       erreurs.push({ section: "Solutions", ligne: trouver(sections, "Solutions").ligne, message: `la solution ${i + 1} échoue : ${r.erreur}` });
+    } else if (verification === "resultat") {
+      const ligne = trouver(sections, "Solutions").ligne;
+      if (r.lignes.length === 0) {
+        erreurs.push({ section: "Solutions", ligne, message: `la solution ${i + 1} ne renvoie aucune ligne (en mode resultat, une requête vide passerait)` });
+      } else if (!verifierResultat({ SQL, base: sql.base, requete: solution, solutions: sql.solutions }).reussi) {
+        erreurs.push({ section: "Solutions", ligne, message: `la solution ${i + 1} n'est pas acceptée par la vérification par le résultat` });
+      }
     }
   });
   return { erreurs, avertissements };
@@ -385,7 +399,7 @@ async function validerFichier(chemin) {
   if (module === "sql/schema") {
     erreurs.push(...verifierSchemaSql(sections));
   } else if (module === "sql/requetes") {
-    const resultat = await verifierRequetesSql(sections);
+    const resultat = await verifierRequetesSql(sections, front.valeurs.verification ?? "texte");
     erreurs.push(...resultat.erreurs);
     avertissements.push(...resultat.avertissements);
   } else if (module === "git/visuel") {
