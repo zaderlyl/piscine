@@ -359,6 +359,67 @@ const tests = [
     const r = executer(nouveauDepot(), "edit style.css");
     assert.equal(r.erreur, true);
   }],
+  ["switch vers origin/main refusé proprement (HEAD détaché)", () => {
+    const d = nouveauDepot();
+    d.branches["origin/main"] = "1a3f01";
+    const r = executer(d, "git switch origin/main");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /HEAD détaché/);
+  }],
+  ["commit avec guillemets simples accepté", () => {
+    const d = executer(nouveauDepot(), "git add index.html").depot;
+    const r = executer(d, "git commit -m 'Message simple'");
+    assert.equal(r.erreur, false);
+    assert.match(r.sortie, /Message simple/);
+  }],
+  ["checkout -b vers branche existante refusé", () => {
+    const d = lancer(["git add .", 'git commit -m "A"']);
+    const r = executer(d, "git checkout -b main");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /existe déjà/);
+  }],
+  ["restore sans argument refusé", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    const r = executer(d, "git restore");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /Précise le fichier/);
+  }],
+  ["restore --staged sans argument refusé", () => {
+    const d = lancer(["git add style.css"]);
+    const r = executer(d, "git restore --staged");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /Précise le fichier/);
+  }],
+  ["reset sans argument refusé", () => {
+    const d = lancer(["git add .", 'git commit -m "A"']);
+    const r = executer(d, "git reset");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /Précise le commit/);
+  }],
+  ["remote add autre que origin refusé", () => {
+    const d = nouveauDepot();
+    const r = executer(d, "git remote add upstream https://foo.git");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /ne connaît que « origin »/);
+  }],
+  ["gh commande inconnue refusée proprement", () => {
+    const d = nouveauDepot();
+    const r = executer(d, "gh repo clone");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /pas encore au programme/);
+  }],
+  ["gh pr review sans pr ouverte refusée", () => {
+    const d = nouveauDepot();
+    const r = executer(d, "gh pr review");
+    assert.equal(r.erreur, true);
+    assert.match(r.sortie, /Pas de pull request ouverte/);
+  }],
+  ["conditions head, travail et serveur", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"']);
+    assert.equal(condition(d, "head main"), true);
+    assert.equal(condition(d, "travail style.css"), true);
+    assert.equal(condition(d, "serveur main"), false);
+  }],
 ];
 
 let echecs = 0;

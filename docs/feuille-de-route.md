@@ -32,56 +32,56 @@ Ordre des langages et notions attendues : [programme-par-langage.md](programme-p
 **Squelette**
 - [x] `00` : À quoi sert HTML
 - [x] `01` : Squelette à la main
-- [x] `02` : `head` (title, meta)
-- [x] `03` : Le squelette en un raccourci (débloque `!`)
+- [x] `02` : Le squelette en un raccourci (débloque `!`)
+- [x] `03` : `head` (title, meta)
 
 **Texte**
 - [x] `04` : Titres h1 à h6
 - [ ] `05` : Paragraphes, `hr` (débloque `lorem`)
 - [ ] `06` : Gras et italique
 - [ ] `07` : Titre en gras ou en italique : qui contient qui ?
-- [ ] `08` : Autres balises de texte
-- [ ] `09` : Balises de sens (`abbr`, `cite`, `code`…)
-- [ ] `10` : Reproduire un modèle de texte
+- [x] `08` : Autres balises de texte
+- [x] `09` : Balises de sens (`abbr`, `cite`, `code`…)
+- [x] `10` : Reproduire un modèle de texte
 
 **Couleurs**
 - [ ] `11` : Noms, hexadécimal, `rgb`
 - [ ] `12` : HTML à l'ancienne (`font`, `center`, `marquee`), à tester avant d'écrire
 
 **Listes**
-- [ ] `13` : Listes à puces et numérotées (débloque `ul>li*3`)
-- [ ] `14` : Options des listes et listes de définitions
-- [ ] `15` : Listes imbriquées
+- [x] `13` : Listes à puces et numérotées (débloque `ul>li*3`)
+- [x] `14` : Options des listes et listes de définitions
+- [x] `15` : Listes imbriquées
 
 **Liens**
-- [ ] `16` : Liens externes
-- [ ] `17` : Ancres dans la page
-- [ ] `18` : Liens vers un deuxième espace
-- [ ] `19` : `mailto`, `tel`, `download`
+- [x] `16` : Liens externes
+- [x] `17` : Ancres dans la page
+- [x] `18` : Liens vers un deuxième espace
+- [x] `19` : `mailto`, `tel`, `download`
 
 **Images**
-- [ ] `20` : Images (`src`, `alt`)
-- [ ] `21` : `figure`, `figcaption`, `picture`
-- [ ] `22` : Image cliquable
-- [ ] `23` : Zones cliquables (`map`, `area`)
+- [x] `20` : Images (`src`, `alt`)
+- [x] `21` : `figure`, `figcaption`, `picture`
+- [x] `22` : Image cliquable
+- [x] `23` : Zones cliquables (`map`, `area`)
 
 **Tableaux**
-- [ ] `24` : Tableau simple (débloque `table>tr*3>td*3`)
-- [ ] `25` : Tableau complet
-- [ ] `26` : Cellules fusionnées
+- [x] `24` : Tableau simple (débloque `table>tr*3>td*3`)
+- [x] `25` : Tableau complet
+- [x] `26` : Cellules fusionnées
 
 **Structure**
-- [ ] `27` : `div` et `span`
-- [ ] `28` : `header`, `nav`, `main`, `section`, `article`, `footer`
-- [ ] `29` : Cadres `iframe` et `frameset` (historique, à tester)
+- [x] `27` : `div` et `span`
+- [x] `28` : `header`, `nav`, `main`, `section`, `article`, `footer`
+- [x] `29` : Cadres `iframe` et `frameset` (historique, à tester)
 
 **Formulaires**
-- [ ] `30` : `form`, `input`, `label`
-- [ ] `31` : Types d'input
-- [ ] `32` : `select`, `option`, `datalist`
-- [ ] `33` : `textarea`, `button`, `fieldset`
-- [ ] `34` : Validation (`required`, `pattern`)
-- [ ] `35` : Formulaire complet
+- [x] `30` : `form`, `input`, `label`
+- [x] `31` : Types d'input
+- [x] `32` : `select`, `option`, `datalist`
+- [x] `33` : `textarea`, `button`, `fieldset`
+- [x] `34` : Validation (`required`, `pattern`)
+- [x] `35` : Formulaire complet
 
 **Interactifs et médias**
 - [ ] `36` : `details`, `dialog`, `progress`, `meter`
@@ -106,25 +106,25 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [x] `03` : La condition `if` et `else`
 - [x] `04` : Répéter avec la boucle `for`
 - [x] `05` : Créer sa première fonction (`return`)
-- [ ] `06` : La boucle `while` (tant que)
-- [ ] `07` : Fonctions fléchées `() => {}` et paramètres par défaut
-- [ ] `08` : Tableaux simples : déclaration, indexation et `.length`
-- [ ] `09` : Objets littéraux : paires clé-valeur
-- [ ] `10` : Déstructuration et opérateur Spread `...`
-- [ ] `11` : Données fiables avec le chaînage optionnel `?.` et le nullish coalescing `??`
-- [ ] `12` : Palier : simulation d'un inventaire de jeu complet
+- [x] `06` : La boucle `while` (tant que)
+- [x] `07` : Fonctions fléchées `() => {}` et paramètres par défaut
+- [x] `08` : Tableaux simples : déclaration, indexation et `.length`
+- [x] `09` : Objets littéraux : paires clé-valeur
+- [x] `10` : Déstructuration et opérateur Spread `...`
+- [x] `11` : Données fiables avec le chaînage optionnel `?.` et le nullish coalescing `??`
+- [x] `12` : Palier : simulation d'un inventaire de jeu complet
 
 **2. DOM moderne, Événements et Persistance locale (vanilla)**
 *Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
-- [ ] `13` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
-- [ ] `14` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
-- [ ] `15` : Écouter un événement avec `addEventListener` et l'objet `e`
-- [ ] `16` : Délégation d'événements : gérer une liste dynamique avec `e.target`
-- [ ] `17` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
-- [ ] `18` : Sauvegarder des données locales avec `localStorage` (thème et score)
-- [ ] `19` : Retours sonores légers avec HTML5 `new Audio()`
-- [ ] `20` : Animation d'apparition au défilement avec `IntersectionObserver`
-- [ ] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+- [x] `13` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
+- [x] `14` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
+- [x] `15` : Écouter un événement avec `addEventListener` et l'objet `e`
+- [x] `16` : Délégation d'événements : gérer une liste dynamique avec `e.target`
+- [x] `17` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
+- [x] `18` : Sauvegarder des données locales avec `localStorage` (thème et score)
+- [x] `19` : Retours sonores légers avec HTML5 `new Audio()`
+- [x] `20` : Animation d'apparition au défilement avec `IntersectionObserver`
+- [x] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
 
 **3. Asynchronisme, Données et POO Passerelle (vanilla)**
 *Fil conducteur : réutilisation des données de l'inventaire du Module 1, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
@@ -169,19 +169,19 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](programme-par-langage.md).
 
 **1. Fondamentaux, Typage strict & Templating serveur**
-- [ ] `00` : Premier script, `declare(strict_types=1)` dès le départ, balises `<?php ?>`, types et concaténation
-- [ ] `01` : Structures de contrôle (`if`, `else`, ternaire), boucles (`while`, `for`, `foreach`) et tableaux associatifs
-- [ ] `02` : Fonctions typées, gestion moderne du temps (`DateTimeImmutable`, fuseau horaire) et templating (`require_once`)
+- [x] `00` : Premier script, `declare(strict_types=1)` dès le départ, balises `<?php ?>`, types et concaténation
+- [x] `01` : Structures de contrôle (`if`, `else`, ternaire), boucles (`while`, `for`, `foreach`) et tableaux associatifs
+- [x] `02` : Fonctions typées, gestion moderne du temps (`DateTimeImmutable`, fuseau horaire) et templating (`require_once`)
 
 **2. Sessions, Cookies & Authentification sécurisée (R2.13)**
 *Les sessions sont apprises ici afin d'être disponibles pour le token CSRF au module suivant.*
-- [ ] `03` : Cookies HTTP sécurisés (`setcookie`, `httponly`, `secure`) et sessions serveur (`session_start`, `$_SESSION`)
-- [ ] `04` : Authentification complète : hachage (`password_hash`, `password_verify`), régénération (`session_regenerate_id(true)`) et protection de page
+- [x] `03` : Cookies HTTP sécurisés (`setcookie`, `httponly`, `secure`) et sessions serveur (`session_start`, `$_SESSION`)
+- [x] `04` : Authentification complète : hachage (`password_hash`, `password_verify`), régénération (`session_regenerate_id(true)`) et protection de page
 
 **3. Formulaires sécurisés, Uploads & Pattern PRG (R2.13)**
-- [ ] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel, pattern PRG (Post-Redirect-Get) et messages flash en session (`$_SESSION['flash']`)
-- [ ] `06` : Protection CSRF : génération de token en session, vérification avec `hash_equals()` et conservation des données
-- [ ] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel, renommage et stockage sécurisé (hors racine web ou `.htaccess`)
+- [x] `05` : Formulaires `$_GET` / `$_POST`, assainissement XSS contextuel, pattern PRG (Post-Redirect-Get) et messages flash en session (`$_SESSION['flash']`)
+- [x] `06` : Protection CSRF : génération de token en session, vérification avec `hash_equals()` et conservation des données
+- [x] `07` : Upload de fichiers sécurisé (`$_FILES`) : `enctype`, taille max, contrôle MIME réel, renommage et stockage sécurisé (hors racine web ou `.htaccess`)
 
 **4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
 *Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant la persistance.*
@@ -206,6 +206,8 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 - [ ] `19` : Renvoyer du JSON avec `json_encode()`, codes HTTP réels (`http_response_code`) et gestion du CORS avec requêtes Preflight `OPTIONS`
 
 ---
+
+L'écriture des exos demande peu de code : c'est la tâche idéale pour contribuer. Voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
 ## Ensuite
 

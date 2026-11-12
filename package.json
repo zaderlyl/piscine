@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "valider-exos": "node scripts/valider-exos.js"
+    "valider-exos": "node scripts/valider-exos.js",
+    "test:exos": "node scripts/valider-exos.js",
+    "test:unit": "node --test",
+    "test": "npm run test:exos && npm run test:unit"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"
