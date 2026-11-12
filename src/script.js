@@ -181,7 +181,16 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
 
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
 
-if (panneaux.includes("depot")) {
+if (exo.type === "cours") {
+  // Cours seul : pas d'exercice, le cours occupe toute la page et l'exo compte comme fait à l'ouverture
+  document.body.classList.add("cours-seul");
+  docOnglet.classList.add("cache");
+  zones.classList.add("cache");
+  afficherPanneauDoc(exo, panneauEnonce, docOnglet, "Cours");
+  marquerReussi(EXO);
+  afficherSuivant();
+  menuNavigation.mettreAJour();
+} else if (panneaux.includes("depot")) {
   // Masque l'éditeur classique, doc et aperçu
   docOnglet.classList.add("cache");
   panneauEnonce.classList.add("cache");
