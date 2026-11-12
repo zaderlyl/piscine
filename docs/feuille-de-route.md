@@ -235,6 +235,10 @@ Programme détaillé : [programme-par-langage.md](programme-par-langage.md), sec
 - [x] `11` : Regrouper avec `GROUP BY`
 - [x] `12` : Garder toutes les lignes avec `LEFT JOIN`
 - [x] `13` : Palier : calculer et regrouper (vérifié par le résultat)
+- [x] `14` : Additionner et faire une moyenne avec `SUM` et `AVG`
+- [x] `15` : Trouver le plus petit et le plus grand avec `MIN` et `MAX`
+- [x] `16` : Filtrer les groupes avec `HAVING`
+- [x] `17` : Palier : agréger des données (vérifié par le résultat)
 
 **3. Requêtes d'écriture (`sql/ecriture`)**
 - [x] `00` : Cours : modifier les données
@@ -244,7 +248,6 @@ Programme détaillé : [programme-par-langage.md](programme-par-langage.md), sec
 - [x] `04` : Palier : modifier une table (vérifié par l'état des tables)
 
 **4. À faire**
-- [ ] Autres fonctions d'agrégation (`SUM`, `AVG`, `MIN`, `MAX`) et `HAVING`
 - [ ] Créer et modifier des tables (`CREATE TABLE`, clés primaires et étrangères en SQL)
 - [ ] Projet SQL de fin de module
 
