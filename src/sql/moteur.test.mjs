@@ -44,3 +44,37 @@ test("executerRequete garde les colonnes d'une table vidée et repère les lectu
   assert.equal(executerRequete(SQL, BASE, "SELECT * FROM eleves").ecriture, false);
   assert.equal(executerRequete(SQL, BASE, "-- DELETE FROM eleves\nSELECT 1").ecriture, false);
 });
+
+test("executerRequete renvoie la structure des tables : types, clé primaire, clé étrangère", options, () => {
+  const base = "CREATE TABLE eleves (id integer PRIMARY KEY, nom TEXT NOT NULL);";
+  const r = executerRequete(SQL, base, "CREATE TABLE notes (id INTEGER PRIMARY KEY, eleve_id INTEGER, note INTEGER, FOREIGN KEY (eleve_id) REFERENCES eleves(id))");
+  assert.equal(r.structureModifiee, true);
+  assert.equal(r.ecriture, false);
+  assert.deepEqual(r.structure, [
+    {
+      nom: "eleves",
+      colonnes: [
+        { nom: "id", type: "INTEGER", cle: 1, nonNul: false },
+        { nom: "nom", type: "TEXT", cle: 0, nonNul: true },
+      ],
+      etrangeres: [],
+    },
+    {
+      nom: "notes",
+      colonnes: [
+        { nom: "id", type: "INTEGER", cle: 1, nonNul: false },
+        { nom: "eleve_id", type: "INTEGER", cle: 0, nonNul: false },
+        { nom: "note", type: "INTEGER", cle: 0, nonNul: false },
+      ],
+      etrangeres: [{ de: "eleve_id", table: "eleves", vers: "id" }],
+    },
+  ]);
+});
+
+test("executerRequete : une clé étrangère sans colonne visée pointe vers la clé primaire", options, () => {
+  const base = "CREATE TABLE eleves (id INTEGER PRIMARY KEY, nom TEXT);";
+  const r = executerRequete(SQL, base, "CREATE TABLE notes (id INTEGER, eleve_id INTEGER REFERENCES eleves)");
+  assert.deepEqual(r.structure[1].etrangeres, [{ de: "eleve_id", table: "eleves", vers: "id" }]);
+  assert.equal(executerRequete(SQL, base, "SELECT * FROM eleves").structureModifiee, false);
+  assert.equal(executerRequete(SQL, base, "-- DROP TABLE eleves\nSELECT 1").structureModifiee, false);
+});
