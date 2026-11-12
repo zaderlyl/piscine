@@ -103,5 +103,6 @@
   "sql/ecriture/03",
   "sql/ecriture/04",
   "sql/tables/00",
-  "sql/tables/01"
+  "sql/tables/01",
+  "sql/tables/02"
 ]
