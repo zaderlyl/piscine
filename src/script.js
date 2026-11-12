@@ -9,6 +9,7 @@ import { debloquerEmmet } from "./emmet.js";
 import { monterPanneauDepot } from "./depot.js";
 import { monterPanneauSchema } from "./schema/panneau.js";
 import { monterPanneauSql } from "./sql/panneau.js";
+import { contenusPageCachee } from "./page-cachee.js";
 import { creerMenuNavigation } from "./navigation.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
@@ -291,12 +292,18 @@ if (exo.type === "cours") {
     location.reload();
   }
 
+  // Contenu des éditeurs : c'est ce qui est enregistré dans le brouillon de l'élève
   function lireContenus() {
     const contenus = {};
     for (const nom in editeurs) {
       contenus[nom] = editeurs[nom].state.doc.toString();
     }
     return contenus;
+  }
+
+  // Fichiers de l'aperçu : pour un exo à page cachée, la page de l'exo plus le script de l'élève
+  function lireContenusApercu() {
+    return exo.page ? contenusPageCachee(exo.page, lireContenus()["script.js"] ?? "") : lireContenus();
   }
 
   function enregistrerBrouillon() {
@@ -308,7 +315,7 @@ if (exo.type === "cours") {
   // Affiche index.html dans l'iframe
   function afficherApercu() {
     if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
-    const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
+    const { code, analyse, balisePresente } = assemblerPage(lireContenusApercu(), testsExo);
     afficherVariables(analyse, balisePresente);
     // localStorage est interdit dans l'iframe isolée : on y place un faux, gardé par exo
     afficherDansApercu(apercu, injecterStockage(code, lireStockageApercu(EXO)));
@@ -321,6 +328,8 @@ if (exo.type === "cours") {
     onglets,
     brouillon: lireBrouillon(CLE_BROUILLON),
     avecPhp: EXO.startsWith("php/"),
+    // exo à page cachée : l'élève n'écrit que script.js
+    fichiers: exo.page ? ["script.js"] : null,
     surChangement(vue) {
       if (vue !== editeurs["index.php"]) afficherApercu();
       clearTimeout(minuteur);
@@ -364,7 +373,7 @@ if (exo.type === "cours") {
 
   afficherSuivant();
   // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
-  const fichierParDefaut = EXO.startsWith("js/") || exo["Solution: script.js"]
+  const fichierParDefaut = exo.page || EXO.startsWith("js/") || exo["Solution: script.js"]
     ? "script.js"
     : EXO.startsWith("php/") || exo["Solution: index.php"]
       ? "index.php"
