@@ -127,8 +127,35 @@ SELECT eleves.nom FROM eleves;
 
 - `## Base` : un seul bloc de code, exécuté pour créer la base de départ. Elle repart de zéro à chaque exécution.
 - `## Solutions` : un bloc de code par requête acceptée. Mets plusieurs solutions quand le palier ou le projet en accepte plusieurs écritures.
-- La vérification compare le **texte** de la requête de l'élève à chaque solution. Sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces, retours à la ligne, commentaires `--` et `;` final.
 - `node scripts/valider-exos.js` exécute chaque solution sur la base (il faut le paquet `sql.js` installé, sinon un avertissement s'affiche).
+
+### Deux modes de vérification
+
+Le champ `verification:` du front matter choisit comment la requête de l'élève est jugée : `texte` (défaut) ou `resultat`. Une autre valeur est refusée par le validateur.
+
+| | `verification: texte` | `verification: resultat` |
+|---|---|---|
+| Idée | Faire utiliser l'outil demandé (exos classiques) | Obtenir le bon tableau, par n'importe quel chemin (paliers et projets) |
+| Comment | Le **texte** de la requête est comparé à chaque solution | La requête et les solutions sont exécutées sur la même base, et les **tableaux** sont comparés |
+| `## Solutions` | Un bloc par écriture acceptée | Une seule solution suffit, les autres écritures qui donnent le même tableau sont acceptées |
+
+En mode `texte`, sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces (y compris autour de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final. Le reste doit être identique : si l'exo accepte plusieurs écritures (`INNER JOIN` ou `JOIN`, conditions dans un autre ordre), mets un bloc par écriture.
+
+En mode `resultat` :
+- Les colonnes doivent être les mêmes (casse ignorée), avec le même nombre de lignes et les mêmes valeurs.
+- L'ordre des lignes compte **seulement si la solution contient un `ORDER BY`**. Pour un tri, choisis des données sans égalité sur la colonne triée.
+- Le validateur refuse une solution qui renvoie 0 ligne (n'importe quelle requête vide passerait).
+
+Extrait de l'en-tête d'un palier (les autres champs restent obligatoires) :
+
+```
+---
+type: palier
+titre: Palier : lire une table
+verification: resultat
+panneaux: [enonce, sql]
+---
+```
 
 ## Les règles à respecter
 
