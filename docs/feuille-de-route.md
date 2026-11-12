@@ -212,25 +212,27 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (lecture) ou par le contenu des tables (écriture) : voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
 **1. Schéma : tables, colonnes et clés (`sql/schema`)**
+- [x] `00` : Cours : qu'est-ce qu'une base de données
 - [x] `01` : Colonnes et lignes
 - [x] `02` : Les types de colonnes
 - [x] `03` : La clé primaire
 - [x] `04` : Relier deux tables
 
 **2. Requêtes de lecture (`sql/requetes`)**
-- [x] `00` : À quoi sert SQL (`SELECT *`)
-- [x] `01` : Afficher des colonnes avec `SELECT`
-- [x] `02` : Filtrer avec `WHERE`
-- [x] `03` : Combiner des conditions avec `AND` et `OR`
-- [x] `04` : Trier avec `ORDER BY`
-- [x] `05` : Limiter avec `LIMIT`
-- [x] `06` : Palier : lire une table (vérifié par le résultat)
-- [x] `07` : Relier deux tables avec `INNER JOIN`
-- [x] `08` : Palier : lire plusieurs tables (vérifié par le résultat)
-- [x] `09` : Compter avec `COUNT`
-- [x] `10` : Regrouper avec `GROUP BY`
-- [x] `11` : Garder toutes les lignes avec `LEFT JOIN`
-- [x] `12` : Palier : calculer et regrouper (vérifié par le résultat)
+- [x] `00` : Cours : à quoi sert SQL
+- [x] `01` : Ma première requête (`SELECT *`)
+- [x] `02` : Afficher des colonnes avec `SELECT`
+- [x] `03` : Filtrer avec `WHERE`
+- [x] `04` : Combiner des conditions avec `AND` et `OR`
+- [x] `05` : Trier avec `ORDER BY`
+- [x] `06` : Limiter avec `LIMIT`
+- [x] `07` : Palier : lire une table (vérifié par le résultat)
+- [x] `08` : Relier deux tables avec `INNER JOIN`
+- [x] `09` : Palier : lire plusieurs tables (vérifié par le résultat)
+- [x] `10` : Compter avec `COUNT`
+- [x] `11` : Regrouper avec `GROUP BY`
+- [x] `12` : Garder toutes les lignes avec `LEFT JOIN`
+- [x] `13` : Palier : calculer et regrouper (vérifié par le résultat)
 
 **3. Requêtes d'écriture (`sql/ecriture`)**
 - [x] `00` : Ajouter une ligne avec `INSERT`
