@@ -13,6 +13,12 @@ export function lireSquelette(section) {
   return fichiers;
 }
 
+// Vrai si l'élève a déjà écrit quelque chose dans l'un des fichiers : { "index.html": "...", ... }.
+// Sert à demander confirmation avant que le squelette ne remplace son code.
+export function contenuEcrit(contenus) {
+  return Object.values(contenus).some((texte) => texte.trim() !== "");
+}
+
 // Liste des problèmes de la section « Squelette » (vide si tout va bien). `section` est le texte de la section,
 // ou undefined si elle est absente : elle est facultative, donc aucun problème.
 export function problemesSquelette(section) {

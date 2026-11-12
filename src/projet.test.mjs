@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { lireSquelette, problemesSquelette, FICHIERS_PROJET } from "./projet.js";
+import { lireSquelette, problemesSquelette, contenuEcrit, FICHIERS_PROJET } from "./projet.js";
+
+test("contenuEcrit : faux pour des éditeurs vides ou blancs, vrai dès qu'un fichier a du texte", () => {
+  assert.equal(contenuEcrit({}), false);
+  assert.equal(contenuEcrit({ "index.html": "", "style.css": "  \n", "script.js": "" }), false);
+  assert.equal(contenuEcrit({ "index.html": "", "script.js": "let a;" }), true);
+});
 
 const SQUELETTE = [
   "```html index.html",
