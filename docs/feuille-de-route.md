@@ -76,12 +76,12 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [x] `29` : Cadres `iframe` et `frameset` (historique, à tester)
 
 **Formulaires**
-- [ ] `30` : `form`, `input`, `label`
-- [ ] `31` : Types d'input
-- [ ] `32` : `select`, `option`, `datalist`
-- [ ] `33` : `textarea`, `button`, `fieldset`
-- [ ] `34` : Validation (`required`, `pattern`)
-- [ ] `35` : Formulaire complet
+- [x] `30` : `form`, `input`, `label`
+- [x] `31` : Types d'input
+- [x] `32` : `select`, `option`, `datalist`
+- [x] `33` : `textarea`, `button`, `fieldset`
+- [x] `34` : Validation (`required`, `pattern`)
+- [x] `35` : Formulaire complet
 
 **Interactifs et médias**
 - [ ] `36` : `details`, `dialog`, `progress`, `meter`
