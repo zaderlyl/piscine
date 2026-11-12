@@ -46,6 +46,8 @@ export function construireTests(tests) {
       };
       const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+      // Code de script.js tel que l'élève l'a écrit (posé par analyserScript), pour les tests sur le code
+      const code = window.__code ?? "";
       const delaiTests = new Promise((_, reject) =>
         setTimeout(
           () => reject({ garde: true }),
