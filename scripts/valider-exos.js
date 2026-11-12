@@ -441,7 +441,9 @@ async function validerFichier(chemin) {
   const erreurs = verifierFront(front);
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
-  if (module === "sql/schema") {
+  // un exo à trous de sql/tables (panneau « schema ») se valide comme un exo de schéma
+  const exoDeSchema = module === "sql/schema" || (module === "sql/tables" && /\bschema\b/.test(front.valeurs.panneaux ?? ""));
+  if (exoDeSchema) {
     erreurs.push(...verifierSchemaSql(sections));
   } else if (module === "sql/requetes" || module === "sql/ecriture" || module === "sql/tables") {
     const resultat = await verifierRequetesSql(sections, front.valeurs.verification ?? "texte", module === "sql/ecriture", module === "sql/tables");
