@@ -139,6 +139,11 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 - [x] `11` : Requêtes réseau modernes avec `fetch()` et `async / await`
 - [x] `12` : Formulaires automatiques avec l'objet `FormData`
 - [x] `13` : Chargement simultané de ressources avec `Promise.all()`
+- [x] `14` : Valider un formulaire avant l'envoi (`value`, `trim`, message d'erreur)
+- [x] `15` : Afficher et cacher avec `classList.toggle` (accordéon)
+- [x] `16` : Réagir au clavier avec `keydown` et `e.key`
+- [x] `17` : Le temps avec `setInterval` et `clearInterval`
+- [x] `18` : Palier : une liste de tâches complète (formulaire, délégation, `localStorage`)
 *Les exos `01` à `09` ont une page cachée. Le `10` garde son propre `index.html` : il enseigne la balise `<script type="module">`, que l'élève doit donc écrire lui-même (la page cachée n'accepte pas encore les modules).*
 
 **4. Graphisme 2D Canvas (canvas)**
