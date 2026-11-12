@@ -6,7 +6,7 @@ Un exo = **un fichier Markdown**, rangé dans `exos/<langage>/<famille>/<numéro
 
 ````markdown
 ---
-type: classique          # intro | classique | palier | projet
+type: classique          # intro | classique | palier | projet | cours
 titre: Les conditions
 annee: 1
 ptp: oui                 # oui (défaut) | non | simple | riche
@@ -41,6 +41,25 @@ const age = 20;
 if (age >= 18) console.log("majeur");
 ```
 ````
+
+## Cours seul (exos 00)
+
+Chaque famille commence par un exo `00` qui est un **cours seul** : l'élève lit, sans exercice à valider. L'exo compte comme fait dès qu'il est ouvert, et le bouton « Exo suivant » apparaît tout de suite.
+
+```markdown
+---
+type: cours
+titre: À quoi sert HTML
+notions: [balise, élément]
+---
+
+## Cours
+Le texte du cours, en Markdown. Les sous-titres `###` sont permis.
+```
+
+- Seuls `type`, `titre` et `notions` sont obligatoires. Pas de `panneaux` ni de `ptp`.
+- La seule section autorisée est `## Cours` : pas d'énoncé, de méthode, de résultat, d'indice, de tests ni de solution. Le validateur refuse le fichier sinon.
+- Le cours doit apprendre ce qui sert dans l'exo `01`, rien de plus.
 
 ## Les sections
 
