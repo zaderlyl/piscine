@@ -129,15 +129,15 @@ SELECT eleves.nom FROM eleves;
 - `## Solutions` : un bloc de code par requête acceptée. Mets plusieurs solutions quand le palier ou le projet en accepte plusieurs écritures.
 - `node scripts/valider-exos.js` exécute chaque solution sur la base (il faut le paquet `sql.js` installé, sinon un avertissement s'affiche).
 
-### Deux modes de vérification
+### Trois modes de vérification
 
-Le champ `verification:` du front matter choisit comment la requête de l'élève est jugée : `texte` (défaut) ou `resultat`. Une autre valeur est refusée par le validateur.
+Le champ `verification:` du front matter choisit comment la requête de l'élève est jugée : `texte` (défaut), `resultat` ou `etat`. Une autre valeur est refusée par le validateur.
 
-| | `verification: texte` | `verification: resultat` |
-|---|---|---|
-| Idée | Faire utiliser l'outil demandé (exos classiques) | Obtenir le bon tableau, par n'importe quel chemin (paliers et projets) |
-| Comment | Le **texte** de la requête est comparé à chaque solution | La requête et les solutions sont exécutées sur la même base, et les **tableaux** sont comparés |
-| `## Solutions` | Un bloc par écriture acceptée | Une seule solution suffit, les autres écritures qui donnent le même tableau sont acceptées |
+| | `verification: texte` | `verification: resultat` | `verification: etat` |
+|---|---|---|---|
+| Idée | Faire utiliser l'outil demandé (exos classiques) | Obtenir le bon tableau, par n'importe quel chemin (paliers et projets de lecture) | Obtenir les bonnes données, par n'importe quel chemin (paliers et projets d'écriture) |
+| Comment | Le **texte** de la requête est comparé à chaque solution | La requête et les solutions sont exécutées sur la même base, et les **tableaux** sont comparés | La requête et les solutions sont exécutées sur la même base, et le **contenu des tables** après exécution est comparé |
+| `## Solutions` | Un bloc par écriture acceptée | Une seule solution suffit, les autres écritures qui donnent le même tableau sont acceptées | Une seule solution suffit, les autres façons d'arriver aux mêmes données sont acceptées |
 
 En mode `texte`, sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces (y compris autour de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final. Le reste doit être identique : si l'exo accepte plusieurs écritures (`INNER JOIN` ou `JOIN`, conditions dans un autre ordre), mets un bloc par écriture.
 
@@ -145,6 +145,12 @@ En mode `resultat` :
 - Les colonnes doivent être les mêmes (casse ignorée), avec le même nombre de lignes et les mêmes valeurs.
 - L'ordre des lignes compte **seulement si la solution contient un `ORDER BY`**. Pour un tri, choisis des données sans égalité sur la colonne triée.
 - Le validateur refuse une solution qui renvoie 0 ligne (n'importe quelle requête vide passerait).
+- Si une colonne est calculée (`COUNT(*)`…), demande dans l'énoncé le nom de la colonne (`AS nb`) : les noms de colonnes sont comparés.
+
+En mode `etat` :
+- Toutes les tables sont comparées après l'exécution : mêmes tables, mêmes colonnes, mêmes lignes. L'ordre des lignes est ignoré (une table n'a pas d'ordre).
+- L'élève peut écrire plusieurs requêtes à la suite, dans n'importe quel ordre : seul compte l'état final.
+- Le validateur refuse une solution qui ne modifie aucune table.
 
 Extrait de l'en-tête d'un palier (les autres champs restent obligatoires) :
 
@@ -156,6 +162,15 @@ verification: resultat
 panneaux: [enonce, sql]
 ---
 ```
+
+## Exos d'écriture SQL
+
+Dans `exos/sql/ecriture/`, l'élève écrit des requêtes qui **modifient** les données (`INSERT`, `UPDATE`, `DELETE`). Le format est celui des exos de requêtes (`## Base` et `## Solutions`, `panneaux: [enonce, sql]`), avec ces particularités :
+- Après **Exécuter**, le panneau affiche le contenu de **toutes les tables** après la requête (une requête d'écriture n'a pas de tableau de résultat).
+- Un bloc de `## Solutions` peut contenir plusieurs requêtes (un palier en demande souvent trois).
+- Les exos classiques se vérifient par le `texte`, les paliers par l'`etat` (voir plus haut).
+- Le validateur refuse, dans ce dossier, une solution qui ne modifie aucune table.
+- Dans le cours, rappelle que `UPDATE` et `DELETE` sans `WHERE` touchent **toutes** les lignes.
 
 ## Les règles à respecter
 

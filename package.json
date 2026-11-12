@@ -9,6 +9,7 @@
     "test": "npm run test:exos && npm run test:unit"
   },
   "devDependencies": {
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "sql.js": "1.8.0"
   }
 }

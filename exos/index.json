@@ -83,5 +83,13 @@
   "sql/requetes/05",
   "sql/requetes/06",
   "sql/requetes/07",
-  "sql/requetes/08"
+  "sql/requetes/08",
+  "sql/requetes/09",
+  "sql/requetes/10",
+  "sql/requetes/11",
+  "sql/requetes/12",
+  "sql/ecriture/00",
+  "sql/ecriture/01",
+  "sql/ecriture/02",
+  "sql/ecriture/03"
 ]

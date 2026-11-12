@@ -209,7 +209,7 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 
 ### Module SQL (R2.13, R2.14)
 
-Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (voir [ecrire-un-exo.md](ecrire-un-exo.md)).
+Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (lecture) ou par le contenu des tables (écriture) : voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
 **1. Schéma : tables, colonnes et clés (`sql/schema`)**
 - [x] `01` : Colonnes et lignes
@@ -227,11 +227,21 @@ Programme détaillé : [programme-par-langage.md](programme-par-langage.md), sec
 - [x] `06` : Palier : lire une table (vérifié par le résultat)
 - [x] `07` : Relier deux tables avec `INNER JOIN`
 - [x] `08` : Palier : lire plusieurs tables (vérifié par le résultat)
+- [x] `09` : Compter avec `COUNT`
+- [x] `10` : Regrouper avec `GROUP BY`
+- [x] `11` : Garder toutes les lignes avec `LEFT JOIN`
+- [x] `12` : Palier : calculer et regrouper (vérifié par le résultat)
 
-**3. À faire**
-- [ ] Requêtes d'écriture (`INSERT`, `UPDATE`, `DELETE`), dans une famille `sql/ecriture` : la vérification compare l'état de la table après la requête
-- [ ] Agrégation (`COUNT`, `GROUP BY`) et `LEFT JOIN`
-- [ ] Vérifier les solutions SQL en CI (installer `sql.js` en `devDependency`)
+**3. Requêtes d'écriture (`sql/ecriture`)**
+- [x] `00` : Ajouter une ligne avec `INSERT`
+- [x] `01` : Modifier des lignes avec `UPDATE`
+- [x] `02` : Supprimer des lignes avec `DELETE`
+- [x] `03` : Palier : modifier une table (vérifié par l'état des tables)
+
+**4. À faire**
+- [ ] Autres fonctions d'agrégation (`SUM`, `AVG`, `MIN`, `MAX`) et `HAVING`
+- [ ] Créer et modifier des tables (`CREATE TABLE`, clés primaires et étrangères en SQL)
+- [ ] Projet SQL de fin de module
 
 ---
 

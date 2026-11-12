@@ -19,14 +19,14 @@ import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js"
 import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
 import { lireSql } from "../src/sql/lecture.js";
-import { verifierResultat } from "../src/sql/verification.js";
+import { verifierResultat, verifierEtat } from "../src/sql/verification.js";
 import { executerRequete } from "../src/sql/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
 const TYPES = ["intro", "classique", "palier", "projet"];
 const VALEURS_PTP = ["oui", "non", "simple", "riche"];
-const VALEURS_VERIFICATION = ["texte", "resultat"];
+const VALEURS_VERIFICATION = ["texte", "resultat", "etat"];
 
 // Les conditions acceptées par condition() dans src/depot/moteur.js.
 // À garder synchronisé avec ce fichier : une condition inconnue ne se coche jamais.
@@ -274,8 +274,9 @@ function verifierSchemaSql(sections) {
 
 // Règle « requetes » : Énoncé, Base et Solutions lisibles, chaque solution s'exécute sans erreur.
 // En mode `verification: resultat`, une solution doit aussi renvoyer au moins une ligne et être
-// acceptée par la vérification (sinon une requête vide passerait).
-async function verifierRequetesSql(sections, verification = "texte") {
+// acceptée par la vérification (sinon une requête vide passerait). Pour une requête d'écriture
+// (mode `etat`, ou exo du dossier sql/ecriture), une solution doit modifier le contenu des tables.
+async function verifierRequetesSql(sections, verification = "texte", ecriture = false) {
   const erreurs = [];
   const avertissements = [];
   for (const nom of ["Énoncé", "Base", "Solutions"]) {
@@ -303,6 +304,14 @@ async function verifierRequetesSql(sections, verification = "texte") {
     const r = executerRequete(SQL, sql.base, solution);
     if (r.erreur) {
       erreurs.push({ section: "Solutions", ligne: trouver(sections, "Solutions").ligne, message: `la solution ${i + 1} échoue : ${r.erreur}` });
+    } else if (verification === "etat" || ecriture) {
+      const ligne = trouver(sections, "Solutions").ligne;
+      const avant = executerRequete(SQL, sql.base, "").tables;
+      if (JSON.stringify(r.tables) === JSON.stringify(avant)) {
+        erreurs.push({ section: "Solutions", ligne, message: `la solution ${i + 1} ne modifie aucune table` });
+      } else if (verification === "etat" && !verifierEtat({ SQL, base: sql.base, requete: solution, solutions: sql.solutions }).reussi) {
+        erreurs.push({ section: "Solutions", ligne, message: `la solution ${i + 1} n'est pas acceptée par la vérification par l'état des tables` });
+      }
     } else if (verification === "resultat") {
       const ligne = trouver(sections, "Solutions").ligne;
       if (r.lignes.length === 0) {
@@ -398,8 +407,8 @@ async function validerFichier(chemin) {
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
   if (module === "sql/schema") {
     erreurs.push(...verifierSchemaSql(sections));
-  } else if (module === "sql/requetes") {
-    const resultat = await verifierRequetesSql(sections, front.valeurs.verification ?? "texte");
+  } else if (module === "sql/requetes" || module === "sql/ecriture") {
+    const resultat = await verifierRequetesSql(sections, front.valeurs.verification ?? "texte", module === "sql/ecriture");
     erreurs.push(...resultat.erreurs);
     avertissements.push(...resultat.avertissements);
   } else if (module === "git/visuel") {
