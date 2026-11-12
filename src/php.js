@@ -1,13 +1,13 @@
 import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
 
 // Exécute les tests d'un exo PHP sur la sortie du programme
-async function testerPhp(tests, sortie) {
+async function testerPhp(tests, sortie, code) {
   const resultats = [];
   const assert = (condition, message) =>
     resultats.push({ ok: !!condition, message });
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
   try {
-    await new AsyncFunction("assert", "sortie", tests)(assert, sortie);
+    await new AsyncFunction("assert", "sortie", "code", tests)(assert, sortie, code);
   } catch (erreur) {
     resultats.push({
       ok: false,
@@ -31,5 +31,5 @@ export async function executerPhp(code, tests) {
   await moteur.binary;
   await moteur.run(code);
 
-  return { sortie, resultats: await testerPhp(tests, sortie) };
+  return { sortie, resultats: await testerPhp(tests, sortie, code) };
 }

@@ -49,6 +49,7 @@ function lectures(noeud, noms) {
 // Analyse le script de l'élève.
 // Renvoie le code à exécuter dans l'aperçu, la liste des variables et une erreur éventuelle.
 export function analyserScript(code) {
+  const initCode = "window.__code = " + JSON.stringify(code).replace(/<\/script/gi, "<\\/script") + ";\n";
   let programme;
   try {
     programme = acorn.parse(code, {
@@ -57,7 +58,7 @@ export function analyserScript(code) {
       locations: true,
     });
   } catch (erreur) {
-    return { code: AIDE_APERCU + code, variables: [], erreur: erreur.message };
+    return { code: initCode + AIDE_APERCU + code, variables: [], erreur: erreur.message };
   }
 
   const variables = [];
@@ -108,7 +109,7 @@ export function analyserScript(code) {
       instrumente.slice(0, ajout.position) + ajout.texte + instrumente.slice(ajout.position);
   }
 
-  return { code: AIDE_APERCU + instrumente, variables, erreur: null };
+  return { code: initCode + AIDE_APERCU + instrumente, variables, erreur: null };
 }
 
 // Dessine une carte par variable, en attendant les valeurs
