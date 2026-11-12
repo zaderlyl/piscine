@@ -48,30 +48,167 @@ Outils (R1.12) : éditeur, navigateur, console et outils de développement. Lire
 - Accessibilité : contraste, focus visible, WCAG (R1.11, R3.12)
 - Framework : Bootstrap (README)
 
-## 3. Algorithmique
+## 3. Algorithmique & Résolution de problèmes
 
-Vue juste avant JS. Les exemples peuvent être donnés en pseudo-code ou directement en JS.
+L'algorithmique est abordée immédiatement avant JavaScript et PHP, les premiers langages qui calculent et prennent des décisions. Elle pose les schémas de pensée universels indispensables pour tout le reste du cursus (JS, Canvas 2D, Phaser, PHP et SQL).
 
-- **Variables et types** : nombres, chaînes de caractères, booléens (`let`, `const`)
-- **Conditions et branchements** : `if`, `else`, `else if`, opérateurs de comparaison (`===`, `!==`, `<`, `>`, `<=`, `>=`) et logiques (`&&`, `||`, `!`)
-- **Boucles fondamentales** : boucle `while` (tant que) et boucle `for` (itérations avec compteur)
-- **Fonctions** :
-  - Déclaration et syntaxe
-  - Paramètres d'entrée et arguments
-  - Valeur de retour (`return`)
-  - Portée des variables (portée de bloc, variables locales vs globales)
-  - Fonctions pures et effets de bord
-- **Structures de données fondamentales** :
-  - Tableaux : création, indexation `[0]`, `.length`, ajout `.push()`
-  - Parcours de tableau : boucles, accumulation de valeurs
-  - Objets : paires clé-valeur, lecture et assignation de propriétés
-- **Débogage et observation** :
-  - Organigrammes algorithmiques (norme ISO : début, action, losange de condition, bouclage)
-  - Tables de trace manuelle (valeurs des variables à chaque tour)
-  - Points d'arrêt et `console.log`
+Elle s'appuie sur le démonstrateur visuel interactif ([visualisation-logique.md](visualisation-logique.md)) pour matérialiser l'exécution pas à pas, la table de trace et les formes normalisées ISO 5807.
 
-Référentiel : R1.12, « Base de l'algorithmique (structures de contrôle et fonctions) » et « méthodes de débogage ».
+Le programme d'algorithmique est structuré en deux niveaux progressifs :
+- **Niveau 1 : Le Socle indispensable (Piscine)** : les notions, syntaxes et patterns à acquérir obligatoirement pour savoir programmer.
+- **Niveau 2 : Approfondissements & Culture Dev (Ouverture)** : les pièges avancés du web/multimédia, la complexité et les optimisations.
 
+---
+
+### PARTIE A : LE SOCLE INDISPENSABLE (NIVEAU 1 - PISCINE)
+
+#### 3.1. Approche didactique et formalisme (R1.12)
+- **Double formalisme : Pseudo-code et Code exécutable** :
+  - Le pseudo-code algorithmique standardisé sert d'outil de conception papier lors des évaluations écrites de la ressource R1.12.
+  - En travaux pratiques, les algorithmes sont traduits directement en syntaxe épurée (JavaScript et PHP 8+) pour être exécutés et testés immédiatement.
+- **Visualisation tridirectionnelle** : chaque algorithme est analysé sous trois angles complémentaires : le code source, l'organigramme (norme ISO 5807) et la table de trace pas à pas (état des variables ligne par ligne).
+
+#### 3.2. Modèle mémoire, variables et expressions
+- **Variables et modèle mémoire** :
+  - Distinction fondamentale entre l'identifiant (nom), l'adresse mémoire et la valeur stockée.
+  - Constantes (`const` par défaut) pour les valeurs invariantes, variables (`let` en JS, `$var` en PHP) pour les accumulateurs et compteurs.
+  - Distinction formelle entre l'affectation (`=`) et la comparaison.
+- **Rigueur sur l'égalité : pourquoi privilégier `===`** :
+  - L'opérateur d'égalité lâche (`==`) effectue des coercitions de types implicites sources de comportements contre-intuitifs (ex. en JS : `"" == 0` renvoie `true`, `false == "0"` renvoie `true`).
+  - En PHP 8+, la table de comparaison de `==` a été révisée (ex. `"abc" == 0` est désormais `false`, alors qu'il était `true` en PHP 7), créant des divergences supplémentaires.
+  - *Règle de rigueur* : utiliser systématiquement l'égalité stricte (`===`) et l'inégalité stricte (`!==`), qui vérifient à la fois la valeur et le type.
+- **Absence de valeur : `null` vs `undefined`** :
+  - `null` : absence explicite et volontaire de valeur (ex. aucun ennemi ciblé).
+  - `undefined` : variable déclarée non initialisée, ou accès à un index inexistant dans un tableau (`tab[10]` sur 3 éléments). *Note : PHP n'a pas de type `undefined` ; une variable non initialisée y est absente (warning) ou `null`.*
+- **L'opérateur Modulo (%) et la cyclicité** :
+  - Reste de la division entière, indispensable pour tester l'alternance et la parité (`n % 2 === 0` / `$n % 2 === 0`).
+  - Navigation cyclique sans débordement d'indice (ex. carrousel d'images, inventaire en boucle) : `index = (index + 1) % tab.length`.
+  - Conversion d'un indice de tableau 1D plat en coordonnées de grille 2D : `colonneX = index % largeur` et `ligneY = Math.floor(index / largeur)`.
+
+#### 3.3. Structures de contrôle fondamentales
+- **Branchements conditionnels (`if`, `else if`, `else`)** :
+  - Comparaisons et algèbre de Boole : ET logique (`&&`), OU logique (`||`), NON logique (`!`).
+  - Évaluation en court-circuit : sécuriser l'accès aux propriétés (`if (joueur !== null && joueur.hp > 0)`).
+  - *Pattern des clauses de garde* : traiter les cas d'erreur ou d'arrêt en tout début de fonction avec un `return` immédiat pour éviter l'imbrication excessive de blocs `if`.
+- **Itérations bornées (boucle `for`)** :
+  - Boucle à compteur : initialisation (`let i = 0`), condition de continuation (`i < limite`), incrémentation (`i++`).
+  - Parcours linéaire classique d'un tableau de gauche à droite.
+- **Itérations non bornées (boucle `while`) et règle des 3 phases** :
+  - Répétition tant qu'un prédicat est vrai (ex. attente, jeu, réduction arithmétique).
+  - *Règle des 3 phases (anti-boucle infinie)* :
+    1. Phase 1 : Initialisation de la variable de condition avant la boucle.
+    2. Phase 2 : Test de continuation en tête de boucle.
+    3. Phase 3 : **Mise à jour impérative de l'état avant l'accolade fermante**.
+- **Ruptures de séquence** : `break` pour interrompre immédiatement une boucle, `continue` pour sauter directement à l'itération suivante.
+
+#### 3.4. Décomposition fonctionnelle et modularité
+- **Signature et contrat d'une fonction** : paramètres reçus en entrée, calcul interne, et valeur unique renvoyée via `return`.
+- **Portée lexicale (Scope) et pile d'appels (Call Stack)** :
+  - Portée de bloc : les variables déclarées à l'intérieur d'une fonction ou d'une boucle n'existent pas à l'extérieur.
+  - Empilement du cadre local lors de l'appel, et **destruction immédiate des variables locales lors du `return`**.
+- **Passage par valeur vs référence** :
+  - Les primitifs (nombres, chaînes, booléens) sont transmis par copie de valeur.
+  - **JavaScript** : les tableaux et les objets sont **partagés** entre l'appelant et la fonction (la fonction reçoit une copie de l'adresse, pas du contenu). Modifier le contenu (`tab[0] = 99`, `tab.sort()`, `tab.pop()`) altère donc le tableau de l'appelant s'il n'a pas été cloné au préalable. En revanche, réassigner le paramètre (`tab = []`) ne change rien à l'extérieur.
+  - **PHP** : les tableaux (`array`) sont transmis **par valeur** (copie à l'écriture) : modifier `$tab[0]` dans la fonction ne touche pas au tableau de l'appelant, sauf si le paramètre est déclaré par référence (`&$tab`). Seuls les **objets** (instances de classes) sont partagés comme en JavaScript.
+  - Piège de transition JS → PHP : le même code de tri en place a un effet visible chez l'appelant en JavaScript, mais pas en PHP.
+
+#### 3.5. Les 7 patterns algorithmiques incontournables
+Ces 7 patrons de conception sont universels et constituent la boîte à outils quotidienne du développeur :
+
+1. **La permutation de valeurs (Swap)** :
+   - Échanger le contenu de deux variables sans écraser la valeur d'origine.
+   - Méthode canonique avec variable temporaire : `temp = a; a = b; b = temp;` (en PHP : `$temp = $a; $a = $b; $b = $temp;`).
+   - Transcription moderne par déstructuration (JS) : `[a, b] = [b, a]`.
+2. **L'accumulation et élément neutre** :
+   - Cumuler des valeurs dans une variable réassignée à chaque tour (`total = total + valeur`).
+   - *Règle de l'élément neutre* : initialiser à `0` pour une addition (`somme = 0`), chaîne vide pour du texte (`texte = ""`), mais impérativement à **`1`** pour un produit ou multiplicateur (`produit = 1`), sous peine de bloquer le résultat final à zéro.
+3. **Le comptage sélectif** :
+   - Compter le nombre d'éléments validant une condition (ex. nombre de produits en stock).
+   - Initialiser un compteur à `0`, et n'incrémenter (`compteur++`) qu'à l'intérieur d'un `if`.
+4. **La recherche d'extremum (Minimum / Maximum)** :
+   - *Étape 1 (Clause de garde obligatoire)* : tester impérativement si le tableau est vide (`if (tab.length === 0) return null;`) pour éviter d'injecter `undefined` dans les calculs.
+   - *Étape 2 (Initialisation sur le premier élément)* : une fois la garde franchie, initialiser `let max = tab[0];` (ne jamais initialiser arbitrairement à `0`, ce qui fausserait le calcul sur un tableau de nombres exclusivement négatifs).
+5. **La recherche séquentielle (Flag & ID)** :
+   - Trouver un élément répondant à un identifiant ou un critère.
+   - *Le piège universel du `return` dans le `else` (à bannir formellement)* :
+     ```javascript
+     // ERREUR CLASSIQUE (stoppe dès le 1er élément testé !) :
+     for (let i = 0; i < tab.length; i++) {
+       if (tab[i].id === cibleId) {
+         return tab[i];
+       } else {
+         return null; // FAUX !
+       }
+     }
+
+     // SCHÉMA CORRECT (l'échec ne se constate qu'après la fin de la boucle) :
+     for (let i = 0; i < tab.length; i++) {
+       if (tab[i].id === cibleId) {
+         return tab[i]; // Trouvé : arrêt immédiat
+       }
+     }
+     return null; // Non trouvé après avoir inspecté TOUT le tableau
+     ```
+6. **Le filtrage et partitionnement** :
+   - Parcourir une collection source pour créer une nouvelle collection ne conservant que les éléments conformes (socle conceptuel de `.filter()` en JS, `array_filter()` en PHP et `WHERE` en SQL).
+7. **La validation globale par drapeau (Flag)** :
+   - Déterminer si une collection valide universellement un critère (tous les éléments : socle de `.every()`) ou existentiellement (au moins un élément : socle de `.some()`).
+   - *Mécanique* : initialiser un drapeau booléen (`tousValides = true`), parcourir la collection, et inverser le drapeau dès la première anomalie avec interruption immédiate par `break`.
+
+#### 3.6. Méthodologie d'analyse : Table de trace (R1.12) et ISO 5807
+- **Organigrammes normalisés (ISO 5807)** :
+  - Rectangles arrondis : Début / Fin.
+  - Parallélogrammes : Entrées / Sorties de données (`console.log`, `echo`).
+  - Losanges : Décisions et embranchements conditionnels (branches Vrai / Faux).
+  - Rectangles : Processus de calcul et affectations.
+  - Rectangles à double barre latérale : Sous-programmes / Appels de fonctions.
+- **Table de trace manuelle (Format examen)** :
+  - Remplir pas à pas un tableau comprenant une colonne par étape, une colonne pour la ligne de code active, l'évaluation de la condition, **une colonne dédiée par variable**, la sortie écran et l'effet produit.
+
+---
+
+### PARTIE B : APPROFONDISSEMENTS & CULTURE DEV (NIVEAU 2 - OUVERTURE)
+
+#### 3.7. Pièges classiques du web et du multimédia
+- **Détection géométrique d'intersection (AABB)** :
+  - Test de collision de deux rectangles alignés sur les axes (`r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y`), servant de socle immédiat aux collisions dans Canvas 2D et Phaser (dissocié des patterns de collections).
+- **Conversions de type et valeurs de formulaires HTML** :
+  - Les valeurs issues d'un formulaire (`<input>`) sont toujours reçues sous forme de chaînes de caractères (`"42"`).
+  - `Number("")` renvoie `0`, tandis que `Number("abc")` renvoie `NaN`.
+  - *Piège absolu sur `NaN`* : `NaN === NaN` renvoie **`false`** ! Pour tester si une valeur n'est pas un nombre, on utilise exclusivement `Number.isNaN(val)`.
+- **Valeurs « Truthy » et « Falsy »** :
+  - Dans un test conditionnel `if (valeur)`, 6 valeurs sont falsy en JS : `false`, `0`, `""`, `null`, `undefined`, et `NaN`.
+  - *Piège des collections vides* : les tableaux vides `[]` et les objets vides `{}` sont considérés comme **truthy** en JavaScript (`if ([])` s'exécute !). Pour tester si un tableau est vide, tester `tab.length === 0`.
+- **Le piège universel des flottants (IEEE 754)** :
+  - En calcul binaire flottant, `0.1 + 0.2 === 0.3` renvoie `false` (`0.30000000000000004`).
+  - Deux approches distinctes selon le besoin :
+    - *Calculs monétaires (paniers e-commerce, TVA)* : calculer en centimes entiers (`10 + 20 === 30`) ou arrondir avec `Math.round()`.
+    - *Comparaisons scientifiques / physiques* : tester avec une tolérance infinitésimale via `Math.abs(a - b) < Number.EPSILON`.
+- **La boucle à rebours (Reverse Loop) pour la suppression en place** :
+  - Lors de la suppression d'éléments dans un tableau dynamique avec `splice()` (ex. projectile touchant un ennemi dans Canvas 2D), un parcours croissant classique saute systématiquement l'élément suivant à cause du décalage d'indices.
+  - La boucle décrémentale (`for (let i = tab.length - 1; i >= 0; i--)`) résout ce problème sans décalage fantôme.
+- **Interdiction de muter une collection pendant `forEach` ou `for...of`** :
+  - Modifier la taille d'un tableau en cours de parcours fonctionnel provoque des sauts d'itérations imprévisibles ; préférer une boucle indexée à rebours ou la méthode non-destructive `.filter()`.
+- **Mathématiques multimédia : Trigonométrie et Aléatoire** :
+  - Les fonctions trigonométriques `Math.sin()` et `Math.cos()` attendent des angles en radians et non en degrés (`radians = degres * (Math.PI / 180)`).
+  - Génération d'un entier aléatoire compris entre 0 et `n - 1` : `Math.floor(Math.random() * n)`.
+- **Delta-temps et fluidité d'animation (`requestAnimationFrame`)** :
+  - Dans une boucle de jeu ou d'animation, la vitesse d'une entité ne doit pas dépendre du taux de rafraîchissement (60 Hz vs 144 Hz) mais du temps réel écoulé : `x += vitesse * deltaTemps`.
+- **Comportement sur la division par zéro (JS vs PHP)** :
+  - En JavaScript : `1 / 0` renvoie `Infinity` sans bloquer le programme.
+  - En PHP 8+ : `1 / 0` lève une exception fatale `DivisionByZeroError` qui interrompt le script si elle n'est pas interceptée.
+
+#### 3.8. Sensibilité à la complexité et cas limites
+- **Complexité intuitive** :
+  - Parcours linéaire $O(n)$ : le temps d'exécution croît proportionnellement à la taille des données.
+  - Double parcours quadratique $O(n^2)$ : tester chaque élément contre tous les autres (ex. détection de collision brute entre toutes les entités).
+  - *Distinction sur les grilles 2D* : une double boucle parcourant une grille de $L$ colonnes par $H$ lignes réalise $L \times H$ opérations, ce qui est une complexité linéaire $O(N)$ par rapport au nombre total de tuiles $N$. Elle n'est en $O(n^2)$ que si $n$ représente la longueur du côté d'une grille carrée.
+- **Le piège du décalage d'un (« Off-by-one »)** :
+  - Confondre `<` et `<=` lors de l'accès à un tableau de longueur $N$ (le dernier élément valide est à l'indice $N - 1$).
+- **Immutabilité profonde** :
+  - `[...tab]` ne réalise qu'une copie superficielle (Shallow Copy). Pour cloner des structures contenant des objets imbriqués sans effets de bord résiduels, utiliser `structuredClone(tab)`.
+
+---
 ## 4. JavaScript
 
 Le module JavaScript est le plus vaste du cursus MMI. Il se découpe en sous-ressources progressives selon le référentiel :
