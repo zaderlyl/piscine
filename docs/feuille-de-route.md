@@ -99,7 +99,9 @@ Ordre des langages et notions attendues : [programme-par-langage.md](programme-p
 
 Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
 
-**1. Fondamentaux, Algorithmique & Syntaxe moderne (vanilla)**
+Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScript pur, résultat en texte ou en nombres, comme on apprendrait Python) et `js/dom` (interactivité sur une page déjà faite, dont l'élève ne voit pas le code : il n'écrit que `script.js`, voir [ecrire-un-exo.md](ecrire-un-exo.md)).
+
+**1. Fondamentaux, Algorithmique & Syntaxe moderne (`js/vanilla`)**
 - [x] `00` : Cours : à quoi sert JavaScript (programme, variable)
 - [x] `01` : Ma première variable (`const`)
 - [x] `02` : Variables modifiables avec `let`
@@ -115,26 +117,29 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [x] `12` : Données fiables avec le chaînage optionnel `?.` et le nullish coalescing `??`
 - [x] `13` : Palier : simulation d'un inventaire de jeu complet
 
-**2. DOM moderne, Événements et Persistance locale (vanilla)**
-*Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
-- [x] `14` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
-- [x] `15` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
-- [x] `16` : Écouter un événement avec `addEventListener` et l'objet `e`
-- [x] `17` : Délégation d'événements : gérer une liste dynamique avec `e.target`
-- [x] `18` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
-- [x] `19` : Sauvegarder des données locales avec `localStorage` (thème et score)
-- [x] `20` : Retours sonores légers avec HTML5 `new Audio()`
-- [x] `21` : Animation d'apparition au défilement avec `IntersectionObserver`
-- [x] `22` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+**2. Données et POO passerelle (`js/vanilla`)**
+*Fil conducteur : réutilisation des données de l'inventaire, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
+- [ ] `14` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
+- [ ] `15` : Gestion des erreurs avec `try...catch`
+- [ ] `16` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
 
-**3. Asynchronisme, Données et POO Passerelle (vanilla)**
-*Fil conducteur : réutilisation des données de l'inventaire du Module 1, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
-- [ ] `23` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
-- [ ] `24` : Requêtes réseau modernes avec `fetch()` et `async / await`
-- [ ] `25` : Gestion des erreurs réseau avec `try...catch`
-- [ ] `26` : Formulaires automatiques avec l'objet `FormData`
-- [ ] `27` : Chargement simultané de ressources avec `Promise.all()`
-- [ ] `28` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
+**3. DOM, Événements et Persistance locale (`js/dom`)**
+*Page fournie et non affichée : l'énoncé liste les `id` et classes à utiliser. Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
+- [x] `00` : Cours : le DOM, la page vue par JavaScript
+- [x] `01` : Retrouver un élément avec `getElementById`
+- [x] `02` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
+- [x] `03` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
+- [x] `04` : Écouter un événement avec `addEventListener` et l'objet `e`
+- [x] `05` : Délégation d'événements : gérer une liste dynamique avec `e.target`
+- [x] `06` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
+- [x] `07` : Sauvegarder des données locales avec `localStorage` (thème et score)
+- [x] `08` : Retours sonores légers avec HTML5 `new Audio()`
+- [x] `09` : Animation d'apparition au défilement avec `IntersectionObserver`
+- [x] `10` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+- [ ] `11` : Requêtes réseau modernes avec `fetch()` et `async / await`
+- [ ] `12` : Formulaires automatiques avec l'objet `FormData`
+- [ ] `13` : Chargement simultané de ressources avec `Promise.all()`
+*À faire : donner une page cachée aux exos `02` à `10`, un par un (ils fournissent encore leur propre `index.html`).*
 
 **4. Graphisme 2D Canvas (canvas)**
 *Démystification de la boucle de rendu et des collisions manuelles avant Phaser.*
