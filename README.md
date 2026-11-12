@@ -191,7 +191,8 @@ Un compteur par élève (**exos validés** depuis son dernier échange, éligibl
 - Quand le compteur « déclenche », l'échange a lieu **au prochain exo éligible** : le rythme ne dépend donc pas du nombre d'exos éligibles, qui n'a aucune raison d'être gonflé.
 - **Éligibilité inversée** : tout exo est éligible par défaut ; seuls ceux marqués `ptp: non` ne le sont pas. Le champ peut aussi valoir `simple` (explication de 2 à 3 minutes, grille allégée) ou `riche` (échange plus long) ; à défaut, `simple`.
 - L'élève ne sait pas à l'avance si l'exo sera corrigé : il se prépare à expliquer chaque exo éligible.
-- Pas de tirage s'il n'y a personne de disponible (le tirage est reporté, l'élève n'attend pas).
+- **Personne de connecté** (hors l'élève) : le tirage est reporté sans geler l'écran ; le déclenchement reste en attente pour le prochain exo éligible.
+- **Plafond d'échanges en cours** : connectés (tous comptes, toutes séances ; les absents ne comptent pas) ÷ 5, arrondi au supérieur (17 connectés : 4 échanges au maximum). Au plafond, le tirage est reporté sans geler l'écran. Le cas « présents mais tous occupés » ne doit donc pas arriver.
 - Chaque échange occupe deux personnes quelques minutes : un rythme trop élevé rendrait la piscine pénible, d'où le réglage au pilote.
 - Piste ultérieure : léger bonus de rattrapage pour les élèves ayant eu moins d'échanges que la moyenne.
 
@@ -216,7 +217,7 @@ Un compteur par élève (**exos validés** depuis son dernier échange, éligibl
 
 ### Cas limites
 - Correcteur confirmé mais qui ne se déplace pas : au bout de ~10 min (à ajuster selon la distance entre salles), alerte au prof.
-- Personne de disponible ou aucun correcteur confirmé après 2 ou 3 tirages : file d'attente, puis appel du prof.
+- Aucun correcteur confirmé : l'élève reste gelé pendant une **recherche d'environ 2 min** (nouveaux tirages si un correcteur ne répond pas). Si aucun n'est trouvé, l'échange est **perdu** (pas de report) et l'élève passe à l'exo suivant. L'appel du prof ne concerne que l'échange déjà confirmé qui traîne (ci-dessus).
 - Fin de session pendant un échange : délai de grâce pour le terminer.
 - Plantage pendant le gel : l'élève retrouve l'écran gelé sur la copie enregistrée.
 

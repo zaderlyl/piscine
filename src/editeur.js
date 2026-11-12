@@ -3,6 +3,7 @@ import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
+import { sql } from "https://esm.sh/@codemirror/lang-sql@6.8.0";
 import { emmetTab } from "./emmet.js";
 
 // un éditeur par fichier, avec son langage
@@ -22,7 +23,7 @@ const theme = EditorView.theme({
 // Crée un éditeur et un onglet par fichier.
 // brouillon = { fichier: texte } ; surChangement(vue) est appelée à chaque modification.
 // Renvoie { editeurs, afficherFichier }.
-export function creerEditeurs({ zones, onglets, brouillon, surChangement }) {
+export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPhp = false }) {
   const editeurs = {};
   const zonesParNom = {};
   const boutons = {};
@@ -33,13 +34,14 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement }) {
 
   // visibilité et cache fichier
   function afficherFichier(nom) {
-    for (const n in fichier) {
+    for (const n in zonesParNom) {
       zonesParNom[n].classList.toggle("cache", n !== nom);
       boutons[n].classList.toggle("actif", n === nom);
     }
   }
 
   for (const [nom, langage] of Object.entries(fichier)) {
+    if (nom === "index.php" && !avecPhp) continue;
     const zone = document.createElement("div");
     zone.className = "zone cache";
     zones.append(zone);
@@ -65,4 +67,20 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement }) {
   }
 
   return { editeurs, afficherFichier };
+}
+
+// Éditeur SQL seul (exos de requêtes). surChangement() est appelée à chaque modification.
+export function creerEditeurSql({ parent, doc, surChangement }) {
+  return new EditorView({
+    doc: doc || "",
+    extensions: [
+      basicSetup,
+      sql(),
+      theme,
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged && surChangement) surChangement(update.view);
+      }),
+    ],
+    parent,
+  });
 }

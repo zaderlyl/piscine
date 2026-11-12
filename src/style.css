@@ -65,7 +65,7 @@ font-family: sans-serif;
 }
 
 .cache {
-  display: none;
+  display: none !important;
 }
 
 #apercu {
@@ -107,6 +107,21 @@ font-family: sans-serif;
   color: #1565c0;
 }
 
+.variable .type {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 0.8em;
+  border-radius: 3px;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #e0e0e0;
+}
+
+.variable .type:empty {
+  display: none;
+}
+
 .variable small {
   margin-left: 6px;
   color: #777;
@@ -144,6 +159,301 @@ font-family: sans-serif;
   font-weight: bold;
 }
 
+/* Panneau Git visuel (panneaux: [enonce, depot]) */
+#depot-gauche {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: sans-serif;
+}
+
+#depot-droite {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: sans-serif;
+}
+
+.depot-graphes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.carte {
+  border: 1px solid #ddd;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.carte h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+#depot-enonce {
+  background: #fffbe6;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+#depot-gauche details {
+  margin-top: 8px;
+}
+
+#depot-gauche summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: #333;
+}
+
+#depot-formulaire {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+#depot-commande {
+  flex: 1;
+  min-width: 140px;
+  font-family: monospace;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+}
+
+#depot-formulaire button {
+  border: 0;
+  background: #eee;
+  padding: 6px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+#depot-formulaire button:hover {
+  background: #ddd;
+}
+
+#depot-sortie {
+  background: #F5F5F5;
+  font-family: monospace;
+  padding: 8px 10px;
+  min-height: 40px;
+  margin: 8px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+#depot-statut {
+  font-family: monospace;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.bon {
+  color: #2a7a2a;
+}
+
+.mauvais {
+  color: #b00020;
+}
+
+
+#barre-progression {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f8f8f8;
+  border-top: 1px solid #ddd;
+  font-family: sans-serif;
+  font-size: 12px;
+  flex: none;
+}
+
+#barre-progression button {
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#barre-progression button:hover {
+  background: #eee;
+  border-color: #bbb;
+}
+
+#msg-progression {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#msg-progression.succes {
+  color: #2e7d32;
+}
+
+#msg-progression.erreur {
+  color: #c62828;
+}
+
+/* Panneau de schéma de base de données (panneaux: [enonce, schema]) */
+.schema {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  font-family: sans-serif;
+  background: white;
+  color: #222;
+}
+
+.schema-table {
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+.schema-table caption {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.schema-table th,
+.schema-table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+}
+
+.schema-table th {
+  background: #f5f5f5;
+}
+
+.schema-trou.juste {
+  border: 2px solid #2e7d32;
+  background: #e8f5e9;
+}
+
+.schema-trou.faux {
+  border: 2px solid #c62828;
+  background: #ffebee;
+}
+
+.schema-verifier {
+  margin-bottom: 8px;
+}
+
+.schema-messages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schema-messages li {
+  color: #c62828;
+  margin: 4px 0;
+}
+
+.schema-messages li.schema-reussi {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.schema-erreur {
+  color: #c62828;
+}
+
+/* Modale et panneau Échange entre pairs (PTP) */
+#ptp-modal {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  max-width: 420px;
+  background: #fff;
+  border: 2px solid #1d76db;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  z-index: 1000;
+  font-family: sans-serif;
+}
+
+#ptp-modal.cache {
+  display: none !important;
+}
+
+.ptp-boite h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: #1d76db;
+}
+
+.ptp-boite p {
+  margin: 6px 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.ptp-boite .ptp-code {
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 0.25em;
+  background: #f0f4f8;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 8px 0;
+  color: #0b4a8b;
+  font-family: monospace;
+}
+
+.ptp-boite button {
+  padding: 6px 12px;
+  border: 1px solid #bbb;
+  background: #fafafa;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ptp-boite button.principal {
+  background: #1d76db;
+  color: #fff;
+  border-color: #1d76db;
+}
+
+.ptp-boite input[type="text"] {
+  padding: 6px;
+  font-size: 1.1rem;
+  width: 14ch;
+  letter-spacing: 0.15em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Panneau de requêtes SQL (panneaux: [enonce, sql]) */
+.sql-table {
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.sql-table th,
+.sql-table td {
+  border: 1px solid #ccc;
+  padding: 4px 10px;
+}
+
+.sql-table th {
+  background: #f5f5f5;
+}
 
 /* Navigation et sélecteur d'exercices */
 #navigation-exos {

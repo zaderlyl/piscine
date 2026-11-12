@@ -53,6 +53,8 @@ if (age >= 18) console.log("majeur");
 | `## Indice` | Un coup de pouce, sans donner la solution. |
 | `## Tests` | Code JS exécuté dans l'aperçu, dans un bloc de code. |
 | `## Solution: <fichier>` | Solution de référence pour ce fichier, dans un bloc de code. |
+| `## Schéma` | Exos de schéma SQL seulement (voir plus bas). Remplace Tests et Solution. |
+| `## Base` / `## Solutions` | Exos de requêtes SQL seulement (voir plus bas). Remplacent Tests et Solution. |
 
 Tout le texte est du Markdown : gras, listes, code avec des backticks.
 
@@ -80,6 +82,54 @@ for (let i = 1; i <= 6; i++) {
 
 Règles : un message clair par test (l'élève le lit), et le code des tests ne doit jamais boucler.
 
+## Exos de schéma SQL
+
+Dans `exos/sql/schema/`, l'élève complète des tables avec des listes déroulantes, sans écrire de code. Front matter : `panneaux: [enonce, schema]`. Il n'y a ni `## Tests` ni `## Solution` : la section `## Schéma` contient tout.
+
+```
+## Schéma
+table: commandes
+colonnes: id  produit  client_id
+cles: ?[primaire|étrangère|aucune]  ?[primaire|étrangère|aucune]  ?[primaire|étrangère|aucune]
+lignes:
+- 10 | Clavier | 2
+- 11 | Souris | 1
+reponses: primaire, aucune, étrangère
+```
+
+- `table:` donne le nom de la table. Pour plusieurs tables, écris plusieurs blocs, chacun commençant par `table:`.
+- Chaque ligne `nom: ...` avant `lignes:` est une rangée d'en-tête (colonnes, types, clés…). Un élément est soit un mot fixe, soit un trou `?[choix1|choix2|…]`.
+- `lignes:` est suivi des lignes de données, une par `- a | b | c`.
+- `reponses:` donne la bonne réponse de chaque trou, dans l'ordre de lecture (table par table, rangée par rangée, de gauche à droite). Elle peut être omise pour une table sans trou.
+- Pour les rangées nommées `colonnes`, `types` ou `cles`, l'élève reçoit un conseil adapté s'il se trompe.
+
+`node scripts/valider-exos.js` vérifie que le schéma est lisible et que chaque réponse est dans les choix de son trou.
+
+## Exos de requêtes SQL
+
+Dans `exos/sql/requetes/`, l'élève écrit une requête dans un éditeur, l'exécute pour voir le résultat, puis la vérifie. Front matter : `panneaux: [enonce, sql]`. Pas de `## Tests` ni de `## Solution`.
+
+````
+## Base
+```sql
+CREATE TABLE eleves (id INTEGER, nom TEXT);
+INSERT INTO eleves VALUES (1, 'Alice'), (2, 'Bruno');
+```
+
+## Solutions
+```sql
+SELECT nom FROM eleves;
+```
+```sql
+SELECT eleves.nom FROM eleves;
+```
+````
+
+- `## Base` : un seul bloc de code, exécuté pour créer la base de départ. Elle repart de zéro à chaque exécution.
+- `## Solutions` : un bloc de code par requête acceptée. Mets plusieurs solutions quand le palier ou le projet en accepte plusieurs écritures.
+- La vérification compare le **texte** de la requête de l'élève à chaque solution. Sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces, retours à la ligne, commentaires `--` et `;` final.
+- `node scripts/valider-exos.js` exécute chaque solution sur la base (il faut le paquet `sql.js` installé, sinon un avertissement s'affiche).
+
 ## Les règles à respecter
 
 - **L'élève part d'un éditeur vide.** Pas de section `## Départ`.
@@ -88,6 +138,43 @@ Règles : un message clair par test (l'élève le lit), et le code des tests ne 
 - Numérotation sur deux chiffres (`00`, `01`, `04`…), voir README section 2.
 - Les titres de section sont exacts : `## Énoncé` (avec accents), pas `## Enonce`.
 - `emmet_debloque` : les abréviations Emmet débloquées quand l'exo est réussi. Facultatif.
+
+## Principes pédagogiques
+
+Ces principes guident l'écriture de tous les exercices de la plateforme (HTML, CSS, JS, Git, etc.). Ils garantissent une progression fluide, bienveillante et sans frustration.
+
+### 1. Typologie des exercices
+Chaque module alterne trois types d'exercices :
+- **Base** : Découverte d'une seule notion nouvelle dans un cadre guidé (ex. : `04` pour les titres `h1` à `h6`).
+- **Imbriquer** : Combinaison de deux notions déjà apprises (ex. : `07` pour un titre contenant du gras `<h1><strong>...</strong></h1>`, ou un lien autour d'une image).
+- **Reproduire** : Mini-palier sans consigne de code détaillée (ex. : `10`). L'élève reproduit un résultat visuel d'après un modèle, en mobilisant ses acquis en autonomie.
+
+### 2. Rythme et taille d'un pas
+- **Une seule idée nouvelle par exercice.** Le `00` apprend `p`, le `04` apprend `h1` à `h6`. Si un exercice demande d'assimiler plusieurs notions complexes d'un coup, on le coupe.
+- **On montre avant d'expliquer (résultat visuel d'abord).** Les premiers exercices produisent un résultat visible immédiat dans l'aperçu. Les notions qui ne s'affichent pas (`head`, `meta charset`, `description`) arrivent plus tard, dans le contexte d'une vraie page complète.
+- **Aucun prérequis caché.** Si un test exige une balise, un attribut ou une structure, cette notion doit impérativement avoir été introduite dans le cours ou un exercice précédent.
+- **Texte libre par défaut.** L'élève est libre de son contenu textuel, sauf quand le test a besoin d'un mot-clé précis pour vérifier l'exercice.
+
+### 3. Difficulté et autonomie
+- **Toujours du code à produire.** L'élève part toujours d'un éditeur vide : pas de code à trous, pas de bug artificiel à réparer, pas de code à prédire.
+- **Durée cible : 2 à 5 minutes par exercice classique.** Un exercice qui prend plus de temps est soit trop verbeux, soit trop dense.
+- **Difficulté en profondeur, pas en dureté.** La complexité vient de la combinaison de briques simples, jamais de pièges syntaxiques obscurs.
+
+### 4. Indices (aide progressive)
+- **Un seul indice par exercice** dans la section `## Indice`.
+- L'indice donne la forme générale ou le modèle syntaxique (`<balise>...</balise>`), sans jamais fournir la réponse exacte à copier-coller.
+- Au-delà, l'élève s'appuie sur le cours, la documentation ou demande de l'aide à un camarade en présentiel.
+
+### 5. Retours à l'élève et messages de tests
+- **Formulation constructive obligatoire.** Le message d'erreur d'un test doit dire explicitement **ce qu'il faut ajouter ou corriger**, en commençant par un verbe d'action (« Ajoute un titre principal h1 dans le body »).
+- **Jamais de constat passif.** Éviter les messages froids du type `❌ Erreur`, `❌ h1 manquant` ou `Assertion failed`.
+- **Clarté sans jargon.** Nommer précisément les balises entre crochets (`<h1>`, `<p>`) et les zones concernées (`dans le head`, `dans le body`), sans terme technique non vu en cours.
+- **Tolérance technique.** Les tests vérifient la sémantique et le DOM, pas des détails invisibles et frustrants (comme le nombre exact d'espaces d'indentation).
+- **Une page vide n'est jamais validée.**
+
+### 6. Rôle des tests automatiques vs Échange PTP
+- **Ce que la machine teste :** La présence des éléments, la conformité de l'arborescence DOM et le comportement minimal attendu.
+- **Ce que l'échange PTP valide :** La compréhension réelle de l'élève (« Pourquoi as-tu utilisé cette balise ? », « À quoi sert cet attribut ? »). La pédagogie repose sur l'explication orale entre pairs.
 
 ## Avant de proposer ton exo
 

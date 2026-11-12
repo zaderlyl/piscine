@@ -1,7 +1,11 @@
 // Vérifie que les exos sont bien formés, avant fusion (README §11).
 // Usage : node scripts/valider-exos.js [dossier]   (par défaut : exos/)
 //
-// Deux façons de valider un exo, selon son module :
+// Quatre façons de valider un exo, selon son module :
+// - exos/sql/requetes : on lit « Base » et « Solutions » avec lireSql() et on exécute chaque solution
+//   sur la base de départ (il faut le paquet sql.js, sinon avertissement).
+// - exos/sql/schema : pas de section « Tests » ni de solution. On lit la section « Schéma »
+//   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
@@ -12,6 +16,10 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
+import { createRequire } from "node:module";
+import { lireSchemas } from "../src/schema/lecture.js";
+import { lireSql } from "../src/sql/lecture.js";
+import { executerRequete } from "../src/sql/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
@@ -125,7 +133,39 @@ function blocDeCode(section) {
 // Même rôle que construireTests() dans src/script.js : $, $$, assert, wait, click, type.
 const DELAI_TESTS = 5000; // ms, pour qu'un test qui attend ne bloque pas le script
 async function jouerTestsHtml(solution, tests) {
-  const dom = new JSDOM(solution, { runScripts: "outside-only", pretendToBeVisual: true });
+  const dom = new JSDOM(solution, {
+    runScripts: "dangerously",
+    pretendToBeVisual: true,
+    url: "http://localhost/",
+    beforeParse(window) {
+      if (!window.localStorage) {
+        const store = new Map();
+        window.localStorage = {
+          getItem: (k) => (store.has(k) ? store.get(k) : null),
+          setItem: (k, v) => store.set(k, String(v)),
+          removeItem: (k) => store.delete(k),
+          clear: () => store.clear(),
+        };
+      }
+      if (!window.Audio) {
+        window.Audio = class Audio {
+          play() {
+            return Promise.resolve();
+          }
+        };
+      }
+      if (!window.IntersectionObserver) {
+        window.IntersectionObserver = class IntersectionObserver {
+          constructor(callback) {
+            this.callback = callback;
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        };
+      }
+    },
+  });
   const fenetre = dom.window;
   const chargement = new Promise((resolve) => fenetre.addEventListener("load", resolve));
   await chargement;
@@ -147,6 +187,7 @@ async function jouerTestsHtml(solution, tests) {
     };
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+    const code = window.__code ?? "";
     try {
       ${tests}
     } catch (erreur) {
@@ -181,19 +222,24 @@ async function verifierTests(sections) {
   if (!codeTests || solutions.length === 0) return { erreurs, avertissements };
 
   const solution = solutions.find((s) => s.titre === "Solution: index.html");
-  if (!solution) {
-    // Seule une solution HTML se joue dans jsdom ; PHP demande un interpréteur PHP
+  const solutionJs = solutions.find((s) => s.titre === "Solution: script.js");
+  if (!solution && !solutionJs) {
+    // Seule une solution HTML ou JS se joue dans jsdom ; PHP demande un interpréteur PHP
     avertissements.push(`tests non exécutés : ${solutions.map((s) => s.titre).join(", ")} (il faut PHP sur la machine)`);
     return { erreurs, avertissements };
   }
-  const bloc = blocDeCode(solution);
+  const cibleSolution = solution || solutionJs;
+  const bloc = blocDeCode(cibleSolution);
   if (!bloc) {
-    erreurs.push({ section: solution ? solution.titre : "Solution", ligne: solution ? solution.ligne : 1, message: "aucun bloc de code dans la solution" });
+    erreurs.push({ section: cibleSolution ? cibleSolution.titre : "Solution", ligne: cibleSolution ? cibleSolution.ligne : 1, message: "aucun bloc de code dans la solution" });
     return { erreurs, avertissements };
   }
   let resultats;
   try {
-    resultats = await jouerTestsHtml(bloc.code, codeTests.code);
+    const htmlDoc = solution
+      ? bloc.code
+      : `<!DOCTYPE html><html><head><script>window.__code = ${JSON.stringify(bloc.code)};\n${bloc.code}<\/script></head><body></body></html>`;
+    resultats = await jouerTestsHtml(htmlDoc, codeTests.code);
   } catch (erreur) {
     erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `les tests n'ont pas pu tourner : ${erreur.message}` });
     return { erreurs, avertissements };
@@ -201,6 +247,57 @@ async function verifierTests(sections) {
   for (const r of resultats) {
     if (!r.ok) erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `test échoué sur la solution : ${r.message}` });
   }
+  return { erreurs, avertissements };
+}
+
+// Règle « schema » : Énoncé, Schéma lisible (trous, choix et réponses cohérents)
+function verifierSchemaSql(sections) {
+  const erreurs = [];
+  for (const nom of ["Énoncé", "Schéma"]) {
+    if (!trouver(sections, nom)) erreurs.push({ section: "—", ligne: 1, message: `section « ${nom} » manquante` });
+  }
+  const schema = trouver(sections, "Schéma");
+  if (schema) {
+    try {
+      lireSchemas(schema.corps.map((l) => l.texte).join("\n"));
+    } catch (erreur) {
+      erreurs.push({ section: "Schéma", ligne: schema.ligne, message: erreur.message });
+    }
+  }
+  return erreurs;
+}
+
+// Règle « requetes » : Énoncé, Base et Solutions lisibles, chaque solution s'exécute sans erreur
+async function verifierRequetesSql(sections) {
+  const erreurs = [];
+  const avertissements = [];
+  for (const nom of ["Énoncé", "Base", "Solutions"]) {
+    if (!trouver(sections, nom)) erreurs.push({ section: "—", ligne: 1, message: `section « ${nom} » manquante` });
+  }
+  if (erreurs.length > 0) return { erreurs, avertissements };
+
+  const texte = (nom) => trouver(sections, nom).corps.map((l) => l.texte).join("\n");
+  let sql;
+  try {
+    sql = lireSql({ Base: texte("Base"), Solutions: texte("Solutions") });
+  } catch (erreur) {
+    erreurs.push({ section: "Base / Solutions", ligne: trouver(sections, "Base").ligne, message: erreur.message });
+    return { erreurs, avertissements };
+  }
+
+  let SQL;
+  try {
+    SQL = await createRequire(import.meta.url)("sql.js")();
+  } catch {
+    avertissements.push("solutions non exécutées (il faut le paquet sql.js)");
+    return { erreurs, avertissements };
+  }
+  sql.solutions.forEach((solution, i) => {
+    const r = executerRequete(SQL, sql.base, solution);
+    if (r.erreur) {
+      erreurs.push({ section: "Solutions", ligne: trouver(sections, "Solutions").ligne, message: `la solution ${i + 1} échoue : ${r.erreur}` });
+    }
+  });
   return { erreurs, avertissements };
 }
 
@@ -285,7 +382,13 @@ async function validerFichier(chemin) {
   if (front.valeurs.type === "cours") return { cours: true, erreurs: [], avertissements };
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
-  if (module === "git/visuel") {
+  if (module === "sql/schema") {
+    erreurs.push(...verifierSchemaSql(sections));
+  } else if (module === "sql/requetes") {
+    const resultat = await verifierRequetesSql(sections);
+    erreurs.push(...resultat.erreurs);
+    avertissements.push(...resultat.avertissements);
+  } else if (module === "git/visuel") {
     erreurs.push(...verifierEtapes(sections, front.valeurs.depot === "aucun"));
   } else {
     const resultat = await verifierTests(sections);
