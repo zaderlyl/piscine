@@ -44,9 +44,9 @@ const msgProgression = document.getElementById("msg-progression");
 
 const boutonPhp = document.createElement("button");
 
-// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 04)
+// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 05)
 const exoChoisi = new URLSearchParams(location.search).get("exo");
-const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
+const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/05";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercu-suspendu";
