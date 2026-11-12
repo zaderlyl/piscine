@@ -119,9 +119,9 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 
 **2. Données et POO passerelle (`js/vanilla`)**
 *Fil conducteur : réutilisation des données de l'inventaire, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
-- [ ] `14` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
-- [ ] `15` : Gestion des erreurs avec `try...catch`
-- [ ] `16` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
+- [x] `14` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
+- [x] `15` : Gestion des erreurs avec `try...catch`
+- [x] `16` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
 
 **3. DOM, Événements et Persistance locale (`js/dom`)**
 *Page fournie et non affichée : l'énoncé liste les `id` et classes à utiliser. Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
