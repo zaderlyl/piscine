@@ -49,9 +49,9 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `12` : HTML à l'ancienne (`font`, `center`, `marquee`), à tester avant d'écrire
 
 **Listes**
-- [ ] `13` : Listes à puces et numérotées (débloque `ul>li*3`)
-- [ ] `14` : Options des listes et listes de définitions
-- [ ] `15` : Listes imbriquées
+- [x] `13` : Listes à puces et numérotées (débloque `ul>li*3`)
+- [x] `14` : Options des listes et listes de définitions
+- [x] `15` : Listes imbriquées
 
 **Liens**
 - [ ] `16` : Liens externes
