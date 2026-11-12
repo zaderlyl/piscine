@@ -41,6 +41,13 @@ export function lirePtp(texte) {
   return ligne ? ligne[1] : "oui";
 }
 
+// Mode de vérification d'un exo SQL dans l'en-tête : `verification: texte | resultat`
+// (défaut : texte). « texte » compare la requête aux solutions, « resultat » compare le tableau obtenu.
+export function lireVerification(texte) {
+  const ligne = texte.match(/^verification:\s*(texte|resultat)/m);
+  return ligne ? ligne[1] : "texte";
+}
+
 export async function chargerExo(fichier) {
   const reponse = await fetch(fichier);
   const texte = (await reponse.text()).replace(/\r\n/g, "\n");
@@ -49,6 +56,7 @@ export async function chargerExo(fichier) {
   Object.defineProperty(exo, "emmetDebloque", { value: lireEmmetExo(texte) });
   Object.defineProperty(exo, "panneaux", { value: lirePanneaux(texte) });
   Object.defineProperty(exo, "ptp", { value: lirePtp(texte) });
+  Object.defineProperty(exo, "verification", { value: lireVerification(texte) });
   Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }

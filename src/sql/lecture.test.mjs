@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { lireExo } from "../exo.js";
+import { lireExo, lireVerification } from "../exo.js";
 import { lireSql } from "./lecture.js";
 
 const EXO = `## Base
@@ -31,4 +31,10 @@ test("lireSql refuse une base ou des solutions manquantes", () => {
 test("lireSql refuse plusieurs blocs dans la base", () => {
   const exo = lireExo("## Base\n```sql\nA;\n```\n```sql\nB;\n```\n## Solutions\n```sql\nC;\n```\n");
   assert.throws(() => lireSql(exo), /un seul bloc/);
+});
+
+test("lireVerification lit le mode de l'en-tête (texte par défaut)", () => {
+  assert.equal(lireVerification("---\ntitre: A\n---\n"), "texte");
+  assert.equal(lireVerification("---\nverification: texte\n---\n"), "texte");
+  assert.equal(lireVerification("---\nverification: resultat\n---\n"), "resultat");
 });
