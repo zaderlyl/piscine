@@ -101,6 +101,39 @@ for (let i = 1; i <= 6; i++) {
 
 Règles : un message clair par test (l'élève le lit), et le code des tests ne doit jamais boucler.
 
+## Exos à page cachée (JS DOM)
+
+Pour les exos qui ajoutent de l'**interactivité** à une page, l'élève n'écrit que `script.js` : la page (HTML et CSS) est fournie, mais **non affichée** dans l'éditeur. Il la voit s'afficher dans l'aperçu et doit s'en servir à partir de ce que dit l'énoncé. C'est ce qu'on fait en vrai : on écrit du JS pour une page qu'on n'a pas écrite.
+
+````markdown
+## Page
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .fait { text-decoration: line-through; }
+  </style>
+</head>
+<body>
+  <button id="ajouter">Ajouter</button>
+  <ul id="taches"></ul>
+  <script src="script.js"></script>
+</body>
+</html>
+```
+````
+
+- La section `## Page` contient **un seul bloc HTML**, avec le CSS dans un `<style>` : la page peut être aussi soignée que tu veux (le module CSS est vu avant), avec des classes d'état déjà stylées (`.actif`, `.fait`, `.erreur`…).
+- Elle doit contenir `<script src="script.js"></script>` : c'est là que le script de l'élève est inséré.
+- L'élève n'a qu'un éditeur `script.js` (pas d'onglets `index.html` ni `style.css`). Le brouillon et « Charger la solution » ne concernent que ce fichier.
+- Il n'y a qu'une solution : `## Solution: script.js`. Les `## Tests` s'exécutent sur la page avec ce script, avec les mêmes fonctions que d'habitude (`$`, `$$`, `click`, `assert`…).
+- **L'énoncé doit lister** les éléments de la page que l'élève utilise (leurs `id` ou leurs classes) et les classes d'état déjà stylées : c'est le seul « code source » qu'il reçoit.
+- Le fichier `.md` reste public, comme les solutions : « caché » veut dire « non affiché », pas secret.
+- Le validateur refuse un exo dont la page n'a pas de bloc HTML ou pas de balise `<script src="script.js">`, qui a une autre solution que `script.js`, ou dont les tests échouent sur la solution.
+- Si des élèves bloquent faute de voir la page, on pourra ajouter un onglet « Page » en lecture seule (pas fait pour l'instant).
+
 ## Exos de schéma SQL
 
 Dans `exos/sql/schema/`, l'élève complète des tables avec des listes déroulantes, sans écrire de code. Front matter : `panneaux: [enonce, schema]`. Il n'y a ni `## Tests` ni `## Solution` : la section `## Schéma` contient tout.
@@ -193,7 +226,7 @@ Dans `exos/sql/ecriture/`, l'élève écrit des requêtes qui **modifient** les 
 
 ## Les règles à respecter
 
-- **L'élève part d'un éditeur vide.** Pas de section `## Départ`.
+- **L'élève part d'un éditeur vide.** Pas de section `## Départ`. Seule exception : pour un exo à page cachée, la page est fournie par `## Page`, mais l'éditeur de `script.js` reste vide.
 - `## Solution` n'est jamais envoyée aux élèves.
 - Une solution est obligatoire : **les tests doivent passer sur elle**. Vérifie avec `?auteur` puis « Charger la solution ».
 - Numérotation sur deux chiffres (`00`, `01`, `04`…), voir README section 2.
