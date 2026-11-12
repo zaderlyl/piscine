@@ -2,7 +2,7 @@ import { marked } from "https://esm.sh/marked@12.0.2";
 
 const SECTION_DOC = ["Énoncé", "Cours", "Méthode", "Indice"];
 
-export function afficherPanneauDoc(exo, panneau, barreOnglets)
+export function afficherPanneauDoc(exo, panneau, barreOnglets, sectionInitiale = "Énoncé")
 {
   const boutonsDoc = {};
 
@@ -22,5 +22,5 @@ export function afficherPanneauDoc(exo, panneau, barreOnglets)
     boutonsDoc[nom] = bouton;
   }
 
-  afficherDoc("Énoncé");
+  afficherDoc(sectionInitiale);
 }

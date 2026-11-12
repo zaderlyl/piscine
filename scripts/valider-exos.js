@@ -24,7 +24,8 @@ import { executerRequete } from "../src/sql/moteur.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
-const TYPES = ["intro", "classique", "palier", "projet"];
+const TYPES = ["intro", "classique", "palier", "projet", "cours"];
+const CHAMPS_COURS = ["type", "titre", "notions"];
 const VALEURS_PTP = ["oui", "non", "simple", "riche"];
 const VALEURS_VERIFICATION = ["texte", "resultat", "etat"];
 
@@ -119,6 +120,32 @@ function verifierFront(front) {
   }
   if (front.valeurs.verification && !VALEURS_VERIFICATION.includes(front.valeurs.verification)) {
     erreurs.push({ section: "Front matter", ligne: front.ligne, message: `verification « ${front.valeurs.verification} » inconnue (attendu : ${VALEURS_VERIFICATION.join(", ")})` });
+  }
+  return erreurs;
+}
+
+// Un cours seul n'a qu'une section « Cours » : ni énoncé, ni méthode, ni indice, ni solution
+function verifierCours(front, sections) {
+  const erreurs = [];
+  if (!front.present) {
+    erreurs.push({ section: "Front matter", ligne: 1, message: "le fichier doit commencer par une ligne « --- »" });
+    return erreurs;
+  }
+  for (const champ of CHAMPS_COURS) {
+    if (!(champ in front.valeurs)) {
+      erreurs.push({ section: "Front matter", ligne: front.ligne, message: `champ « ${champ} » manquant` });
+    }
+  }
+  for (const s of sections) {
+    if (s.titre !== "Cours") {
+      erreurs.push({ section: s.titre, ligne: s.ligne, message: "un cours ne contient que la section « Cours » (pas d'énoncé, de méthode, d'indice ni de solution)" });
+    }
+  }
+  const cours = trouver(sections, "Cours");
+  if (!cours) {
+    erreurs.push({ section: "Cours", ligne: front.ligne, message: "section « Cours » manquante" });
+  } else if (!cours.corps.some((l) => l.texte.trim())) {
+    erreurs.push({ section: "Cours", ligne: cours.ligne, message: "section « Cours » vide" });
   }
   return erreurs;
 }
@@ -399,10 +426,10 @@ function verifierEtapes(sections, sansDepot) {
 async function validerFichier(chemin) {
   const texte = readFileSync(chemin, "utf8");
   const { front, sections } = lireFichier(texte);
-  const erreurs = verifierFront(front);
   const avertissements = [];
 
-  if (front.valeurs.type === "cours") return { cours: true, erreurs: [], avertissements };
+  if (front.valeurs.type === "cours") return { cours: true, erreurs: verifierCours(front, sections), avertissements };
+  const erreurs = verifierFront(front);
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
   if (module === "sql/schema") {
@@ -430,10 +457,7 @@ let avertissements = 0;
 for (const chemin of fichiers) {
   const rel = relative(process.cwd(), chemin).split(sep).join("/");
   const r = await validerFichier(chemin);
-  if (r.cours) {
-    cours++;
-    continue;
-  }
+  if (r.cours) cours++;
   for (const a of r.avertissements) {
     avertissements++;
     console.log(`⚠ ${rel} : ${a}`);
@@ -448,5 +472,5 @@ for (const chemin of fichiers) {
   }
 }
 
-console.log(`\n${valides} exo(s) valide(s), ${enErreur} en erreur, ${cours} cours ignoré(s), ${avertissements} avertissement(s).`);
+console.log(`\n${valides} exo(s) valide(s) (dont ${cours} cours), ${enErreur} en erreur, ${avertissements} avertissement(s).`);
 process.exitCode = enErreur > 0 ? 1 : 0;

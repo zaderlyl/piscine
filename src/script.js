@@ -44,9 +44,9 @@ const msgProgression = document.getElementById("msg-progression");
 
 const boutonPhp = document.createElement("button");
 
-// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 04)
+// exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 05)
 const exoChoisi = new URLSearchParams(location.search).get("exo");
-const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/04";
+const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/05";
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercu-suspendu";
@@ -181,7 +181,16 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
 
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
 
-if (panneaux.includes("depot")) {
+if (exo.type === "cours") {
+  // Cours seul : pas d'exercice, le cours occupe toute la page et l'exo compte comme fait à l'ouverture
+  document.body.classList.add("cours-seul");
+  docOnglet.classList.add("cache");
+  zones.classList.add("cache");
+  afficherPanneauDoc(exo, panneauEnonce, docOnglet, "Cours");
+  marquerReussi(EXO);
+  afficherSuivant();
+  menuNavigation.mettreAJour();
+} else if (panneaux.includes("depot")) {
   // Masque l'éditeur classique, doc et aperçu
   docOnglet.classList.add("cache");
   panneauEnonce.classList.add("cache");
