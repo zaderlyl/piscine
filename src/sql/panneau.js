@@ -1,5 +1,5 @@
 import { lireSql } from "./lecture.js";
-import { verifierRequete } from "./verification.js";
+import { verifierRequete, verifierResultat } from "./verification.js";
 import { chargerSql, executerRequete } from "./moteur.js";
 
 // Remplit `conteneur` avec le tableau d'un résultat { colonnes, lignes }.
@@ -37,9 +37,11 @@ export function afficherTableau(conteneur, { colonnes, lignes }) {
 
 // Panneau d'un exo de requêtes : boutons « Exécuter » et « Vérifier », tableau de résultat.
 // exo : sections de l'exo (Base, Solutions). lireRequete() renvoie le texte de l'éditeur.
-// onSucces() est appelée quand la requête ressemble à une solution.
+// verification : « texte » (la requête ressemble à une solution) ou « resultat » (le tableau obtenu
+// est celui d'une solution).
+// onSucces() est appelée quand la requête est jugée correcte.
 // charger : fournit l'objet sql.js (remplaçable dans les tests).
-export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, charger = chargerSql }) {
+export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verification = "texte", charger = chargerSql }) {
   conteneur.innerHTML = "";
   conteneur.classList.add("schema");
 
@@ -98,8 +100,20 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, charge
     }
   }
 
-  function verifierLaRequete() {
-    const r = verifierRequete(lireRequete(), sql.solutions);
+  async function verifierLaRequete() {
+    let r;
+    if (verification === "resultat") {
+      let SQL;
+      try {
+        SQL = await charger();
+      } catch (erreur) {
+        message(erreur.message);
+        return;
+      }
+      r = verifierResultat({ SQL, base: sql.base, requete: lireRequete(), solutions: sql.solutions });
+    } else {
+      r = verifierRequete(lireRequete(), sql.solutions);
+    }
     message(r.message, r.reussi ? "schema-reussi" : "");
     if (r.reussi && typeof onSucces === "function") onSucces();
   }

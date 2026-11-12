@@ -266,6 +266,7 @@ if (panneaux.includes("depot")) {
     exo,
     lireRequete: () => editeurSql.state.doc.toString(),
     onSucces: validerExo,
+    verification: exo.verification,
   });
 
   afficherSuivant();
