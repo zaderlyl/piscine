@@ -105,5 +105,6 @@
   "sql/tables/00",
   "sql/tables/01",
   "sql/tables/02",
-  "sql/tables/03"
+  "sql/tables/03",
+  "sql/tables/04"
 ]
