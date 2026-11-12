@@ -1,7 +1,7 @@
 // Vérifie la requête SQL d'un élève, de deux façons (champ `verification:` de l'exo) :
 // - « texte » : on compare son texte aux solutions acceptées. Les différences de présentation
-//   sont ignorées : majuscules/minuscules (hors texte entre guillemets), espaces, retours à la
-//   ligne, commentaires `--` et `;` final.
+//   sont ignorées : majuscules/minuscules (hors texte entre guillemets), espaces (y compris autour
+//   de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final.
 // - « resultat » : on compare le tableau obtenu à celui d'une solution.
 
 import { executerRequete } from "./moteur.js";
@@ -14,7 +14,11 @@ export function normaliserRequete(requete) {
   for (const m of (requete || "").matchAll(MORCEAUX)) {
     const morceau = m[0];
     if (morceau.startsWith("--")) continue;
-    texte += morceau[0] === "'" || morceau[0] === '"' ? morceau : morceau.toLowerCase();
+    // hors guillemets : minuscules, et pas d'espace autour des opérateurs de comparaison
+    texte +=
+      morceau[0] === "'" || morceau[0] === '"'
+        ? morceau
+        : morceau.toLowerCase().replace(/\s*(<=|>=|<>|!=|=|<|>)\s*/g, "$1");
   }
   return texte
     .replace(/\s+/g, " ")
