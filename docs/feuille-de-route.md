@@ -17,7 +17,7 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [x] Documentation dans un panneau (Énoncé, Cours, Méthode, Indice)
 - [x] Correctif : insertion des tests dans le document (cas `frameset`) et encodage UTF-8
 - [x] PHP dans le navigateur (php-wasm)
-- [ ] SQLite côté navigateur (sql.js)
+- [x] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
 - [x] Panneau de visualisation de la logique (variables, boucles, fonctions) : voir [visualisation-logique.md](visualisation-logique.md)
@@ -204,6 +204,34 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 **7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)**
 - [ ] `18` : Réception de requêtes JSON du client JS via le flux brut `php://input` (contournement du piège de `$_POST` vide)
 - [ ] `19` : Renvoyer du JSON avec `json_encode()`, codes HTTP réels (`http_response_code`) et gestion du CORS avec requêtes Preflight `OPTIONS`
+
+---
+
+### Module SQL (R2.13, R2.14)
+
+Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (voir [ecrire-un-exo.md](ecrire-un-exo.md)).
+
+**1. Schéma : tables, colonnes et clés (`sql/schema`)**
+- [x] `01` : Colonnes et lignes
+- [x] `02` : Les types de colonnes
+- [x] `03` : La clé primaire
+- [x] `04` : Relier deux tables
+
+**2. Requêtes de lecture (`sql/requetes`)**
+- [x] `00` : À quoi sert SQL (`SELECT *`)
+- [x] `01` : Afficher des colonnes avec `SELECT`
+- [x] `02` : Filtrer avec `WHERE`
+- [x] `03` : Combiner des conditions avec `AND` et `OR`
+- [x] `04` : Trier avec `ORDER BY`
+- [x] `05` : Limiter avec `LIMIT`
+- [x] `06` : Palier : lire une table (vérifié par le résultat)
+- [x] `07` : Relier deux tables avec `INNER JOIN`
+- [x] `08` : Palier : lire plusieurs tables (vérifié par le résultat)
+
+**3. À faire**
+- [ ] Requêtes d'écriture (`INSERT`, `UPDATE`, `DELETE`), dans une famille `sql/ecriture` : la vérification compare l'état de la table après la requête
+- [ ] Agrégation (`COUNT`, `GROUP BY`) et `LEFT JOIN`
+- [ ] Vérifier les solutions SQL en CI (installer `sql.js` en `devDependency`)
 
 ---
 
