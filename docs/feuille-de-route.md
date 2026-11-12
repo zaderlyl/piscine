@@ -211,7 +211,7 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 
 ### Module SQL (R2.13, R2.14)
 
-Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (lecture) ou par le contenu des tables (écriture) : voir [ecrire-un-exo.md](ecrire-un-exo.md).
+Programme détaillé : [programme-par-langage.md](programme-par-langage.md), section 8. Les exos classiques sont vérifiés par le texte de la requête, les paliers par le tableau obtenu (lecture), par le contenu des tables (écriture) ou par leur structure (création) : voir [ecrire-un-exo.md](ecrire-un-exo.md).
 
 **1. Schéma : tables, colonnes et clés (`sql/schema`)**
 - [x] `00` : Cours : qu'est-ce qu'une base de données
@@ -247,8 +247,17 @@ Programme détaillé : [programme-par-langage.md](programme-par-langage.md), sec
 - [x] `03` : Supprimer des lignes avec `DELETE`
 - [x] `04` : Palier : modifier une table (vérifié par l'état des tables)
 
-**4. À faire**
-- [ ] Créer et modifier des tables (`CREATE TABLE`, clés primaires et étrangères en SQL)
+**4. Création de tables (`sql/tables`, vérifié par la structure des tables)**
+- [x] `00` : Cours : créer une table
+- [x] `01` : Les types `INTEGER` et `TEXT` (à trous)
+- [x] `02` : Créer une table avec `CREATE TABLE`
+- [x] `03` : La clé primaire avec `PRIMARY KEY` (à trous)
+- [x] `04` : Créer une table avec sa clé primaire
+- [x] `05` : La clé étrangère avec `FOREIGN KEY` (à trous)
+- [x] `06` : Relier deux tables avec une clé étrangère
+
+**5. À faire**
+- [ ] Modifier des tables (`ALTER TABLE`)
 - [ ] Projet SQL de fin de module
 
 ---
