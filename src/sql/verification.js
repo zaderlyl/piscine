@@ -1,8 +1,9 @@
-// Vérifie la requête SQL d'un élève, de deux façons (champ `verification:` de l'exo) :
+// Vérifie la requête SQL d'un élève, de trois façons (champ `verification:` de l'exo) :
 // - « texte » : on compare son texte aux solutions acceptées. Les différences de présentation
 //   sont ignorées : majuscules/minuscules (hors texte entre guillemets), espaces (y compris autour
 //   de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final.
 // - « resultat » : on compare le tableau obtenu à celui d'une solution.
+// - « etat » : pour les requêtes d'écriture, on compare le contenu des tables après la requête.
 
 import { executerRequete } from "./moteur.js";
 
@@ -71,6 +72,52 @@ export function verifierResultat({ SQL, base, requete, solutions }) {
     const attendu = executerRequete(SQL, base, solution);
     if (attendu.erreur) continue;
     const r = comparerResultats(attendu, eleve, /\border\s+by\b/i.test(solution));
+    if (r.reussi) return r;
+    premier = premier || r;
+  }
+  return premier || { reussi: false, message: "Aucune solution n'a pu être exécutée." };
+}
+
+// Mode « etat » : on compare le contenu des tables (liste { nom, colonnes, lignes }) après la requête.
+// L'ordre des lignes est ignoré : une table n'a pas d'ordre.
+export function comparerEtats(attendu, obtenu) {
+  const noms = (tables) => tables.map((t) => t.nom.toLowerCase()).join("|");
+  if (noms(attendu) !== noms(obtenu)) {
+    return { reussi: false, message: "Les tables ne sont pas celles attendues. Relis l'énoncé." };
+  }
+  for (let i = 0; i < attendu.length; i++) {
+    const a = attendu[i];
+    const o = obtenu[i];
+    if (a.colonnes.join("|").toLowerCase() !== o.colonnes.join("|").toLowerCase()) {
+      return { reussi: false, message: `Les colonnes de la table ${a.nom} ne sont pas celles attendues.` };
+    }
+    if (a.lignes.length !== o.lignes.length) {
+      return {
+        reussi: false,
+        message: `La table ${a.nom} a ${o.lignes.length} ligne(s), il en faut ${a.lignes.length}. Relis l'énoncé.`,
+      };
+    }
+    const texte = (lignes) => lignes.map((l) => JSON.stringify(l)).sort();
+    const ta = texte(a.lignes);
+    const to = texte(o.lignes);
+    if (ta.some((ligne, j) => ligne !== to[j])) {
+      return { reussi: false, message: `Le contenu de la table ${a.nom} n'est pas celui attendu. Relis l'énoncé.` };
+    }
+  }
+  return { reussi: true, message: "Réussi : tes tables sont dans l'état attendu." };
+}
+
+// Mode « etat » complet : exécute la requête de l'élève et les solutions sur la même base,
+// puis compare le contenu des tables. Accepté s'il est identique à celui d'une solution.
+export function verifierEtat({ SQL, base, requete, solutions }) {
+  if (!normaliserRequete(requete)) return { reussi: false, message: "Écris une requête avant de vérifier." };
+  const eleve = executerRequete(SQL, base, requete);
+  if (eleve.erreur) return { reussi: false, message: "Ta requête a une erreur : " + eleve.erreur };
+  let premier = null;
+  for (const solution of solutions) {
+    const attendu = executerRequete(SQL, base, solution);
+    if (attendu.erreur) continue;
+    const r = comparerEtats(attendu.tables, eleve.tables);
     if (r.reussi) return r;
     premier = premier || r;
   }

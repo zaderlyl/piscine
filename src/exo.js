@@ -41,10 +41,11 @@ export function lirePtp(texte) {
   return ligne ? ligne[1] : "oui";
 }
 
-// Mode de vérification d'un exo SQL dans l'en-tête : `verification: texte | resultat`
-// (défaut : texte). « texte » compare la requête aux solutions, « resultat » compare le tableau obtenu.
+// Mode de vérification d'un exo SQL dans l'en-tête : `verification: texte | resultat | etat`
+// (défaut : texte). « texte » compare la requête aux solutions, « resultat » compare le tableau obtenu,
+// « etat » compare le contenu des tables après une requête d'écriture.
 export function lireVerification(texte) {
-  const ligne = texte.match(/^verification:\s*(texte|resultat)/m);
+  const ligne = texte.match(/^verification:\s*(texte|resultat|etat)/m);
   return ligne ? ligne[1] : "texte";
 }
 

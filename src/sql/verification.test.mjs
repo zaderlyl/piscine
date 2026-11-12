@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { normaliserRequete, verifierRequete, comparerResultats, verifierResultat } from "./verification.js";
+import {
+  normaliserRequete,
+  verifierRequete,
+  comparerResultats,
+  verifierResultat,
+  comparerEtats,
+  verifierEtat,
+} from "./verification.js";
 
 const SOLUTIONS = ["SELECT nom FROM eleves;", "SELECT eleves.nom FROM eleves WHERE nom = 'Alice'"];
 
@@ -93,4 +100,31 @@ test("verifierResultat signale une erreur SQL ou une requête vide", options, ()
   const solutions = ["SELECT nom FROM eleves"];
   assert.match(verifierResultat({ SQL, base: BASE, requete: "SELECT nom FROM profs", solutions }).message, /erreur/);
   assert.match(verifierResultat({ SQL, base: BASE, requete: " ", solutions }).message, /Écris/);
+});
+
+const TABLE = (lignes, nom = "eleves") => [{ nom, colonnes: ["id", "nom"], lignes }];
+
+test("comparerEtats accepte le même contenu, dans n'importe quel ordre de lignes", () => {
+  const attendu = TABLE([[1, "Alice"], [2, "Bruno"]]);
+  assert.equal(comparerEtats(attendu, TABLE([[2, "Bruno"], [1, "Alice"]])).reussi, true);
+});
+
+test("comparerEtats refuse un mauvais nombre de lignes, un mauvais contenu ou d'autres tables", () => {
+  const attendu = TABLE([[1, "Alice"], [2, "Bruno"]]);
+  assert.match(comparerEtats(attendu, TABLE([[1, "Alice"]])).message, /1 ligne\(s\), il en faut 2/);
+  assert.match(comparerEtats(attendu, TABLE([[1, "Alice"], [2, "Zoé"]])).message, /contenu de la table eleves/);
+  assert.match(comparerEtats(attendu, TABLE([[1, "Alice"], [2, "Bruno"]], "profs")).message, /tables/);
+});
+
+test("verifierEtat accepte deux écritures qui laissent les tables dans le même état", options, () => {
+  const solutions = ["UPDATE eleves SET age = 18 WHERE nom = 'Bruno'"];
+  assert.equal(verifierEtat({ SQL, base: BASE, requete: "update eleves set age=18 where id = 2;", solutions }).reussi, true);
+});
+
+test("verifierEtat refuse une requête qui oublie le WHERE, une lecture seule, une erreur ou une requête vide", options, () => {
+  const solutions = ["DELETE FROM eleves WHERE age < 18"];
+  assert.match(verifierEtat({ SQL, base: BASE, requete: "DELETE FROM eleves", solutions }).message, /ligne\(s\)/);
+  assert.equal(verifierEtat({ SQL, base: BASE, requete: "SELECT * FROM eleves", solutions }).reussi, false);
+  assert.match(verifierEtat({ SQL, base: BASE, requete: "DELETE FROM profs", solutions }).message, /erreur/);
+  assert.match(verifierEtat({ SQL, base: BASE, requete: " ", solutions }).message, /Écris/);
 });
