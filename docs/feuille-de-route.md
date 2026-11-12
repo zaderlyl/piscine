@@ -60,10 +60,10 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [x] `19` : `mailto`, `tel`, `download`
 
 **Images**
-- [ ] `20` : Images (`src`, `alt`)
-- [ ] `21` : `figure`, `figcaption`, `picture`
-- [ ] `22` : Image cliquable
-- [ ] `23` : Zones cliquables (`map`, `area`)
+- [x] `20` : Images (`src`, `alt`)
+- [x] `21` : `figure`, `figcaption`, `picture`
+- [x] `22` : Image cliquable
+- [x] `23` : Zones cliquables (`map`, `area`)
 
 **Tableaux**
 - [ ] `24` : Tableau simple (débloque `table>tr*3>td*3`)
