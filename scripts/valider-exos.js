@@ -125,7 +125,39 @@ function blocDeCode(section) {
 // Même rôle que construireTests() dans src/script.js : $, $$, assert, wait, click, type.
 const DELAI_TESTS = 5000; // ms, pour qu'un test qui attend ne bloque pas le script
 async function jouerTestsHtml(solution, tests) {
-  const dom = new JSDOM(solution, { runScripts: "outside-only", pretendToBeVisual: true });
+  const dom = new JSDOM(solution, {
+    runScripts: "dangerously",
+    pretendToBeVisual: true,
+    url: "http://localhost/",
+    beforeParse(window) {
+      if (!window.localStorage) {
+        const store = new Map();
+        window.localStorage = {
+          getItem: (k) => (store.has(k) ? store.get(k) : null),
+          setItem: (k, v) => store.set(k, String(v)),
+          removeItem: (k) => store.delete(k),
+          clear: () => store.clear(),
+        };
+      }
+      if (!window.Audio) {
+        window.Audio = class Audio {
+          play() {
+            return Promise.resolve();
+          }
+        };
+      }
+      if (!window.IntersectionObserver) {
+        window.IntersectionObserver = class IntersectionObserver {
+          constructor(callback) {
+            this.callback = callback;
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        };
+      }
+    },
+  });
   const fenetre = dom.window;
   const chargement = new Promise((resolve) => fenetre.addEventListener("load", resolve));
   await chargement;
@@ -147,6 +179,7 @@ async function jouerTestsHtml(solution, tests) {
     };
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const assert = (condition, message) => resultats.push({ ok: !!condition, message });
+    const code = window.__code ?? "";
     try {
       ${tests}
     } catch (erreur) {
@@ -181,19 +214,24 @@ async function verifierTests(sections) {
   if (!codeTests || solutions.length === 0) return { erreurs, avertissements };
 
   const solution = solutions.find((s) => s.titre === "Solution: index.html");
-  if (!solution) {
-    // Seule une solution HTML se joue dans jsdom ; PHP demande un interpréteur PHP
+  const solutionJs = solutions.find((s) => s.titre === "Solution: script.js");
+  if (!solution && !solutionJs) {
+    // Seule une solution HTML ou JS se joue dans jsdom ; PHP demande un interpréteur PHP
     avertissements.push(`tests non exécutés : ${solutions.map((s) => s.titre).join(", ")} (il faut PHP sur la machine)`);
     return { erreurs, avertissements };
   }
-  const bloc = blocDeCode(solution);
+  const cibleSolution = solution || solutionJs;
+  const bloc = blocDeCode(cibleSolution);
   if (!bloc) {
-    erreurs.push({ section: solution ? solution.titre : "Solution", ligne: solution ? solution.ligne : 1, message: "aucun bloc de code dans la solution" });
+    erreurs.push({ section: cibleSolution ? cibleSolution.titre : "Solution", ligne: cibleSolution ? cibleSolution.ligne : 1, message: "aucun bloc de code dans la solution" });
     return { erreurs, avertissements };
   }
   let resultats;
   try {
-    resultats = await jouerTestsHtml(bloc.code, codeTests.code);
+    const htmlDoc = solution
+      ? bloc.code
+      : `<!DOCTYPE html><html><head><script>window.__code = ${JSON.stringify(bloc.code)};\n${bloc.code}<\/script></head><body></body></html>`;
+    resultats = await jouerTestsHtml(htmlDoc, codeTests.code);
   } catch (erreur) {
     erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `les tests n'ont pas pu tourner : ${erreur.message}` });
     return { erreurs, avertissements };
