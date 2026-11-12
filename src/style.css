@@ -307,6 +307,70 @@ font-family: sans-serif;
   color: #c62828;
 }
 
+/* Panneau de schéma de base de données (panneaux: [enonce, schema]) */
+.schema {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  font-family: sans-serif;
+  background: white;
+  color: #222;
+}
+
+.schema-table {
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+.schema-table caption {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.schema-table th,
+.schema-table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+}
+
+.schema-table th {
+  background: #f5f5f5;
+}
+
+.schema-trou.juste {
+  border: 2px solid #2e7d32;
+  background: #e8f5e9;
+}
+
+.schema-trou.faux {
+  border: 2px solid #c62828;
+  background: #ffebee;
+}
+
+.schema-verifier {
+  margin-bottom: 8px;
+}
+
+.schema-messages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schema-messages li {
+  color: #c62828;
+  margin: 4px 0;
+}
+
+.schema-messages li.schema-reussi {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.schema-erreur {
+  color: #c62828;
+
 /* Modale et panneau Échange entre pairs (PTP) */
 #ptp-modal {
   position: fixed;

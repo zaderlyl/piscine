@@ -7,6 +7,7 @@ import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 import { debloquerEmmet } from "./emmet.js";
 import { monterPanneauDepot } from "./depot.js";
+import { monterPanneauSchema } from "./schema/panneau.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -191,6 +192,27 @@ if (panneaux.includes("depot")) {
     exo,
     nomExo: EXO,
     auteur: new URLSearchParams(location.search).has("auteur"),
+    onSucces: validerExo,
+  });
+
+  afficherSuivant();
+} else if (panneaux.includes("schema")) {
+  // Exo de schéma de base de données : énoncé à gauche, table à compléter à droite
+  zones.classList.add("cache");
+  apercu.classList.add("cache");
+  document.getElementById("separateur-a").classList.add("cache");
+  document.getElementById("variables").classList.add("cache");
+  document.getElementById("separateur-b").classList.add("cache");
+  panneauResultats.classList.add("cache");
+
+  afficherPanneauDoc(exo, panneauEnonce, docOnglet);
+
+  const conteneurSchema = document.createElement("div");
+  document.getElementById("droite").append(conteneurSchema);
+
+  monterPanneauSchema({
+    conteneur: conteneurSchema,
+    section: exo["Schéma"],
     onSucces: validerExo,
   });
 

@@ -1,7 +1,9 @@
 // Vérifie que les exos sont bien formés, avant fusion (README §11).
 // Usage : node scripts/valider-exos.js [dossier]   (par défaut : exos/)
 //
-// Deux façons de valider un exo, selon son module :
+// Trois façons de valider un exo, selon son module :
+// - exos/sql/schema : pas de section « Tests » ni de solution. On lit la section « Schéma »
+//   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
@@ -12,6 +14,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
+import { lireSchemas } from "../src/schema/lecture.js";
 
 const RACINE = process.argv[2] ?? fileURLToPath(new URL("../exos", import.meta.url));
 const CHAMPS_OBLIGATOIRES = ["type", "titre", "annee", "ptp", "notions", "panneaux"];
@@ -242,6 +245,23 @@ async function verifierTests(sections) {
   return { erreurs, avertissements };
 }
 
+// Règle « schema » : Énoncé, Schéma lisible (trous, choix et réponses cohérents)
+function verifierSchemaSql(sections) {
+  const erreurs = [];
+  for (const nom of ["Énoncé", "Schéma"]) {
+    if (!trouver(sections, nom)) erreurs.push({ section: "—", ligne: 1, message: `section « ${nom} » manquante` });
+  }
+  const schema = trouver(sections, "Schéma");
+  if (schema) {
+    try {
+      lireSchemas(schema.corps.map((l) => l.texte).join("\n"));
+    } catch (erreur) {
+      erreurs.push({ section: "Schéma", ligne: schema.ligne, message: erreur.message });
+    }
+  }
+  return erreurs;
+}
+
 // Règle « etapes » : Énoncé, Étapes (format et conditions valides), Solution qui coche toutes les étapes
 function verifierEtapes(sections, sansDepot) {
   const erreurs = [];
@@ -323,7 +343,9 @@ async function validerFichier(chemin) {
   if (front.valeurs.type === "cours") return { cours: true, erreurs: [], avertissements };
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
-  if (module === "git/visuel") {
+  if (module === "sql/schema") {
+    erreurs.push(...verifierSchemaSql(sections));
+  } else if (module === "git/visuel") {
     erreurs.push(...verifierEtapes(sections, front.valeurs.depot === "aucun"));
   } else {
     const resultat = await verifierTests(sections);
