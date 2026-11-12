@@ -1,9 +1,11 @@
-// Vérifie la requête SQL d'un élève, de trois façons (champ `verification:` de l'exo) :
+// Vérifie la requête SQL d'un élève, de quatre façons (champ `verification:` de l'exo) :
 // - « texte » : on compare son texte aux solutions acceptées. Les différences de présentation
 //   sont ignorées : majuscules/minuscules (hors texte entre guillemets), espaces (y compris autour
 //   de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final.
 // - « resultat » : on compare le tableau obtenu à celui d'une solution.
-// - « etat » : pour les requêtes d'écriture, on compare le contenu des tables après la requête.
+// - « etat » : pour les requêtes d'écriture, on compare le contenu des tables après la requête ;
+// - « structure » : pour les requêtes qui créent des tables, on compare la structure obtenue
+//   (tables, colonnes, types, clé primaire, clés étrangères). NOT NULL n'est pas comparé.
 
 import { executerRequete } from "./moteur.js";
 
@@ -118,6 +120,56 @@ export function verifierEtat({ SQL, base, requete, solutions }) {
     const attendu = executerRequete(SQL, base, solution);
     if (attendu.erreur) continue;
     const r = comparerEtats(attendu.tables, eleve.tables);
+    if (r.reussi) return r;
+    premier = premier || r;
+  }
+  return premier || { reussi: false, message: "Aucune solution n'a pu être exécutée." };
+}
+
+// Mode « structure » : on compare la structure des tables (liste { nom, colonnes, etrangeres }, voir moteur.js).
+// Les noms et les types sont comparés sans tenir compte de la casse ; l'ordre des colonnes compte
+// (l'énoncé l'impose), celui des clés étrangères non.
+export function comparerStructures(attendu, obtenu) {
+  const bas = (s) => String(s).toLowerCase();
+  const nomsAttendus = attendu.map((t) => bas(t.nom));
+  const nomsObtenus = obtenu.map((t) => bas(t.nom));
+  const manquante = attendu.find((t) => !nomsObtenus.includes(bas(t.nom)));
+  if (manquante) return { reussi: false, message: `Il manque la table ${manquante.nom}. Relis l'énoncé.` };
+  const enTrop = obtenu.find((t) => !nomsAttendus.includes(bas(t.nom)));
+  if (enTrop) return { reussi: false, message: `La table ${enTrop.nom} n'est pas demandée. Relis l'énoncé.` };
+  for (const a of attendu) {
+    const o = obtenu.find((t) => bas(t.nom) === bas(a.nom));
+    if (a.colonnes.map((c) => bas(c.nom)).join("|") !== o.colonnes.map((c) => bas(c.nom)).join("|")) {
+      return { reussi: false, message: `Les colonnes de la table ${a.nom} ne sont pas celles attendues (noms ou ordre).` };
+    }
+    for (let i = 0; i < a.colonnes.length; i++) {
+      if (bas(a.colonnes[i].type) !== bas(o.colonnes[i].type)) {
+        return { reussi: false, message: `La colonne ${a.colonnes[i].nom} de la table ${a.nom} n'a pas le bon type.` };
+      }
+    }
+    const cle = (t) => t.colonnes.filter((c) => c.cle > 0).sort((x, y) => x.cle - y.cle).map((c) => bas(c.nom)).join(",");
+    if (cle(a) !== cle(o)) {
+      return { reussi: false, message: `La clé primaire de la table ${a.nom} n'est pas celle attendue.` };
+    }
+    const etrangeres = (t) => t.etrangeres.map((f) => bas(`${f.de}>${f.table}.${f.vers}`)).sort().join("|");
+    if (etrangeres(a) !== etrangeres(o)) {
+      return { reussi: false, message: `Les clés étrangères de la table ${a.nom} ne sont pas celles attendues.` };
+    }
+  }
+  return { reussi: true, message: "Réussi : tes tables ont la structure attendue." };
+}
+
+// Mode « structure » complet : exécute la requête de l'élève et les solutions sur la même base,
+// puis compare la structure des tables. Accepté si elle est identique à celle d'une solution.
+export function verifierStructure({ SQL, base, requete, solutions }) {
+  if (!normaliserRequete(requete)) return { reussi: false, message: "Écris une requête avant de vérifier." };
+  const eleve = executerRequete(SQL, base, requete);
+  if (eleve.erreur) return { reussi: false, message: "Ta requête a une erreur : " + eleve.erreur };
+  let premier = null;
+  for (const solution of solutions) {
+    const attendu = executerRequete(SQL, base, solution);
+    if (attendu.erreur) continue;
+    const r = comparerStructures(attendu.structure, eleve.structure);
     if (r.reussi) return r;
     premier = premier || r;
   }
