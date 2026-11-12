@@ -20,20 +20,20 @@ Tout tourne dans le navigateur (compatible GitHub Pages).
 - [ ] SQLite côté navigateur (sql.js)
 - [ ] Faux terminal Bash
 - [ ] Simulateur de tirage PTP (sans interface, élèves fictifs)
-- [ ] Panneau de visualisation de la logique (variables, boucles, fonctions) : voir [visualisation-logique.md](visualisation-logique.md)
+- [x] Panneau de visualisation de la logique (variables, boucles, fonctions) : voir [visualisation-logique.md](visualisation-logique.md)
 - [ ] Module Git visuel : niveaux 1 à 7 faits (moteur, page, exos 01 à 11). Reste : intégration en panneau (dépend de #29), retours pédagogiques affinés, test avec des élèves (issue [#36](https://github.com/zaderlyl/piscine/issues/36)) : voir [git-apprentissage.md](git-apprentissage.md)
 
 ## Contenu (exos)
 
 Ordre des langages et notions attendues : [programme-par-langage.md](programme-par-langage.md).
 
-Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
+### Module HTML : 42 exos prévus (`00` à `41`, voir README section 3)
 
 **Squelette**
-- [ ] `00` : À quoi sert HTML
-- [ ] `01` : Squelette à la main
-- [ ] `02` : Le squelette en un raccourci (débloque `!`)
-- [ ] `03` : `head` (title, meta)
+- [x] `00` : À quoi sert HTML
+- [x] `01` : Squelette à la main
+- [x] `02` : Le squelette en un raccourci (débloque `!`)
+- [x] `03` : `head` (title, meta)
 
 **Texte**
 - [x] `04` : Titres h1 à h6
@@ -93,16 +93,76 @@ Module HTML : 42 exos prévus (`00` à `41`, voir README section 3).
 - [ ] `40` : Palier : une page complète à cahier des charges
 - [ ] `41` : Projet : page personnelle
 
-### Module JavaScript (DOM et Événements)
-- [x] `13` : Sélection d'éléments (`querySelector` et `querySelectorAll`)
-- [x] `14` : Manipulation de texte, classes CSS (`classList`) et attributs `dataset`
-- [x] `15` : Écouteurs d'événements avec `addEventListener` et l'objet événement (`e`)
-- [x] `16` : Délégation d'événements pour les listes dynamiques (`e.target`)
-- [x] `17` : Rendu dynamique avec la balise `<template>` et clonage propre (`cloneNode(true)`)
-- [x] `18` : Sauvegarde locale sans serveur avec `localStorage` (score ou préférence)
-- [x] `19` : Bruitages légers avec l'API HTML5 Audio (`new Audio().play()`)
-- [x] `20` : Animations d'apparition avec `IntersectionObserver`
+---
+
+### Module JavaScript & Algorithmique (R1.12, R3.12)
+
+Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-par-langage.md).
+
+**1. Fondamentaux, Algorithmique & Syntaxe moderne (vanilla)**
+- [x] `00` : À quoi sert JavaScript (variables, `const`)
+- [x] `01` : Variables modifiables avec `let`
+- [x] `02` : Calculs et opérations arithmétiques
+- [x] `03` : La condition `if` et `else`
+- [x] `04` : Répéter avec la boucle `for`
+- [x] `05` : Créer sa première fonction (`return`)
+- [x] `06` : La boucle `while` (tant que)
+- [x] `07` : Fonctions fléchées `() => {}` et paramètres par défaut
+- [x] `08` : Tableaux simples : déclaration, indexation et `.length`
+- [x] `09` : Objets littéraux : paires clé-valeur
+- [x] `10` : Déstructuration et opérateur Spread `...`
+- [x] `11` : Données fiables avec le chaînage optionnel `?.` et le nullish coalescing `??`
+- [x] `12` : Palier : simulation d'un inventaire de jeu complet
+
+**2. DOM moderne, Événements et Persistance locale (vanilla)**
+*Vigilance séance 21 : anticiper le protocole HTTP (Live Server) pour éviter les blocages CORS sur les modules.*
+- [x] `13` : Sélectionner des éléments avec `querySelector` et `querySelectorAll`
+- [x] `14` : Modifier le texte, classes CSS dynamiques et attributs `dataset`
+- [x] `15` : Écouter un événement avec `addEventListener` et l'objet `e`
+- [x] `16` : Délégation d'événements : gérer une liste dynamique avec `e.target`
+- [x] `17` : Rendu propre avec la balise `<template>` et `.cloneNode(true)`
+- [x] `18` : Sauvegarder des données locales avec `localStorage` (thème et score)
+- [x] `19` : Retours sonores légers avec HTML5 `new Audio()`
+- [x] `20` : Animation d'apparition au défilement avec `IntersectionObserver`
 - [x] `21` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
+
+**3. Asynchronisme, Données et POO Passerelle (vanilla)**
+*Fil conducteur : réutilisation des données de l'inventaire du Module 1, exercices calibrés courts (5 à 10 lignes) pour éviter le décrochage.*
+- [ ] `22` : Méthodes de tableau fonctionnelles : `.map()`, `.filter()`, `.reduce()`
+- [ ] `23` : Requêtes réseau modernes avec `fetch()` et `async / await`
+- [ ] `24` : Gestion des erreurs réseau avec `try...catch`
+- [ ] `25` : Formulaires automatiques avec l'objet `FormData`
+- [ ] `26` : Chargement simultané de ressources avec `Promise.all()`
+- [ ] `27` : POO tremplin : `class`, `constructor` et héritage (`extends`) pour Phaser et PHP
+
+**4. Graphisme 2D Canvas (canvas)**
+*Démystification de la boucle de rendu et des collisions manuelles avant Phaser.*
+- [ ] `01` : Initialiser le canvas 2D et tracer des formes géométriques
+- [ ] `02` : Couleurs, styles, images et effacement
+- [ ] `03` : Boucle d'animation fluide avec `requestAnimationFrame`
+- [ ] `04` : Pointer Events (`pointerdown`, `pointermove`) pour le dessin et le tactile
+- [ ] `05` : Détection de collisions (AABB) et mini-jeu d'arcade
+
+**5. Visualisation de données avec Chart.js (chartjs)**
+- [ ] `01` : Premier graphique en barres avec Chart.js
+- [ ] `02` : Graphique en courbes et personnalisation des axes
+- [ ] `03` : Graphique circulaire (camembert / donut)
+- [ ] `04` : Mise à jour dynamique des données avec `chart.update()`
+
+**6. Moteur de jeu 2D avec Phaser (phaser)**
+*Réutilisation de la POO (`class GameScene extends Phaser.Scene`) et de la physique Arcade.*
+- [ ] `01` : Configuration et scène Phaser (`preload`, `create`, `update`)
+- [ ] `02` : Spritesheets, animations et physique Arcade
+- [ ] `03` : Contrôles au clavier, sauts et limites du monde
+- [ ] `04` : Collisions, score et sauvegarde du record avec `localStorage`
+
+**7. Interactivité déclarative avec Alpine.js (alpine)**
+- [ ] `01` : État réactif avec `x-data` et affichage avec `x-text`
+- [ ] `02` : Événements (`@click`) et bascule d'affichage (`x-show`)
+- [ ] `03` : Rendu de listes dynamiques avec `x-for`
+- [ ] `04` : Transitions et animations légères avec `x-transition`
+
+---
 
 ### Module PHP (Sessions et Sécurité)
 - [x] `03` : Cookies HTTP sécurisés (`setcookie` avec flags `httponly`, `secure`, `samesite`) et sessions serveur (`session_start`, `$_SESSION`)
