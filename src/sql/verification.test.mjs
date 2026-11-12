@@ -13,8 +13,20 @@ test("normaliserRequete ignore casse, espaces, commentaires et ; final", () => {
   assert.equal(normaliserRequete("SELECT a , b FROM t"), "select a,b from t");
 });
 
+test("normaliserRequete ignore les espaces autour des opérateurs de comparaison", () => {
+  const ref = normaliserRequete("SELECT nom FROM eleves WHERE age >= 18 AND classe = 'MMI1'");
+  assert.equal(normaliserRequete("select nom from eleves where age>=18 and classe='MMI1'"), ref);
+  assert.equal(normaliserRequete("SELECT nom FROM eleves WHERE age   >=   18 AND classe =\n'MMI1'"), ref);
+  assert.equal(normaliserRequete("WHERE a<>1"), normaliserRequete("WHERE a <> 1"));
+  assert.notEqual(normaliserRequete("WHERE a<1"), normaliserRequete("WHERE a<=1"));
+});
+
+test("normaliserRequete ne touche pas aux espaces dans le texte entre guillemets", () => {
+  assert.notEqual(normaliserRequete("WHERE n = 'a=b'"), normaliserRequete("WHERE n = 'a = b'"));
+});
+
 test("normaliserRequete garde la casse du texte entre guillemets", () => {
-  assert.equal(normaliserRequete("SELECT * FROM t WHERE n = 'Alice'"), "select * from t where n = 'Alice'");
+  assert.equal(normaliserRequete("SELECT * FROM t WHERE n = 'Alice'"), "select * from t where n='Alice'");
   assert.notEqual(normaliserRequete("WHERE n = 'Alice'"), normaliserRequete("WHERE n = 'alice'"));
 });
 
