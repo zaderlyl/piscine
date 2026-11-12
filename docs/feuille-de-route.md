@@ -235,10 +235,11 @@ Programme détaillé : [programme-par-langage.md](programme-par-langage.md), sec
 - [x] `13` : Palier : calculer et regrouper (vérifié par le résultat)
 
 **3. Requêtes d'écriture (`sql/ecriture`)**
-- [x] `00` : Ajouter une ligne avec `INSERT`
-- [x] `01` : Modifier des lignes avec `UPDATE`
-- [x] `02` : Supprimer des lignes avec `DELETE`
-- [x] `03` : Palier : modifier une table (vérifié par l'état des tables)
+- [x] `00` : Cours : modifier les données
+- [x] `01` : Ajouter une ligne avec `INSERT`
+- [x] `02` : Modifier des lignes avec `UPDATE`
+- [x] `03` : Supprimer des lignes avec `DELETE`
+- [x] `04` : Palier : modifier une table (vérifié par l'état des tables)
 
 **4. À faire**
 - [ ] Autres fonctions d'agrégation (`SUM`, `AVG`, `MIN`, `MAX`) et `HAVING`

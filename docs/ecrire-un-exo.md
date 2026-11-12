@@ -211,7 +211,7 @@ Chaque module alterne trois types d'exercices :
 - **Reproduire** : Mini-palier sans consigne de code détaillée (ex. : `10`). L'élève reproduit un résultat visuel d'après un modèle, en mobilisant ses acquis en autonomie.
 
 ### 2. Rythme et taille d'un pas
-- **Une seule idée nouvelle par exercice.** Le `00` apprend `p`, le `04` apprend `h1` à `h6`. Si un exercice demande d'assimiler plusieurs notions complexes d'un coup, on le coupe.
+- **Une seule idée nouvelle par exercice.** Le `01` apprend `p`, le `05` apprend `h1` à `h6`. Si un exercice demande d'assimiler plusieurs notions complexes d'un coup, on le coupe.
 - **On montre avant d'expliquer (résultat visuel d'abord).** Les premiers exercices produisent un résultat visible immédiat dans l'aperçu. Les notions qui ne s'affichent pas (`head`, `meta charset`, `description`) arrivent plus tard, dans le contexte d'une vraie page complète.
 - **Aucun prérequis caché.** Si un test exige une balise, un attribut ou une structure, cette notion doit impérativement avoir été introduite dans le cours ou un exercice précédent.
 - **Texte libre par défaut.** L'élève est libre de son contenu textuel, sauf quand le test a besoin d'un mot-clé précis pour vérifier l'exercice.
