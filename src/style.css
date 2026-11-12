@@ -603,3 +603,8 @@ font-family: sans-serif;
   color: #888;
   border-color: #e0e0e0;
 }
+
+.sql-table-nom {
+  margin: 12px 0 0;
+  font-size: 14px;
+}

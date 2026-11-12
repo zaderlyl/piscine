@@ -1,5 +1,5 @@
 import { lireSql } from "./lecture.js";
-import { verifierRequete, verifierResultat } from "./verification.js";
+import { verifierRequete, verifierResultat, verifierEtat } from "./verification.js";
 import { chargerSql, executerRequete } from "./moteur.js";
 
 // Remplit `conteneur` avec le tableau d'un résultat { colonnes, lignes }.
@@ -35,10 +35,27 @@ export function afficherTableau(conteneur, { colonnes, lignes }) {
   conteneur.append(table);
 }
 
+// Remplit `conteneur` avec le contenu de chaque table : [{ nom, colonnes, lignes }].
+export function afficherTables(conteneur, tables) {
+  conteneur.innerHTML = "";
+  const intro = document.createElement("p");
+  intro.textContent = "Tables après ta requête :";
+  conteneur.append(intro);
+  for (const table of tables) {
+    const titre = document.createElement("h3");
+    titre.className = "sql-table-nom";
+    titre.textContent = table.nom;
+    const zone = document.createElement("div");
+    afficherTableau(zone, table);
+    conteneur.append(titre, zone);
+  }
+}
+
 // Panneau d'un exo de requêtes : boutons « Exécuter » et « Vérifier », tableau de résultat.
 // exo : sections de l'exo (Base, Solutions). lireRequete() renvoie le texte de l'éditeur.
-// verification : « texte » (la requête ressemble à une solution) ou « resultat » (le tableau obtenu
-// est celui d'une solution).
+// verification : « texte » (la requête ressemble à une solution), « resultat » (le tableau obtenu
+// est celui d'une solution) ou « etat » (les tables après la requête sont celles d'une solution).
+// Une requête d'écriture (INSERT, UPDATE, DELETE) affiche le contenu des tables après son exécution.
 // onSucces() est appelée quand la requête est jugée correcte.
 // charger : fournit l'objet sql.js (remplaçable dans les tests).
 export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verification = "texte", charger = chargerSql }) {
@@ -95,6 +112,8 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
     if (r.erreur) {
       resultat.innerHTML = "";
       message("Erreur SQL : " + r.erreur);
+    } else if (r.ecriture) {
+      afficherTables(resultat, r.tables);
     } else {
       afficherTableau(resultat, r);
     }
@@ -102,7 +121,7 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
 
   async function verifierLaRequete() {
     let r;
-    if (verification === "resultat") {
+    if (verification === "resultat" || verification === "etat") {
       let SQL;
       try {
         SQL = await charger();
@@ -110,7 +129,8 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
         message(erreur.message);
         return;
       }
-      r = verifierResultat({ SQL, base: sql.base, requete: lireRequete(), solutions: sql.solutions });
+      const verifier = verification === "etat" ? verifierEtat : verifierResultat;
+      r = verifier({ SQL, base: sql.base, requete: lireRequete(), solutions: sql.solutions });
     } else {
       r = verifierRequete(lireRequete(), sql.solutions);
     }
