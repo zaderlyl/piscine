@@ -10,6 +10,7 @@ import { monterPanneauDepot } from "./depot.js";
 import { monterPanneauSchema } from "./schema/panneau.js";
 import { monterPanneauSql } from "./sql/panneau.js";
 import { contenusPageCachee } from "./page-cachee.js";
+import { contenuEcrit } from "./projet.js";
 import { creerMenuNavigation } from "./navigation.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
@@ -284,7 +285,7 @@ if (exo.type === "cours") {
   // HTML / CSS / JS / PHP classique
   let minuteurTests = null;
   let minuteur = null;
-  let testsExo = lireCode(exo["Tests"]);
+  let testsExo = lireCode(exo["Tests"] ?? ""); // un projet n'a pas de tests
 
   function arreterApercu() {
     enregistrerBrouillon();
@@ -365,6 +366,21 @@ if (exo.type === "cours") {
     onglets.append(boutonSolution);
   }
 
+  // Projet : l'éditeur démarre vide ; si l'exo a un squelette, l'élève peut le charger d'un clic
+  if (Object.keys(exo.squelette).length > 0) {
+    const boutonSquelette = document.createElement("button");
+    boutonSquelette.textContent = "Partir d'un squelette";
+    boutonSquelette.addEventListener("click", () => {
+      if (contenuEcrit(lireContenus()) && !confirm("Le squelette va remplacer ce que tu as écrit. Continuer ?")) return;
+      for (const [nom, contenu] of Object.entries(exo.squelette)) {
+        const editeur = editeurs[nom];
+        if (!editeur) continue;
+        editeur.dispatch({ changes: { from: 0, to: editeur.state.doc.length, insert: contenu } });
+      }
+    });
+    onglets.append(boutonSquelette);
+  }
+
   if (EXO.startsWith("php/")) {
     boutonPhp.textContent = "Exécuter PHP";
     boutonPhp.addEventListener("click", lancerPhp);
@@ -373,7 +389,9 @@ if (exo.type === "cours") {
 
   afficherSuivant();
   // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
-  const fichierParDefaut = exo.page || EXO.startsWith("js/") || exo["Solution: script.js"]
+  const fichierParDefaut = exo.type === "projet"
+    ? "index.html"
+    : exo.page || EXO.startsWith("js/") || exo["Solution: script.js"]
     ? "script.js"
     : EXO.startsWith("php/") || exo["Solution: index.php"]
       ? "index.php"
@@ -415,6 +433,10 @@ if (exo.type === "cours") {
   window.addEventListener("message", (e) => {
     if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
     clearTimeout(minuteurTests);
+    if (exo.type === "projet") {
+      panneauResultats.textContent = "Projet libre : pas de tests automatiques.";
+      return;
+    }
     const echecs = e.data.resultats.filter((r) => !r.ok);
     panneauResultats.textContent = echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")
