@@ -1,4 +1,4 @@
-import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
+import { EditorView, basicSetup, lineNumbers } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
@@ -51,6 +51,7 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPh
       doc: brouillon[nom] || "",
       extensions: [
         basicSetup,
+        lineNumbers(),
         langage(),
         theme,
         ecoute,
