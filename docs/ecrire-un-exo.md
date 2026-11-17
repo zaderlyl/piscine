@@ -172,9 +172,50 @@ Dans `exos/sql/ecriture/`, l'élève écrit des requêtes qui **modifient** les 
 - Le validateur refuse, dans ce dossier, une solution qui ne modifie aucune table.
 - Dans le cours, rappelle que `UPDATE` et `DELETE` sans `WHERE` touchent **toutes** les lignes.
 
+## Exos de projet
+
+Un projet est une **production personnelle**, rendue aux profs avec « Rendre mon projet » (voir README section 5). Il se range dans une famille `projets` par langage : `exos/js/projets/01.md`, `02.md`, `03.md`. Il est listé dans `exos/index.json` **après les paliers** des familles qu'il remobilise.
+
+````markdown
+---
+type: projet
+titre: Projet : une application web interactive
+annee: 1
+ptp: non
+notions: [DOM, événements, Alpine.js]
+panneaux: [enonce, editeur, apercu]
+---
+
+## Énoncé
+Le contexte : ce que l'on veut construire et pour qui (quelques phrases).
+
+## Obligatoire
+- [ ] Une fonctionnalité que l'application doit avoir
+- [ ] Une autre
+
+## Bonus
+- [ ] Une amélioration facultative
+
+## Critères
+- **Code** : ce que les profs regardent dans le code
+- **Fonctionnalités** : ce qui doit marcher
+- **Pertinence** : le choix et l'adaptation au contexte
+
+## Départ: index.html
+```html
+<!-- base minimale facultative, par fichier -->
+```
+````
+
+- **Sections** : `## Énoncé`, `## Obligatoire`, `## Bonus` et `## Critères` (les trois axes : code, fonctionnalités, pertinence, montrés à l'élève). Pas de `## Cours`, `## Méthode`, `## Indice`, `## Tests` ni `## Solution` : un projet est libre et évalué par les profs.
+- **Entête** : `type: projet` et `ptp: non` (un projet n'est pas un échange PTP).
+- **Point de départ** : un bloc `## Départ: <fichier>` par fichier, très léger (par exemple un `index.html` avec les liens des bibliothèques). Facultatif : sans lui, l'élève part d'un éditeur vide.
+- **Palier obligatoire avant** : au moins un palier dans la famille (ou les familles) remobilisée doit précéder le projet.
+- **Minimum au rendu** : l'élève a **modifié les fichiers de départ** et la page se charge **sans erreur** dans la console. Rien de plus n'est testé automatiquement : l'évaluation est différée et faite par les profs.
+
 ## Les règles à respecter
 
-- **L'élève part d'un éditeur vide.** Pas de section `## Départ`.
+- **L'élève part d'un éditeur vide**, sauf pour un projet qui fournit une base (`## Départ: <fichier>`, voir plus haut).
 - `## Solution` n'est jamais envoyée aux élèves.
 - Une solution est obligatoire : **les tests doivent passer sur elle**. Vérifie avec `?auteur` puis « Charger la solution ».
 - Numérotation sur deux chiffres (`00`, `01`, `04`…), voir README section 2.
