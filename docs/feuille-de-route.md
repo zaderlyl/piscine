@@ -148,6 +148,8 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `02` : Graphique en courbes et personnalisation des axes
 - [ ] `03` : Graphique circulaire (camembert / donut)
 - [ ] `04` : Mise à jour dynamique des données avec `chart.update()`
+- [ ] `05` : Palier : un graphique complet à cahier des charges
+- [ ] Projet 2 : tableau de bord de données (`exos/js/projets/02`)
 
 **6. Moteur de jeu 2D avec Phaser (phaser)**
 *Réutilisation de la POO (`class GameScene extends Phaser.Scene`) et de la physique Arcade.*
@@ -155,12 +157,16 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 - [ ] `02` : Spritesheets, animations et physique Arcade
 - [ ] `03` : Contrôles au clavier, sauts et limites du monde
 - [ ] `04` : Collisions, score et sauvegarde du record avec `localStorage`
+- [ ] `05` : Palier : un niveau de jeu à cahier des charges (remobilise `canvas` et `phaser`)
+- [ ] Projet 3 : petit jeu 2D (`exos/js/projets/03`)
 
 **7. Interactivité déclarative avec Alpine.js (alpine)**
 - [ ] `01` : État réactif avec `x-data` et affichage avec `x-text`
 - [ ] `02` : Événements (`@click`) et bascule d'affichage (`x-show`)
 - [ ] `03` : Rendu de listes dynamiques avec `x-for`
 - [ ] `04` : Transitions et animations légères avec `x-transition`
+- [ ] `05` : Palier : une interface réactive à cahier des charges
+- [ ] Projet 1 : application web interactive (`exos/js/projets/01`)
 
 ---
 
