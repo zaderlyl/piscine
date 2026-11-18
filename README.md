@@ -69,7 +69,7 @@ La numérotation est **propre à chaque ressource**. En interne, la ressource de
 - Les notions retenues et celles écartées, avec leur source dans le référentiel national, sont dans [docs/referentiel-mmi.md](docs/referentiel-mmi.md).
 - Le nombre d'exos varie selon la ressource (pas 20 partout).
 - Le contenu des années 2 et 3 reste à définir ; il s'écrit au fil de l'eau.
-- Ordre des ressources dans un module : vanilla d'abord, puis les autres ; chacune se termine par son palier et son projet.
+- Ordre des ressources dans un module : vanilla d'abord, puis les autres ; chacune se termine par ses paliers et son projet.
 
 ### Principes d'écriture des exos
 - **Toujours du code à produire**, depuis un éditeur vide : pas de page cassée à corriger, pas de code à prédire. Seules exceptions : un fichier imposé par l'exo (ex : `page2.html`), créé vide ; des jeux de données (MySQL) ; des fichiers d'exemple (images, audio, vidéo) fournis par l'app.
@@ -156,11 +156,11 @@ Verrouillé · Disponible · En cours · Gelé / en échange PTP · Validé · �
 
 ### Exo
 - Impose un outil ou une notion (« utilise une boucle `for` ») : les tests peuvent vérifier la **méthode** en plus du résultat.
-- **Éligible à un échange PTP par défaut** (voir §6), sauf ceux marqués `ptp: non` (intro, tout premiers exos de squelette, palier, projet, et quelques sujets où il n'y a presque rien à expliquer).
+- **Éligible à un échange PTP par défaut** (voir §6), sauf ceux marqués `ptp: non` (intro, tout premiers exos de squelette, projet, et quelques sujets où il n'y a presque rien à expliquer).
 
 ### Palier et projet : « palier en deux temps »
 À la fin d'une ressource ou d'un module :
-- **Partie A, palier** : cahier des charges précis, testé automatiquement, **essais illimités**. Seul le **résultat** compte ; les tests ne regardent jamais le code source. L'énoncé impose des repères (ex : « le bouton a l'id `valider` »). Messages d'échec **comportementaux** (« après le clic, le compteur devrait afficher 1 »). Un critère non testable automatiquement va dans le projet.
+- **Partie A, palier** : un **gros résultat** à obtenir, testé automatiquement, **essais illimités**. Le palier **impose 2 ou 3 notions** dont l'emploi est vérifié (les tests peuvent lire le code pour ces notions seulement) et laisse l'élève **libre pour le reste**. Une ressource peut avoir **plusieurs paliers**, un à la fin de chaque bloc de notions ; **au moins un palier est obligatoire avant chaque projet**. Un palier est éligible à l'échange PTP. L'énoncé impose des repères (ex : « le bouton a l'id `valider` »). Messages d'échec **comportementaux** (« après le clic, le compteur devrait afficher 1 »). Un critère non testable automatiquement va dans le projet.
 - **Partie B, projet** : énoncé plus libre, production personnelle. L'élève clique sur **« Rendre mon projet »**.
   - **Le rendu est obligatoire pour avancer** ; il débloque la suite **immédiatement**.
   - Un **minimum automatique** au rendu (tests de la partie A passés, fichiers réellement modifiés) évite le clic à vide.
@@ -296,7 +296,7 @@ Limites assumées : une page web ne peut **pas** détecter une IA lancée sur un
 
 - **JavaScript libre**, exécutés **dans le navigateur** sur l'aperçu en `iframe sandbox`.
 - Petite **API de test** : `click`, `type`, `$`, `$$`, `style`, `wait`, `assert(condition, message)` ; le message de l'`assert` est montré à l'élève.
-- `source(fichier)` (lecture du code) est **réservé aux exos**, refusé sur les paliers.
+- `source(fichier)` (lecture du code) sert aux exos et aux paliers (pour vérifier les notions imposées) ; il n'a pas lieu d'être sur un projet.
 - **Timeout** de quelques secondes contre les boucles infinies (Worker ou iframe séparé).
 - Chaque exo a une **solution de référence** qui doit passer ses tests avant publication.
 - Les tests n'ont accès qu'aux panneaux déclarés par l'exo, et pas au reste de l'app.
@@ -361,7 +361,7 @@ const age = 20;
 if (age >= 18) console.log("majeur");
 ```
 
-- **Méthode** : contraintes d'outil (exos seulement). **Résultat** : ce qui doit être obtenu (exos et paliers).
+- **Méthode** : contraintes d'outil (exos et paliers : les notions imposées). **Résultat** : ce qui doit être obtenu (exos et paliers).
 - **Pas de section `## Départ`** : l'élève part toujours d'un éditeur vide (un fichier imposé par l'exo existe, mais vide). L'exo 00 contient seulement le cours.
 - `## Solution` n'est **jamais envoyée** aux élèves.
 - **Avant fusion** : `node scripts/valider-exos.js` vérifie le front matter, les sections et la solution. Pour les exos HTML, la section `## Tests` est exécutée sur la solution dans un DOM (jsdom). Les solutions PHP ne sont pas encore exécutées (il faut un interpréteur PHP). Pour les exos Git (`exos/git/visuel`), il n'y a pas de `## Tests` : le script joue le départ puis la solution dans le moteur Git, et vérifie que chaque étape de `## Étapes` se coche.
@@ -494,7 +494,7 @@ Git (app et exos), VS Code, environnement local PHP/MySQL (XAMPP, Laragon ou Doc
 - **À vérifier auprès de l'IUT** : envoi de mails depuis le serveur (indispensable pour la confirmation d'inscription ; sinon prévoir une validation par un prof), accord de l'établissement pour héberger l'outil et ses règles sur les données d'élèves, durée de l'hébergement après mes études et responsable de la maintenance (« on verra »).
 
 ### Méthodes
-- **Pédagogiques** : peer-learning et explication orale ; difficulté en profondeur ; exo = notion imposée, palier = résultat libre, projet = production personnelle ; feedback explicite et non punitif ; messages d'échec comportementaux.
+- **Pédagogiques** : peer-learning et explication orale ; difficulté en profondeur ; exo = notion imposée, palier = gros résultat avec 2 ou 3 notions imposées, projet = production personnelle ; feedback explicite et non punitif ; messages d'échec comportementaux.
 - **Fonctionnelles** : déclenchement PTP équitable (repos, probabilité croissante, plafond) ; détection d'activité avant de bloquer un correcteur ; code à usage unique ; notifications volontaires pour les recours ; sessions simultanées et PTP inter-promos ; versionnage des exos par hash.
 - **Techniques** : sandbox pour tout code d'élève ; tests JS libres avec timeout ; solution de référence à l'import ; heartbeat de présence + activité réelle ; dates en UTC ; éditeur virtuel.
 - **De travail** : prototypes techniques d'abord ; développement incrémental (un module complet avant la suite) ; écriture des exos au fil de l'eau.

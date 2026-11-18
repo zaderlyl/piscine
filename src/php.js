@@ -1,4 +1,6 @@
 import { PhpWeb } from "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs";
+// Ajoute les extensions sqlite3 et pdo_sqlite (bases en mémoire pour les exos PDO)
+import sqlite from "https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.2.0/index.mjs";
 
 // Exécute les tests d'un exo PHP sur la sortie du programme
 async function testerPhp(tests, sortie, code) {
@@ -20,7 +22,7 @@ async function testerPhp(tests, sortie, code) {
 // Exécute du code PHP puis les tests ; renvoie { sortie, resultats }
 export async function executerPhp(code, tests) {
   let sortie = "";
-  const moteur = new PhpWeb(); // un moteur neuf à chaque exécution
+  const moteur = new PhpWeb({ version: "8.4", sharedLibs: [sqlite] }); // un moteur neuf à chaque exécution
   moteur.addEventListener("output", (e) => {
     sortie += e.detail;
   });
