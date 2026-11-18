@@ -53,6 +53,7 @@ if (age >= 18) console.log("majeur");
 | `## Indice` | Un coup de pouce, sans donner la solution. |
 | `## Tests` | Code JS exécuté dans l'aperçu, dans un bloc de code. |
 | `## Solution: <fichier>` | Solution de référence pour ce fichier, dans un bloc de code. |
+| `## Squelette` | Projets seulement (voir « Exos projet ») : les fichiers de départ, facultatifs, que l'élève peut charger d'un clic. |
 | `## Schéma` | Exos de schéma SQL seulement (voir plus bas). Remplace Tests et Solution. |
 | `## Base` / `## Solutions` | Exos de requêtes SQL seulement (voir plus bas). Remplacent Tests et Solution. |
 
@@ -172,9 +173,9 @@ Dans `exos/sql/ecriture/`, l'élève écrit des requêtes qui **modifient** les 
 - Le validateur refuse, dans ce dossier, une solution qui ne modifie aucune table.
 - Dans le cours, rappelle que `UPDATE` et `DELETE` sans `WHERE` touchent **toutes** les lignes.
 
-## Exos de projet
+## Exos projet
 
-Un projet est une **production personnelle**, rendue aux profs avec « Rendre mon projet » (voir README section 5). Il se range dans une famille `projets` par langage : `exos/js/projets/01.md`, `02.md`, `03.md`. Il est listé dans `exos/index.json` **après les paliers** des familles qu'il remobilise.
+Un **projet** est la partie B du « palier en deux temps » (README, section 5) : une production personnelle à l'énoncé libre, rendue aux profs. Il y a **un projet par ressource** du référentiel ; le module JS en a trois, par thème (application web, données, jeu 2D), voir la [feuille de route](feuille-de-route.md). Le projet se place **après les paliers** des familles qu'il couvre, dans un dossier à lui (par exemple `exos/js/projet/01.md`).
 
 ````markdown
 ---
@@ -182,40 +183,46 @@ type: projet
 titre: Projet : une application web interactive
 annee: 1
 ptp: non
-notions: [DOM, événements, Alpine.js]
+notions: [projet, DOM, localStorage]
 panneaux: [enonce, editeur, apercu]
 ---
 
+## Cours
+Le contexte du projet et la démarche conseillée (par où commencer, comment découper le travail).
+
 ## Énoncé
-Le contexte : ce que l'on veut construire et pour qui (quelques phrases).
+Le cahier des charges, en liste : ce que l'application doit pouvoir faire, plus quelques contraintes.
 
-## Obligatoire
-- [ ] Une fonctionnalité que l'application doit avoir
-- [ ] Une autre
-
-## Bonus
-- [ ] Une amélioration facultative
-
-## Critères
-- **Code** : ce que les profs regardent dans le code
-- **Fonctionnalités** : ce qui doit marcher
-- **Pertinence** : le choix et l'adaptation au contexte
-
-## Départ: index.html
-```html
-<!-- base minimale facultative, par fichier -->
+## Squelette
+```html index.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <script src="script.js"></script>
+</body>
+</html>
+```
+```css style.css
+```
+```js script.js
 ```
 ````
 
-- **Sections** : `## Énoncé`, `## Obligatoire`, `## Bonus` et `## Critères` (les trois axes : code, fonctionnalités, pertinence, montrés à l'élève). Pas de `## Cours`, `## Méthode`, `## Indice`, `## Tests` ni `## Solution` : un projet est libre et évalué par les profs.
-- **Entête** : `type: projet` et `ptp: non` (un projet n'est pas un échange PTP).
-- **Point de départ** : un bloc `## Départ: <fichier>` par fichier, très léger (par exemple un `index.html` avec les liens des bibliothèques). Facultatif : sans lui, l'élève part d'un éditeur vide.
-- **Palier obligatoire avant** : au moins un palier dans la famille (ou les familles) remobilisée doit précéder le projet.
-- **Minimum au rendu** : l'élève a **modifié les fichiers de départ** et la page se charge **sans erreur** dans la console. Rien de plus n'est testé automatiquement : l'évaluation est différée et faite par les profs.
+- **Pas de `## Solution` ni de `## Tests`** : le projet est libre, et il n'existe pas une seule bonne réponse. Le validateur refuse ces sections.
+- **L'éditeur est vide au départ**, avec les trois onglets `index.html`, `style.css` et `script.js`. L'élève **choisit** : il peut partir de zéro, ou cliquer sur « Partir d'un squelette » pour charger la section `## Squelette` (avec une confirmation s'il a déjà écrit quelque chose). C'est utile aux élèves moins à l'aise.
+- La section `## Squelette` est **facultative** : sans elle, pas de bouton. Elle contient un bloc de code par fichier, dont l'info de bloc donne le langage puis le nom du fichier (` ```html index.html `).
+- Pour les projets qui utilisent une bibliothèque (Chart.js, Phaser), le squelette contient sa balise `<script src="…">`. Sans squelette, le cours indique à l'élève la balise à ajouter.
+- **Le minimum automatique au rendu** est volontairement léger : l'élève a modifié des fichiers, et la page se charge sans erreur JavaScript. Aucun critère du cahier des charges n'est testé par la machine : ce qui n'est pas testable est jugé par les profs sur trois axes (code, fonctionnalités, pertinence).
+- L'énoncé reste **libre** : il décrit ce qu'on attend, pas comment le faire, et ne fixe pas d'`id` précis.
+- Le bouton « Rendre mon projet » (rendu, fichiers figés, évaluation) dépend du serveur et des comptes : il n'est **pas encore développé**. En attendant, un projet se joue comme un exo, sans rendu.
 
 ## Les règles à respecter
 
-- **L'élève part d'un éditeur vide**, sauf pour un projet qui fournit une base (`## Départ: <fichier>`, voir plus haut).
+- **L'élève part d'un éditeur vide.** Pas de section `## Départ`. Pour un projet, il peut en plus charger le squelette d'un clic (voir « Exos projet »).
 - `## Solution` n'est jamais envoyée aux élèves.
 - Une solution est obligatoire : **les tests doivent passer sur elle**. Vérifie avec `?auteur` puis « Charger la solution ».
 - Numérotation sur deux chiffres (`00`, `01`, `04`…), voir README section 2.
