@@ -10,6 +10,7 @@ import { monterPanneauDepot } from "./depot.js";
 import { monterPanneauSchema } from "./schema/panneau.js";
 import { monterPanneauSql } from "./sql/panneau.js";
 import { creerMenuNavigation } from "./navigation.js";
+import { demarrerChrono } from "./chrono.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -47,6 +48,9 @@ const boutonPhp = document.createElement("button");
 // exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 05)
 const exoChoisi = new URLSearchParams(location.search).get("exo");
 const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/05";
+
+// Temps actif de l'élève sur cet exo (enregistré dans le localStorage, rien n'est affiché)
+demarrerChrono(EXO);
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
 const CLE_SUSPENDU = "piscine-apercu-suspendu";
