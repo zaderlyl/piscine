@@ -2,7 +2,7 @@ export function lireExo(texte) {
   const section = {};
   let courant = null;
   for (const ligne of texte.split("\n")) {
-    const titre = ligne.match(/^##\s*(.*)/);
+    const titre = ligne.match(/^##(?!#)\s*(.*)/);
     if (titre) {
       courant = titre[1].trim();
       section[courant] = "";
@@ -49,6 +49,12 @@ export function lireVerification(texte) {
   return ligne ? ligne[1] : "texte";
 }
 
+// Type de l'exo dans l'en-tête : `type: cours` désigne un cours seul, sans exercice (par exemple les exos 00).
+export function lireType(texte) {
+  const ligne = texte.match(/^type:\s*([\w-]+)/m);
+  return ligne ? ligne[1] : "classique";
+}
+
 export async function chargerExo(fichier) {
   const reponse = await fetch(fichier);
   const texte = (await reponse.text()).replace(/\r\n/g, "\n");
@@ -58,6 +64,7 @@ export async function chargerExo(fichier) {
   Object.defineProperty(exo, "panneaux", { value: lirePanneaux(texte) });
   Object.defineProperty(exo, "ptp", { value: lirePtp(texte) });
   Object.defineProperty(exo, "verification", { value: lireVerification(texte) });
+  Object.defineProperty(exo, "type", { value: lireType(texte) });
   Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }
