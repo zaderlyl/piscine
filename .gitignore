@@ -12,3 +12,4 @@ dist/
 # Fichiers locaux
 *.log
 .env
+api/config.local.php

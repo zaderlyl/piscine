@@ -64,6 +64,22 @@ font-family: sans-serif;
   inset: 0;
 }
 
+.cm-editor {
+  height: 100%;
+}
+
+.cm-gutters {
+  background-color: #fafafa;
+  color: #999;
+  border-right: 1px solid #ddd;
+}
+
+.cm-gutterElement {
+  padding: 0 8px 0 6px;
+  min-width: 20px;
+  text-align: right;
+}
+
 .cache {
   display: none !important;
 }
@@ -607,4 +623,27 @@ font-family: sans-serif;
 .sql-table-nom {
   margin: 12px 0 0;
   font-size: 14px;
+}
+
+/* Cours seul : le cours occupe toute la page, sans éditeur ni colonne de droite */
+body.cours-seul {
+  grid-template-columns: 1fr;
+}
+
+body.cours-seul #separateur-v,
+body.cours-seul #droite {
+  display: none;
+}
+
+body.cours-seul #editeur {
+  min-height: 0;
+}
+
+body.cours-seul #enonce {
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+  padding: 24px max(12px, calc((100% - 760px) / 2));
+  line-height: 1.6;
+  font-size: 16px;
 }

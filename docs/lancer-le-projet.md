@@ -45,7 +45,7 @@ Un exo est rangé dans `exos/<langage>/<famille>/<numéro>.md`. Le format est d�
 
 ## Choisir l'exo affiché
 
-Ajoute `?exo=langage/famille/numéro` à l'URL, par exemple `?exo=php/vanilla/00`. Sans paramètre, l'exo HTML 04 est affiché. Les paramètres se combinent : `?auteur&exo=php/vanilla/00`.
+Ajoute `?exo=langage/famille/numéro` à l'URL, par exemple `?exo=php/vanilla/00`. Sans paramètre, l'exo HTML 05 est affiché. Les paramètres se combinent : `?auteur&exo=php/vanilla/00`.
 
 ## En cas de problème
 
