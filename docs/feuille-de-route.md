@@ -177,7 +177,8 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 - [ ] `03` : Rendu de listes dynamiques avec `x-for`
 - [ ] `04` : Transitions et animations légères avec `x-transition`
 
-**Projets JS** (à écrire, `type: projet`)
+**Projets JS** (à écrire, `type: projet`, voir [ecrire-un-exo.md](ecrire-un-exo.md))
+*Un projet par ressource, libre, rendu aux profs. Le module JS en a trois, par thème, chacun après les paliers de ses familles.*
 - [x] Projet 1 : boutique interactive (`js/vanilla`, `js/dom`, `alpine`)
 - [ ] Projet 2 : tableau de bord de données (`chartjs`, avec `fetch` vu dans `js/dom`)
 - [ ] Projet 3 : petit jeu 2D (`canvas`, `phaser`)
