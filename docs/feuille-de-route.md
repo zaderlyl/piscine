@@ -178,7 +178,7 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 - [ ] `04` : Transitions et animations légères avec `x-transition`
 
 **Projets JS** (à écrire, `type: projet`)
-- [ ] Projet 1 : application web interactive (`js/vanilla`, `js/dom`, `alpine`)
+- [x] Projet 1 : boutique interactive (`js/vanilla`, `js/dom`, `alpine`)
 - [ ] Projet 2 : tableau de bord de données (`chartjs`, avec `fetch` vu dans `js/dom`)
 - [ ] Projet 3 : petit jeu 2D (`canvas`, `phaser`)
 
