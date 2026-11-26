@@ -8,6 +8,10 @@
 //   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
+// - les exos à page cachée (section « Page ») : la page et le script de « Solution: script.js » sont
+//   joués ensemble ; la page doit contenir <script src="script.js">.
+// - les exos projet (type: projet) : sections « Cours » et « Énoncé » obligatoires, « Squelette » facultative
+//   (un bloc par fichier) ; ni « Tests » ni solution, et ptp: non.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
 //   sur la solution HTML dans un DOM (jsdom). Une solution PHP n'est pas exécutée
 //   (il faut un interpréteur PHP) : le script l'signale par un avertissement.
@@ -18,6 +22,8 @@ import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
 import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
+import { problemesPage } from "../src/page-cachee.js";
+import { problemesSquelette } from "../src/projet.js";
 import { lireSql } from "../src/sql/lecture.js";
 import { verifierResultat, verifierEtat, verifierStructure } from "../src/sql/verification.js";
 import { executerRequete } from "../src/sql/moteur.js";
@@ -150,6 +156,30 @@ function verifierCours(front, sections) {
   return erreurs;
 }
 
+// Un projet est libre : « Cours » et « Énoncé » obligatoires, « Squelette » facultative, ni tests ni solution,
+// et pas d'échange PTP (le projet est évalué par les profs)
+function verifierProjet(front, sections) {
+  const erreurs = [];
+  for (const titre of ["Cours", "Énoncé"]) {
+    const s = trouver(sections, titre);
+    if (!s) erreurs.push({ section: titre, ligne: front.ligne, message: `section « ${titre} » manquante` });
+    else if (!s.corps.some((l) => l.texte.trim())) erreurs.push({ section: titre, ligne: s.ligne, message: `section « ${titre} » vide` });
+  }
+  for (const s of sections) {
+    if (s.titre === "Tests" || s.titre.startsWith("Solution")) {
+      erreurs.push({ section: s.titre, ligne: s.ligne, message: "un projet est libre : pas de section « Tests » ni de solution" });
+    }
+  }
+  if (front.valeurs.ptp && front.valeurs.ptp !== "non") {
+    erreurs.push({ section: "Front matter", ligne: front.ligne, message: "un projet est évalué par les profs : ptp doit valoir « non »" });
+  }
+  const squelette = trouver(sections, "Squelette");
+  for (const message of problemesSquelette(squelette ? squelette.corps.map((l) => l.texte).join("\n") : undefined)) {
+    erreurs.push({ section: "Squelette", ligne: squelette.ligne, message });
+  }
+  return erreurs;
+}
+
 // Contenu du premier bloc de code d'une section, avec la ligne de son premier contenu
 function blocDeCode(section) {
   if (!section) return null;
@@ -255,6 +285,32 @@ async function verifierTests(sections) {
 
   const solution = solutions.find((s) => s.titre === "Solution: index.html");
   const solutionJs = solutions.find((s) => s.titre === "Solution: script.js");
+
+  // Exo à page cachée (section « Page ») : la page est jouée avec le script de la solution
+  const sectionPage = trouver(sections, "Page");
+  if (sectionPage) {
+    const page = blocDeCode(sectionPage);
+    const problemes = problemesPage(page ? page.code : "");
+    for (const message of problemes) erreurs.push({ section: "Page", ligne: sectionPage.ligne, message });
+    if (!solutionJs || solutions.length > 1) {
+      erreurs.push({ section: "Page", ligne: sectionPage.ligne, message: "un exo à page cachée n'a qu'une solution : « Solution: script.js »" });
+    }
+    const bloc = solutionJs && blocDeCode(solutionJs);
+    if (problemes.length > 0 || erreurs.length > 0 || !bloc) return { erreurs, avertissements };
+    let resultats;
+    try {
+      const inline = `<script>window.__code = ${JSON.stringify(bloc.code)};\n${bloc.code.replace(/<\/script/gi, "<\\/script")}<\/script>`;
+      resultats = await jouerTestsHtml(page.code.replace(/<script[^>]*\bsrc=["']script\.js["'][^>]*>\s*<\/script>/i, () => inline), codeTests.code);
+    } catch (erreur) {
+      erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `les tests n'ont pas pu tourner : ${erreur.message}` });
+      return { erreurs, avertissements };
+    }
+    for (const r of resultats) {
+      if (!r.ok) erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `test échoué sur la solution : ${r.message}` });
+    }
+    return { erreurs, avertissements };
+  }
+
   if (!solution && !solutionJs) {
     // Seule une solution HTML ou JS se joue dans jsdom ; PHP demande un interpréteur PHP
     avertissements.push(`tests non exécutés : ${solutions.map((s) => s.titre).join(", ")} (il faut PHP sur la machine)`);
@@ -439,6 +495,11 @@ async function validerFichier(chemin) {
 
   if (front.valeurs.type === "cours") return { cours: true, erreurs: verifierCours(front, sections), avertissements };
   const erreurs = verifierFront(front);
+
+  if (front.valeurs.type === "projet") {
+    erreurs.push(...verifierProjet(front, sections));
+    return { cours: false, erreurs, avertissements };
+  }
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
   // un exo à trous de sql/tables (panneau « schema ») se valide comme un exo de schéma
