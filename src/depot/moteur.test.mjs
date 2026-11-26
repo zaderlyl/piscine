@@ -420,6 +420,32 @@ const tests = [
     assert.equal(condition(d, "travail style.css"), true);
     assert.equal(condition(d, "serveur main"), false);
   }],
+  ["condition commits : compte l'historique de la branche courante", () => {
+    let d = lancer(["git add index.html", 'git commit -m "A"']);
+    assert.equal(condition(d, "commits 1"), true);
+    assert.equal(condition(d, "commits 2"), false);
+    d = lancer(["git add style.css", 'git commit -m "B"'], d);
+    assert.equal(condition(d, "commits 2"), true);
+  }],
+  ["condition integre : avance rapide et fusion avec commit", () => {
+    let d = lancer(["git add index.html", 'git commit -m "A"', "git switch -c menu"]);
+    assert.equal(condition(d, "integre"), false);
+    d = lancer(["git add style.css", 'git commit -m "B"', "git switch main"], d);
+    assert.equal(condition(d, "integre"), false);
+    assert.equal(condition(lancer(["git merge menu"], d), "integre"), true);
+    // fusion avec commit de fusion : main a avancé de son côté
+    d = lancer(["git add index.html", 'git commit -m "A"', "git switch -c menu"]);
+    d = scripter(["edit style.css"], d);
+    d = lancer(["git add style.css", 'git commit -m "B"', "git switch main"], d);
+    d = scripter(["edit index.html"], d);
+    d = lancer(["git add index.html", 'git commit -m "C"', "git merge menu"], d);
+    assert.equal(condition(d, "fusion"), true);
+    assert.equal(condition(d, "integre"), true);
+  }],
+  ["condition integre : une branche créée mais jamais fusionnée ne compte pas", () => {
+    const d = lancer(["git add index.html", 'git commit -m "A"', "git switch -c menu", "git switch main"]);
+    assert.equal(condition(d, "integre"), false);
+  }],
 ];
 
 let echecs = 0;

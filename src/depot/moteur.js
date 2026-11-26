@@ -23,6 +23,8 @@ export function nouveauDepot() {
     distant: null,
     suivi: {},
     prs: [],
+    // Fusions réussies : { nom, dans } (la branche « nom » a été fusionnée dans « dans »)
+    fusionnees: [],
   };
 }
 
@@ -170,6 +172,7 @@ function commit(depot, ligne, resultat) {
     depot.branches[depot.head] = id;
     depot.index = [];
     depot.fusion = null;
+    noterFusion(depot, de);
     return resultat(`[${depot.head} ${id}] ${depot.commits[id].message}`);
   }
 
@@ -180,6 +183,11 @@ function commit(depot, ligne, resultat) {
   depot.branches[depot.head] = id;
   depot.index = [];
   return resultat(`[${depot.head} ${id}] ${message}`);
+}
+
+// Retient qu'une branche vient d'être fusionnée dans la branche courante (pour la condition « integre »)
+function noterFusion(depot, nom) {
+  depot.fusionnees = [...(depot.fusionnees ?? []), { nom, dans: depot.head }];
 }
 
 // Tous les commits accessibles depuis un commit (lui compris)
@@ -304,6 +312,7 @@ function fusionner(depot, args, resultat) {
 
   if (!actuel || ancetres(depot, autre).has(actuel)) {
     depot.branches[depot.head] = autre;
+    noterFusion(depot, nom);
     return resultat(`Fusion en avance rapide : « ${depot.head} » avance jusqu'au commit de « ${nom} ».`);
   }
 
@@ -319,6 +328,7 @@ function fusionner(depot, args, resultat) {
   }
   const id = creerCommit(depot, `Fusionne « ${nom} »`, [actuel, autre], contenu, []);
   depot.branches[depot.head] = id;
+  noterFusion(depot, nom);
   return resultat(`Fusion faite : [${depot.head} ${id}] Fusionne « ${nom} »`);
 }
 
@@ -572,7 +582,9 @@ export function ecarts(depot, cible) {
 
 // Vérifie une étape d'exo, écrite en texte. Forme : « commit "msg" », « sans "msg" », « branche nom »,
 // « meme a b » (deux branches sur le même commit), « head nom », « index f », « travail f », « propre »,
-// « origine nom », « suivi nom », « fusion », « conflit », « pr ouverte | approuvee | fusionnee ».
+// « origine nom », « suivi nom », « fusion », « conflit », « pr ouverte | approuvee | fusionnee »,
+// « commits N » (au moins N commits dans l'historique de la branche courante, commits de départ compris),
+// « integre » (une autre branche a été fusionnée dans main, avance rapide comprise).
 export function condition(depot, texte) {
   const t = texte.trim();
   const tete = depot.branches[depot.head];
@@ -596,6 +608,8 @@ export function condition(depot, texte) {
   }
   if (t === "fusion") return !depot.fusion && Boolean(tete) && depot.commits[tete].parents.length === 2;
   if (t === "conflit") return Boolean(depot.fusion);
+  if ((m = t.match(/^commits (\d+)$/))) return ancetres(depot, tete).size >= Number(m[1]);
+  if (t === "integre") return (depot.fusionnees ?? []).some((f) => f.dans === "main" && f.nom !== "main");
   if (t === "pr ouverte") return depot.prs.some((p) => p.etat === "ouverte");
   if (t === "pr approuvee") return depot.prs.some((p) => p.approuvee);
   if (t === "pr fusionnee") return depot.prs.some((p) => p.etat === "fusionnée");
