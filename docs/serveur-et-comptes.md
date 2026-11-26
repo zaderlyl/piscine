@@ -59,7 +59,7 @@ Les promos, les brouillons et le chrono viendront dans leurs propres tables, qua
 
 ## Développement en local
 
-Chaque membre a besoin de PHP et de MySQL (Homebrew, XAMPP ou Laragon). Le détail des commandes sera ajouté à [lancer-le-projet.md](lancer-le-projet.md) quand le socle existera : création de la base avec le script SQL, copie du fichier de configuration d'exemple, lancement du serveur.
+Chaque membre a besoin de PHP et de MySQL (Homebrew ou XAMPP). Les commandes (création de la base avec le script SQL, copie du fichier de configuration d'exemple, lancement du serveur) et le déploiement sur le serveur de l'IUT sont dans [lancer-le-projet.md](lancer-le-projet.md#serveur-php-et-base-de-données).
 
 ## Découpage proposé en issues
 
