@@ -6,13 +6,13 @@ import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
 import { creerEditeurs, creerEditeurSql } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 import { debloquerEmmet } from "./emmet.js";
-import { monterPanneauSchema } from "./schema/panneau.js";
 import { monterPanneauSql } from "./sql/panneau.js";
 import { creerMenuNavigation } from "./navigation.js";
 import { demarrerChrono } from "./chrono.js";
 import { monterProgressionUi } from "./progression-ui.js";
 import { monterPanneauCours } from "./panneaux/cours.js";
 import { monterPanneauDepotExo } from "./panneaux/depot.js";
+import { monterPanneauSchemaExo } from "./panneaux/schema.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -141,26 +141,17 @@ if (exo.type === "cours") {
     onOuvert: afficherSuivant,
   });
 } else if (panneaux.includes("schema")) {
-  // Exo de schéma de base de données : énoncé à gauche, table à compléter à droite
-  zones.classList.add("cache");
-  apercu.classList.add("cache");
-  document.getElementById("separateur-a").classList.add("cache");
-  document.getElementById("variables").classList.add("cache");
-  document.getElementById("separateur-b").classList.add("cache");
-  panneauResultats.classList.add("cache");
-
-  afficherPanneauDoc(exo, panneauEnonce, docOnglet);
-
-  const conteneurSchema = document.createElement("div");
-  document.getElementById("droite").append(conteneurSchema);
-
-  monterPanneauSchema({
-    conteneur: conteneurSchema,
-    section: exo["Schéma"],
+  // Schéma de base de données (src/panneaux/schema.js)
+  monterPanneauSchemaExo({
+    exo,
+    apercu,
+    docOnglet,
+    panneauEnonce,
+    zones,
+    panneauResultats,
     onSucces: validerExo,
+    onOuvert: afficherSuivant,
   });
-
-  afficherSuivant();
 } else if (panneaux.includes("sql")) {
   // Exo de requêtes SQL : énoncé et éditeur à gauche, résultat à droite
   apercu.classList.add("cache");
