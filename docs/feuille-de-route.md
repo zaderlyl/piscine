@@ -38,8 +38,8 @@ Ordre des langages et notions attendues : [programme-par-langage.md](programme-p
 
 **Texte**
 - [x] `05` : Titres h1 à h6
-- [ ] `06` : `hr` et texte factice (débloque `lorem`)
-- [ ] `07` : Gras et italique, et leur imbrication : qui contient qui ?
+- [x] `06` : Ligne horizontale `hr` (débloque `lorem`)
+- [x] `07` : Gras et italique avec `strong` et `em`, et leur imbrication
 - [x] `08` : Autres balises de texte
 - [x] `09` : Balises de sens (`abbr`, `cite`, `code`…)
 - [x] `10` : Reproduire un modèle de texte

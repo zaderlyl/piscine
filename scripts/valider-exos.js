@@ -8,6 +8,8 @@
 //   avec lireSchemas() et on vérifie que chaque réponse est dans les choix de son trou.
 // - exos/git/visuel : pas de section « Tests ». On joue la solution dans le moteur
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
+// - les exos à page cachée (section « Page ») : la page et le script de « Solution: script.js » sont
+//   joués ensemble ; la page doit contenir <script src="script.js">.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
 //   sur la solution HTML dans un DOM (jsdom). Une solution PHP n'est pas exécutée
 //   (il faut un interpréteur PHP) : le script l'signale par un avertissement.
@@ -18,6 +20,7 @@ import { JSDOM } from "jsdom";
 import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js";
 import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
+import { problemesPage } from "../src/page-cachee.js";
 import { lireSql } from "../src/sql/lecture.js";
 import { verifierResultat, verifierEtat } from "../src/sql/verification.js";
 import { executerRequete } from "../src/sql/moteur.js";
@@ -255,6 +258,32 @@ async function verifierTests(sections) {
 
   const solution = solutions.find((s) => s.titre === "Solution: index.html");
   const solutionJs = solutions.find((s) => s.titre === "Solution: script.js");
+
+  // Exo à page cachée (section « Page ») : la page est jouée avec le script de la solution
+  const sectionPage = trouver(sections, "Page");
+  if (sectionPage) {
+    const page = blocDeCode(sectionPage);
+    const problemes = problemesPage(page ? page.code : "");
+    for (const message of problemes) erreurs.push({ section: "Page", ligne: sectionPage.ligne, message });
+    if (!solutionJs || solutions.length > 1) {
+      erreurs.push({ section: "Page", ligne: sectionPage.ligne, message: "un exo à page cachée n'a qu'une solution : « Solution: script.js »" });
+    }
+    const bloc = solutionJs && blocDeCode(solutionJs);
+    if (problemes.length > 0 || erreurs.length > 0 || !bloc) return { erreurs, avertissements };
+    let resultats;
+    try {
+      const inline = `<script>window.__code = ${JSON.stringify(bloc.code)};\n${bloc.code.replace(/<\/script/gi, "<\\/script")}<\/script>`;
+      resultats = await jouerTestsHtml(page.code.replace(/<script[^>]*\bsrc=["']script\.js["'][^>]*>\s*<\/script>/i, () => inline), codeTests.code);
+    } catch (erreur) {
+      erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `les tests n'ont pas pu tourner : ${erreur.message}` });
+      return { erreurs, avertissements };
+    }
+    for (const r of resultats) {
+      if (!r.ok) erreurs.push({ section: "Tests", ligne: codeTests.ligne, message: `test échoué sur la solution : ${r.message}` });
+    }
+    return { erreurs, avertissements };
+  }
+
   if (!solution && !solutionJs) {
     // Seule une solution HTML ou JS se joue dans jsdom ; PHP demande un interpréteur PHP
     avertissements.push(`tests non exécutés : ${solutions.map((s) => s.titre).join(", ")} (il faut PHP sur la machine)`);

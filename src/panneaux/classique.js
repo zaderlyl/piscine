@@ -7,6 +7,7 @@ import { lireBrouillon, sauvegarderBrouillon } from "../brouillon.js";
 import { creerEditeurs } from "../editeur.js";
 import { afficherPanneauDoc } from "../doc.js";
 import { debloquerEmmet } from "../emmet.js";
+import { contenusPageCachee } from "../page-cachee.js";
 import { afficherVariables, ecouterValeurs } from "../visualiseur-variables.js";
 import { glissable } from "../redimensionner.js";
 
@@ -39,12 +40,18 @@ export function monterPanneauClassique({
     location.reload();
   }
 
+  // Contenu des éditeurs : c'est ce qui est enregistré dans le brouillon de l'élève
   function lireContenus() {
     const contenus = {};
     for (const nom in editeurs) {
       contenus[nom] = editeurs[nom].state.doc.toString();
     }
     return contenus;
+  }
+
+  // Fichiers de l'aperçu : pour un exo à page cachée, la page de l'exo plus le script de l'élève
+  function lireContenusApercu() {
+    return exo.page ? contenusPageCachee(exo.page, lireContenus()["script.js"] ?? "") : lireContenus();
   }
 
   function enregistrerBrouillon() {
@@ -54,7 +61,7 @@ export function monterPanneauClassique({
   // Affiche index.html dans l'iframe
   function afficherApercu() {
     if (nomExo.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
-    const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
+    const { code, analyse, balisePresente } = assemblerPage(lireContenusApercu(), testsExo);
     afficherVariables(analyse, balisePresente);
     // localStorage est interdit dans l'iframe isolée : on y place un faux, gardé par exo
     afficherDansApercu(apercu, injecterStockage(code, lireStockageApercu(nomExo)));
@@ -67,6 +74,8 @@ export function monterPanneauClassique({
     onglets,
     brouillon: lireBrouillon(cleBrouillon),
     avecPhp: nomExo.startsWith("php/"),
+    // exo à page cachée : l'élève n'écrit que script.js
+    fichiers: exo.page ? ["script.js"] : null,
     surChangement(vue) {
       if (vue !== editeurs["index.php"]) afficherApercu();
       clearTimeout(minuteur);
@@ -110,7 +119,7 @@ export function monterPanneauClassique({
 
   onOuvert();
   // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
-  const fichierParDefaut = nomExo.startsWith("js/") || exo["Solution: script.js"]
+  const fichierParDefaut = exo.page || nomExo.startsWith("js/") || exo["Solution: script.js"]
     ? "script.js"
     : nomExo.startsWith("php/") || exo["Solution: index.php"]
       ? "index.php"
