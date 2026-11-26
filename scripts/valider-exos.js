@@ -41,6 +41,7 @@ const CONDITIONS_CONNUES = [
   /^commit ".*"$/, /^sans ".*"$/, /^branche \S+$/, /^meme \S+ \S+$/, /^head \S+$/,
   /^index \S+$/, /^travail \S+$/, /^propre$/, /^origine \S+$/, /^suivi \S+$/,
   /^serveur \S+$/, /^fusion$/, /^conflit$/, /^pr ouverte$/, /^pr approuvee$/, /^pr fusionnee$/,
+  /^commits \d+$/, /^integre$/,
 ];
 
 // Liste des fichiers .md sous un dossier, triés
