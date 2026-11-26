@@ -1,11 +1,4 @@
-import { lireCode, chargerExo } from "./exo.js";
-import { assemblerPage, afficherDansApercu } from "./apercu.js";
-import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
-import { executerPhp } from "./php.js?v=2";
-import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
-import { creerEditeurs } from "./editeur.js";
-import { afficherPanneauDoc } from "./doc.js";
-import { debloquerEmmet } from "./emmet.js";
+import { chargerExo } from "./exo.js";
 import { creerMenuNavigation } from "./navigation.js";
 import { demarrerChrono } from "./chrono.js";
 import { monterProgressionUi } from "./progression-ui.js";
@@ -13,8 +6,8 @@ import { monterPanneauCours } from "./panneaux/cours.js";
 import { monterPanneauDepotExo } from "./panneaux/depot.js";
 import { monterPanneauSchemaExo } from "./panneaux/schema.js";
 import { monterPanneauSqlExo } from "./panneaux/sql.js";
+import { monterPanneauClassique } from "./panneaux/classique.js";
 
-import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
 import {
   marquerReussi,
@@ -37,8 +30,6 @@ const panneauResultats = document.getElementById("resultat");
 const panneauEnonce = document.getElementById("enonce");
 const docOnglet = document.getElementById("doc-onglet");
 
-const boutonPhp = document.createElement("button");
-
 // exo choisi dans l'adresse, par exemple ?exo=html/vanilla/04 (par défaut : HTML 05)
 const exoChoisi = new URLSearchParams(location.search).get("exo");
 const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/05";
@@ -47,11 +38,8 @@ const EXO = /^[\w/-]+$/.test(exoChoisi || "") ? exoChoisi : "html/vanilla/05";
 demarrerChrono(EXO);
 
 const CLE_BROUILLON = "piscine-brouillon:" + EXO;
-const CLE_SUSPENDU = "piscine-apercu-suspendu";
 
 const FICHIER_EXO = `../exos/${EXO}.md`;
-
-const DELAI_SUSPENDU = 5000;
 
 let enregistrerBrouillonActif = null;
 
@@ -166,172 +154,20 @@ if (exo.type === "cours") {
     onOuvert: afficherSuivant,
   });
 } else {
-  // HTML / CSS / JS / PHP classique
-  let minuteurTests = null;
-  let minuteur = null;
-  let testsExo = lireCode(exo["Tests"]);
-
-  function arreterApercu() {
-    enregistrerBrouillon();
-    localStorage.setItem(CLE_SUSPENDU, "1");
-    location.reload();
-  }
-
-  function lireContenus() {
-    const contenus = {};
-    for (const nom in editeurs) {
-      contenus[nom] = editeurs[nom].state.doc.toString();
-    }
-    return contenus;
-  }
-
-  function enregistrerBrouillon() {
-    sauvegarderBrouillon(CLE_BROUILLON, lireContenus());
-  }
-
-  enregistrerBrouillonActif = enregistrerBrouillon;
-
-  // Affiche index.html dans l'iframe
-  function afficherApercu() {
-    if (EXO.startsWith("php/")) return; // les exos PHP se testent avec « Exécuter PHP »
-    const { code, analyse, balisePresente } = assemblerPage(lireContenus(), testsExo);
-    afficherVariables(analyse, balisePresente);
-    // localStorage est interdit dans l'iframe isolée : on y place un faux, gardé par exo
-    afficherDansApercu(apercu, injecterStockage(code, lireStockageApercu(EXO)));
-    clearTimeout(minuteurTests);
-    minuteurTests = setTimeout(arreterApercu, DELAI_SUSPENDU);
-  }
-
-  const { editeurs, afficherFichier } = creerEditeurs({
-    zones,
+  // HTML / CSS / JS / PHP classique (src/panneaux/classique.js)
+  enregistrerBrouillonActif = monterPanneauClassique({
+    exo,
+    nomExo: EXO,
+    cleBrouillon: CLE_BROUILLON,
+    apercu,
     onglets,
-    brouillon: lireBrouillon(CLE_BROUILLON),
-    avecPhp: EXO.startsWith("php/"),
-    surChangement(vue) {
-      if (vue !== editeurs["index.php"]) afficherApercu();
-      clearTimeout(minuteur);
-      minuteur = setTimeout(enregistrerBrouillon, 1000);
-    },
+    zones,
+    panneauResultats,
+    panneauEnonce,
+    docOnglet,
+    onSucces: validerExo,
+    onOuvert: afficherSuivant,
   });
-
-  afficherPanneauDoc(exo, panneauEnonce, docOnglet);
-
-  // remplace le code des editeurs par la solution de reference
-  function chargerSolution() {
-    for (const [tire, contenu] of Object.entries(exo)) {
-      if (!tire.startsWith("Solution: ")) continue;
-      const editeur = editeurs[tire.slice("Solution: ".length).trim()];
-      if (!editeur) continue;
-      editeur.dispatch({
-        changes: {
-          from: 0,
-          to: editeur.state.doc.length,
-          insert: lireCode(contenu),
-        },
-      });
-    }
-    // Un exo PHP se teste avec « Exécuter PHP » : on le lance directement
-    if (exo["Solution: index.php"]) lancerPhp();
-  }
-
-  // Mode auteur ( acces via ?auteur ) bouton pour verif solution
-  if (new URLSearchParams(location.search).has("auteur")) {
-    const boutonSolution = document.createElement("button");
-    boutonSolution.textContent = "Charger la solution";
-    boutonSolution.addEventListener("click", chargerSolution);
-    onglets.append(boutonSolution);
-  }
-
-  if (EXO.startsWith("php/")) {
-    boutonPhp.textContent = "Exécuter PHP";
-    boutonPhp.addEventListener("click", lancerPhp);
-    onglets.append(boutonPhp);
-  }
-
-  afficherSuivant();
-  // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
-  const fichierParDefaut = EXO.startsWith("js/") || exo["Solution: script.js"]
-    ? "script.js"
-    : EXO.startsWith("php/") || exo["Solution: index.php"]
-      ? "index.php"
-      : "index.html";
-  afficherFichier(fichierParDefaut);
-
-  if (localStorage.getItem(CLE_SUSPENDU)) {
-    localStorage.removeItem(CLE_SUSPENDU);
-    panneauResultats.textContent =
-      "Aperçu suspendu : ton code semble tourner à l'infini. Corrige-le pour relancer.";
-  } else {
-    afficherApercu();
-  }
-
-  ecouterValeurs(apercu);
-
-  // Barres pour agrandir ou réduire les colonnes et les panneaux de droite
-  // Les limites hautes laissent toujours de la place au résultat des tests (environ 10 % de la hauteur)
-  glissable(document.getElementById("separateur-a"), apercu, {
-    axe: "y",
-    variable: "--h-apercu",
-    min: 80,
-    max: () => window.innerHeight * 0.6,
-  });
-  glissable(document.getElementById("separateur-b"), document.getElementById("variables"), {
-    axe: "y",
-    variable: "--h-variables",
-    min: 60,
-    max: () => window.innerHeight * 0.3,
-  });
-
-  // Enregistre le localStorage de l'aperçu (voir stockage-apercu.js)
-  window.addEventListener("message", (e) => {
-    if (e.source !== apercu.contentWindow || e.data?.type !== "stockage") return;
-    ecrireStockageApercu(EXO, e.data.donnees);
-  });
-
-  // Affiche les résultats envoyés par l'aperçu
-  window.addEventListener("message", (e) => {
-    if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
-    clearTimeout(minuteurTests);
-    const echecs = e.data.resultats.filter((r) => !r.ok);
-    panneauResultats.textContent = echecs.length
-      ? echecs.map((r) => "❌ " + r.message).join("\n")
-      : "✅ Tous les tests passent";
-    if (!echecs.length && e.data.resultats.length) {
-      if (testsExo && exo.emmetDebloque) debloquerEmmet(exo.emmetDebloque);
-      validerExo();
-    }
-  });
-
-  let executionPhpEnCours = false;
-  async function lancerPhp() {
-    if (executionPhpEnCours) return;
-    executionPhpEnCours = true;
-    boutonPhp.disabled = true;
-    try {
-      panneauResultats.textContent = "Exécution en cours...";
-      const { sortie, resultats } = await executerPhp(
-        editeurs["index.php"].state.doc.toString(),
-        testsExo,
-      );
-
-      const echecs = resultats.filter((r) => !r.ok);
-      panneauResultats.textContent =
-        sortie +
-        "\n\n" +
-        (echecs.length
-          ? echecs.map((r) => "❌ " + r.message).join("\n")
-          : "✅ Tous les tests passent");
-      if (!echecs.length && resultats.length) {
-        validerExo();
-      }
-
-      clearTimeout(minuteurTests);
-      afficherDansApercu(apercu, sortie);
-    } finally {
-      executionPhpEnCours = false;
-      boutonPhp.disabled = false;
-    }
-  }
 }
 
 // Initialisation PTP
