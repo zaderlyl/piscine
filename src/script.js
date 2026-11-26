@@ -12,6 +12,7 @@ import { monterPanneauSql } from "./sql/panneau.js";
 import { creerMenuNavigation } from "./navigation.js";
 import { demarrerChrono } from "./chrono.js";
 import { monterProgressionUi } from "./progression-ui.js";
+import { monterPanneauCours } from "./panneaux/cours.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -114,14 +115,18 @@ glissable(document.getElementById("separateur-v"), document.getElementById("edit
 const panneaux = exo.panneaux || ["enonce", "editeur", "apercu"];
 
 if (exo.type === "cours") {
-  // Cours seul : pas d'exercice, le cours occupe toute la page et l'exo compte comme fait à l'ouverture
-  document.body.classList.add("cours-seul");
-  docOnglet.classList.add("cache");
-  zones.classList.add("cache");
-  afficherPanneauDoc(exo, panneauEnonce, docOnglet, "Cours");
-  marquerReussi(EXO);
-  afficherSuivant();
-  menuNavigation.mettreAJour();
+  // Cours seul (src/panneaux/cours.js)
+  monterPanneauCours({
+    exo,
+    nomExo: EXO,
+    panneauEnonce,
+    docOnglet,
+    zones,
+    onOuvert: () => {
+      afficherSuivant();
+      menuNavigation.mettreAJour();
+    },
+  });
 } else if (panneaux.includes("depot")) {
   // Masque l'éditeur classique, doc et aperçu
   docOnglet.classList.add("cache");
