@@ -3,16 +3,16 @@ import { assemblerPage, afficherDansApercu } from "./apercu.js";
 import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "./stockage-apercu.js";
 import { executerPhp } from "./php.js?v=2";
 import { lireBrouillon, sauvegarderBrouillon } from "./brouillon.js";
-import { creerEditeurs, creerEditeurSql } from "./editeur.js";
+import { creerEditeurs } from "./editeur.js";
 import { afficherPanneauDoc } from "./doc.js";
 import { debloquerEmmet } from "./emmet.js";
-import { monterPanneauSql } from "./sql/panneau.js";
 import { creerMenuNavigation } from "./navigation.js";
 import { demarrerChrono } from "./chrono.js";
 import { monterProgressionUi } from "./progression-ui.js";
 import { monterPanneauCours } from "./panneaux/cours.js";
 import { monterPanneauDepotExo } from "./panneaux/depot.js";
 import { monterPanneauSchemaExo } from "./panneaux/schema.js";
+import { monterPanneauSqlExo } from "./panneaux/sql.js";
 
 import { afficherVariables, ecouterValeurs } from "./visualiseur-variables.js";
 import { glissable } from "./redimensionner.js";
@@ -153,44 +153,18 @@ if (exo.type === "cours") {
     onOuvert: afficherSuivant,
   });
 } else if (panneaux.includes("sql")) {
-  // Exo de requêtes SQL : énoncé et éditeur à gauche, résultat à droite
-  apercu.classList.add("cache");
-  document.getElementById("separateur-a").classList.add("cache");
-  document.getElementById("variables").classList.add("cache");
-  document.getElementById("separateur-b").classList.add("cache");
-  panneauResultats.classList.add("cache");
-
-  afficherPanneauDoc(exo, panneauEnonce, docOnglet);
-
-  const zoneSql = document.createElement("div");
-  zoneSql.className = "zone";
-  zones.append(zoneSql);
-
-  let minuteurSql = null;
-  const editeurSql = creerEditeurSql({
-    parent: zoneSql,
-    doc: lireBrouillon(CLE_BROUILLON)["requete.sql"],
-    surChangement(vue) {
-      clearTimeout(minuteurSql);
-      minuteurSql = setTimeout(
-        () => sauvegarderBrouillon(CLE_BROUILLON, { "requete.sql": vue.state.doc.toString() }),
-        1000,
-      );
-    },
-  });
-
-  const conteneurSql = document.createElement("div");
-  document.getElementById("droite").append(conteneurSql);
-
-  monterPanneauSql({
-    conteneur: conteneurSql,
+  // Requêtes SQL (src/panneaux/sql.js)
+  monterPanneauSqlExo({
     exo,
-    lireRequete: () => editeurSql.state.doc.toString(),
+    cleBrouillon: CLE_BROUILLON,
+    apercu,
+    docOnglet,
+    panneauEnonce,
+    zones,
+    panneauResultats,
     onSucces: validerExo,
-    verification: exo.verification,
+    onOuvert: afficherSuivant,
   });
-
-  afficherSuivant();
 } else {
   // HTML / CSS / JS / PHP classique
   let minuteurTests = null;
