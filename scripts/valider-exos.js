@@ -10,6 +10,8 @@
 //   Git et on vérifie que toutes les étapes (## Étapes) se cochent dans l'ordre.
 // - les exos à page cachée (section « Page ») : la page et le script de « Solution: script.js » sont
 //   joués ensemble ; la page doit contenir <script src="script.js">.
+// - les exos projet (type: projet) : sections « Cours » et « Énoncé » obligatoires, « Squelette » facultative
+//   (un bloc par fichier) ; ni « Tests » ni solution, et ptp: non.
 // - les autres modules (HTML, PHP) : section « Tests » obligatoire. Les tests sont joués
 //   sur la solution HTML dans un DOM (jsdom). Une solution PHP n'est pas exécutée
 //   (il faut un interpréteur PHP) : le script l'signale par un avertissement.
@@ -21,6 +23,7 @@ import { nouveauDepot, executerScript, condition } from "../src/depot/moteur.js"
 import { createRequire } from "node:module";
 import { lireSchemas } from "../src/schema/lecture.js";
 import { problemesPage } from "../src/page-cachee.js";
+import { problemesSquelette } from "../src/projet.js";
 import { lireSql } from "../src/sql/lecture.js";
 import { verifierResultat, verifierEtat } from "../src/sql/verification.js";
 import { executerRequete } from "../src/sql/moteur.js";
@@ -149,6 +152,30 @@ function verifierCours(front, sections) {
     erreurs.push({ section: "Cours", ligne: front.ligne, message: "section « Cours » manquante" });
   } else if (!cours.corps.some((l) => l.texte.trim())) {
     erreurs.push({ section: "Cours", ligne: cours.ligne, message: "section « Cours » vide" });
+  }
+  return erreurs;
+}
+
+// Un projet est libre : « Cours » et « Énoncé » obligatoires, « Squelette » facultative, ni tests ni solution,
+// et pas d'échange PTP (le projet est évalué par les profs)
+function verifierProjet(front, sections) {
+  const erreurs = [];
+  for (const titre of ["Cours", "Énoncé"]) {
+    const s = trouver(sections, titre);
+    if (!s) erreurs.push({ section: titre, ligne: front.ligne, message: `section « ${titre} » manquante` });
+    else if (!s.corps.some((l) => l.texte.trim())) erreurs.push({ section: titre, ligne: s.ligne, message: `section « ${titre} » vide` });
+  }
+  for (const s of sections) {
+    if (s.titre === "Tests" || s.titre.startsWith("Solution")) {
+      erreurs.push({ section: s.titre, ligne: s.ligne, message: "un projet est libre : pas de section « Tests » ni de solution" });
+    }
+  }
+  if (front.valeurs.ptp && front.valeurs.ptp !== "non") {
+    erreurs.push({ section: "Front matter", ligne: front.ligne, message: "un projet est évalué par les profs : ptp doit valoir « non »" });
+  }
+  const squelette = trouver(sections, "Squelette");
+  for (const message of problemesSquelette(squelette ? squelette.corps.map((l) => l.texte).join("\n") : undefined)) {
+    erreurs.push({ section: "Squelette", ligne: squelette.ligne, message });
   }
   return erreurs;
 }
@@ -459,6 +486,11 @@ async function validerFichier(chemin) {
 
   if (front.valeurs.type === "cours") return { cours: true, erreurs: verifierCours(front, sections), avertissements };
   const erreurs = verifierFront(front);
+
+  if (front.valeurs.type === "projet") {
+    erreurs.push(...verifierProjet(front, sections));
+    return { cours: false, erreurs, avertissements };
+  }
 
   const module = relative(RACINE, chemin).split(sep).slice(0, -1).join("/");
   if (module === "sql/schema") {

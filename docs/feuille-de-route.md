@@ -101,6 +101,10 @@ Programme détaillé des 7 sous-modules : [programme-par-langage.md](programme-p
 
 Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScript pur, résultat en texte ou en nombres, comme on apprendrait Python) et `js/dom` (interactivité sur une page déjà faite, dont l'élève ne voit pas le code : il n'écrit que `script.js`, voir [ecrire-un-exo.md](ecrire-un-exo.md)).
 
+**Paliers et projets** (voir README section 5) :
+- **Un palier par famille** (`js/vanilla`, `js/dom`, `canvas`, `chartjs`, `phaser`, `alpine`) : tests automatiques sur le résultat seulement, jamais sur le code source.
+- **Un projet par ressource**, rendu aux profs (« Rendre mon projet »). Comme les familles JS sont très différentes, le module JS a **trois projets** par thème, chacun placé après les paliers de ses familles (voir la fin de la section).
+
 **1. Fondamentaux, Algorithmique & Syntaxe moderne (`js/vanilla`)**
 - [x] `00` : Cours : à quoi sert JavaScript (programme, variable)
 - [x] `01` : Ma première variable (`const`)
@@ -175,7 +179,7 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 
 **Projets JS** (à écrire, `type: projet`, voir [ecrire-un-exo.md](ecrire-un-exo.md))
 *Un projet par ressource, libre, rendu aux profs. Le module JS en a trois, par thème, chacun après les paliers de ses familles.*
-- [ ] Projet 1 : boutique interactive (`js/vanilla`, `js/dom`, `alpine`)
+- [x] Projet 1 : boutique interactive (`js/vanilla`, `js/dom`, `alpine`)
 - [ ] Projet 2 : tableau de bord de données (`chartjs`, avec `fetch` vu dans `js/dom`)
 - [ ] Projet 3 : petit jeu 2D (`canvas`, `phaser`)
 

@@ -135,6 +135,53 @@ Pour les exos qui ajoutent de l'**interactivité** à une page, l'élève n'écr
 - Le validateur refuse un exo dont la page n'a pas de bloc HTML ou pas de balise `<script src="script.js">`, qui a une autre solution que `script.js`, ou dont les tests échouent sur la solution.
 - Si des élèves bloquent faute de voir la page, on pourra ajouter un onglet « Page » en lecture seule (pas fait pour l'instant).
 
+## Exos projet
+
+Un **projet** est la partie B du « palier en deux temps » (README, section 5) : une production personnelle à l'énoncé libre, rendue aux profs. Il y a **un projet par ressource** du référentiel ; le module JS en a trois, par thème (application web, données, jeu 2D), voir la [feuille de route](feuille-de-route.md). Le projet se place **après les paliers** des familles qu'il couvre, dans un dossier à lui (par exemple `exos/js/projet/01.md`).
+
+````markdown
+---
+type: projet
+titre: Projet : une application web interactive
+annee: 1
+ptp: non
+notions: [projet, DOM, localStorage]
+panneaux: [enonce, editeur, apercu]
+---
+
+## Cours
+Le contexte du projet et la démarche conseillée (par où commencer, comment découper le travail).
+
+## Énoncé
+Le cahier des charges, en liste : ce que l'application doit pouvoir faire, plus quelques contraintes.
+
+## Squelette
+```html index.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <script src="script.js"></script>
+</body>
+</html>
+```
+```css style.css
+```
+```js script.js
+```
+````
+
+- **Pas de `## Solution` ni de `## Tests`** : le projet est libre, et il n'existe pas une seule bonne réponse. Le validateur refuse ces sections.
+- **L'éditeur est vide au départ**, avec les trois onglets `index.html`, `style.css` et `script.js`. L'élève **choisit** : il peut partir de zéro, ou cliquer sur « Partir d'un squelette » pour charger la section `## Squelette` (avec une confirmation s'il a déjà écrit quelque chose). C'est utile aux élèves moins à l'aise.
+- La section `## Squelette` est **facultative** : sans elle, pas de bouton. Elle contient un bloc de code par fichier, dont l'info de bloc donne le langage puis le nom du fichier (` ```html index.html `).
+- Pour les projets qui utilisent une bibliothèque (Chart.js, Phaser), le squelette contient sa balise `<script src="…">`. Sans squelette, le cours indique à l'élève la balise à ajouter.
+- **Le minimum automatique au rendu** est volontairement léger : l'élève a modifié des fichiers, et la page se charge sans erreur JavaScript. Aucun critère du cahier des charges n'est testé par la machine : ce qui n'est pas testable est jugé par les profs sur trois axes (code, fonctionnalités, pertinence).
+- L'énoncé reste **libre** : il décrit ce qu'on attend, pas comment le faire, et ne fixe pas d'`id` précis.
+- Le bouton « Rendre mon projet » (rendu, fichiers figés, évaluation) dépend du serveur et des comptes : il n'est **pas encore développé**. En attendant, un projet se joue comme un exo, sans rendu.
+
 ## Exos de schéma SQL
 
 Dans `exos/sql/schema/`, l'élève complète des tables avec des listes déroulantes, sans écrire de code. Front matter : `panneaux: [enonce, schema]`. Il n'y a ni `## Tests` ni `## Solution` : la section `## Schéma` contient tout.

@@ -1,5 +1,6 @@
 // Panneau « classique » (HTML, CSS, JS, PHP) : éditeurs à onglets, aperçu, tests et exécution PHP
 import { lireCode } from "../exo.js";
+import { contenuEcrit } from "../projet.js";
 import { assemblerPage, afficherDansApercu } from "../apercu.js";
 import { injecterStockage, lireStockageApercu, ecrireStockageApercu } from "../stockage-apercu.js";
 import { executerPhp } from "../php.js?v=2";
@@ -32,7 +33,7 @@ export function monterPanneauClassique({
 
   let minuteurTests = null;
   let minuteur = null;
-  let testsExo = lireCode(exo["Tests"]);
+  let testsExo = lireCode(exo["Tests"] ?? ""); // un projet n'a pas de tests
 
   function arreterApercu() {
     enregistrerBrouillon();
@@ -111,6 +112,21 @@ export function monterPanneauClassique({
     onglets.append(boutonSolution);
   }
 
+  // Projet : l'éditeur démarre vide ; si l'exo a un squelette, l'élève peut le charger d'un clic
+  if (Object.keys(exo.squelette).length > 0) {
+    const boutonSquelette = document.createElement("button");
+    boutonSquelette.textContent = "Partir d'un squelette";
+    boutonSquelette.addEventListener("click", () => {
+      if (contenuEcrit(lireContenus()) && !confirm("Le squelette va remplacer ce que tu as écrit. Continuer ?")) return;
+      for (const [nom, contenu] of Object.entries(exo.squelette)) {
+        const editeur = editeurs[nom];
+        if (!editeur) continue;
+        editeur.dispatch({ changes: { from: 0, to: editeur.state.doc.length, insert: contenu } });
+      }
+    });
+    onglets.append(boutonSquelette);
+  }
+
   if (nomExo.startsWith("php/")) {
     boutonPhp.textContent = "Exécuter PHP";
     boutonPhp.addEventListener("click", lancerPhp);
@@ -119,11 +135,13 @@ export function monterPanneauClassique({
 
   onOuvert();
   // Fichier ouvert au départ : script.js pour les exos JS, index.php pour PHP, sinon index.html
-  const fichierParDefaut = exo.page || nomExo.startsWith("js/") || exo["Solution: script.js"]
-    ? "script.js"
-    : nomExo.startsWith("php/") || exo["Solution: index.php"]
-      ? "index.php"
-      : "index.html";
+  const fichierParDefaut = exo.type === "projet"
+    ? "index.html"
+    : exo.page || nomExo.startsWith("js/") || exo["Solution: script.js"]
+      ? "script.js"
+      : nomExo.startsWith("php/") || exo["Solution: index.php"]
+        ? "index.php"
+        : "index.html";
   afficherFichier(fichierParDefaut);
 
   if (localStorage.getItem(CLE_SUSPENDU)) {
@@ -161,6 +179,10 @@ export function monterPanneauClassique({
   window.addEventListener("message", (e) => {
     if (e.source !== apercu.contentWindow || e.data.type !== "tests") return;
     clearTimeout(minuteurTests);
+    if (exo.type === "projet") {
+      panneauResultats.textContent = "Projet libre : pas de tests automatiques.";
+      return;
+    }
     const echecs = e.data.resultats.filter((r) => !r.ok);
     panneauResultats.textContent = echecs.length
       ? echecs.map((r) => "❌ " + r.message).join("\n")

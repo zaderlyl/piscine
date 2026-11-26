@@ -1,3 +1,5 @@
+import { lireSquelette } from "./projet.js";
+
 export function lireExo(texte) {
   const section = {};
   let courant = null;
@@ -67,6 +69,8 @@ export async function chargerExo(fichier) {
   Object.defineProperty(exo, "type", { value: lireType(texte) });
   // page HTML cachée d'un exo JS DOM (section « Page »), vide si l'exo n'en a pas
   Object.defineProperty(exo, "page", { value: lireCode(exo["Page"] ?? "") });
+  // fichiers de départ facultatifs d'un exo projet (section « Squelette »), objet vide sans squelette
+  Object.defineProperty(exo, "squelette", { value: lireSquelette(exo["Squelette"]) });
   Object.defineProperty(exo, "texteBrut", { value: texte });
   return exo;
 }
