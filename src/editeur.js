@@ -22,8 +22,10 @@ const theme = EditorView.theme({
 
 // Crée un éditeur et un onglet par fichier.
 // brouillon = { fichier: texte } ; surChangement(vue) est appelée à chaque modification.
+// `fichiers` limite les éditeurs créés (par exemple ["script.js"] pour un exo à page cachée) ;
+// sans lui, tous les fichiers sont créés (index.php seulement si avecPhp).
 // Renvoie { editeurs, afficherFichier }.
-export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPhp = false }) {
+export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPhp = false, fichiers = null }) {
   const editeurs = {};
   const zonesParNom = {};
   const boutons = {};
@@ -42,6 +44,7 @@ export function creerEditeurs({ zones, onglets, brouillon, surChangement, avecPh
 
   for (const [nom, langage] of Object.entries(fichier)) {
     if (nom === "index.php" && !avecPhp) continue;
+    if (fichiers && !fichiers.includes(nom)) continue;
     const zone = document.createElement("div");
     zone.className = "zone cache";
     zones.append(zone);
