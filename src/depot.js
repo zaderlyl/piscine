@@ -14,7 +14,7 @@ try {
 export const ORDRE = [
   "git/visuel/01", "git/visuel/02", "git/visuel/03", "git/visuel/04",
   "git/visuel/05", "git/visuel/06", "git/visuel/07", "git/visuel/08",
-  "git/visuel/09", "git/visuel/10", "git/visuel/11",
+  "git/visuel/09", "git/visuel/10", "git/visuel/11", "git/visuel/12",
 ];
 
 const COURS_LIBRE = `Dans ce bac à sable, il n'y a pas d'exo. Tu pars d'un dossier qui contient
@@ -151,6 +151,7 @@ export function attacherDepot(racine, {
   sansDepot = false,
   indiceGeneral = "",
   cible = null,
+  parEtapes = false,
   libre = false,
   onSucces = () => {},
   nomExo = "",
@@ -213,7 +214,11 @@ export function attacherDepot(racine, {
     if (grapheEl) grapheEl.innerHTML = dessinerArbre(depot, marques, cible);
     precedent = instantane(depot);
 
-    const reussi = Boolean(cible && depot && signature(depot) === signature(cible));
+    // Palier : la réussite vient des étapes (le chemin est libre), pas de la comparaison avec un graphe cible
+    verifierEtapes();
+    const reussi = parEtapes
+      ? Boolean(depot && etapes.length && avancement >= etapes.length)
+      : Boolean(cible && depot && signature(depot) === signature(cible));
     let messages = [];
     if (cible && !depot) messages = ["Il n'y a pas encore de dépôt : lance « git init »."];
     else if (cible && !reussi) messages = ecarts(depot, cible);
@@ -226,12 +231,12 @@ export function attacherDepot(racine, {
     if (sortie) sortie.className = derniereErreur ? "mauvais" : avance || reussi ? "bon" : "";
     if (liste) liste.className = derniereErreur && !reussi ? "mauvais" : "";
 
-    verifierEtapes();
     afficherEtapes();
 
     if (verdict) {
       verdict.className = reussi ? "bon" : "";
-      verdict.textContent = reussi ? "Réussi : ton graphe correspond à la cible." : "";
+      const texteReussite = parEtapes ? "Palier réussi : toutes les étapes sont faites." : "Réussi : ton graphe correspond à la cible.";
+      verdict.textContent = reussi ? texteReussite : "";
     }
     if (liste) {
       liste.innerHTML = messages.map((m) => `<li>${echapper(m)}</li>`).join("");
@@ -376,7 +381,9 @@ export function monterPanneauDepot({
   const sansDepot = /^depot:\s*aucun/m.test(texteBrut);
   const etapes = lireEtapes(exo["Étapes"]);
   const indiceGeneral = (exo["Indice"] ?? "").trim();
-  const cible = jouer(jouer(nouveauDepot(), depart), solution);
+  // Un palier se juge sur ses étapes : pas de graphe cible, le chemin est libre
+  const parEtapes = exo.type === "palier";
+  const cible = parEtapes ? null : jouer(jouer(nouveauDepot(), depart), solution);
 
   const enonceEl = conteneurGauche.querySelector("#depot-enonce");
   const coursEl = conteneurGauche.querySelector("#depot-cours");
@@ -390,6 +397,7 @@ export function monterPanneauDepot({
     sansDepot,
     indiceGeneral,
     cible,
+    parEtapes,
     libre: false,
     nomExo,
     onSucces,
@@ -453,7 +461,8 @@ if (typeof document !== "undefined" && document.getElementById("formulaire") && 
     const solution = lireCommandes(exo["Solution"]);
     const etapes = lireEtapes(exo["Étapes"]);
     const indiceGeneral = (exo["Indice"] ?? "").trim();
-    const cible = jouer(jouer(nouveauDepot(), depart), solution);
+    const parEtapes = /^type:\s*palier/m.test(texte);
+    const cible = parEtapes ? null : jouer(jouer(nouveauDepot(), depart), solution);
 
     if (auteur) document.getElementById("solution").hidden = false;
 
@@ -464,6 +473,7 @@ if (typeof document !== "undefined" && document.getElementById("formulaire") && 
       sansDepot,
       indiceGeneral,
       cible,
+      parEtapes,
       libre: false,
       nomExo: EXO,
       listeOrdre,

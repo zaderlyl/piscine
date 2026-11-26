@@ -10,9 +10,9 @@ import { monterPanneauDepot, ORDRE } from "../depot.js";
 const RACINE = fileURLToPath(new URL("../..", import.meta.url));
 
 // 1. Ordre des exercices
-assert.equal(ORDRE.length, 11, "ORDRE doit contenir 11 exercices");
+assert.equal(ORDRE.length, 12, "ORDRE doit contenir 12 exercices");
 assert.equal(ORDRE[0], "git/visuel/01");
-assert.equal(ORDRE[10], "git/visuel/11");
+assert.equal(ORDRE[11], "git/visuel/12");
 
 // 2. Test sur l'exercice 01 (Premier commit)
 const chemin01 = join(RACINE, "exos/git/visuel/01.md");
@@ -85,15 +85,16 @@ btnSolution.dispatchEvent(new dom.window.Event("click"));
 assert.equal(succesAppele, true, "onSucces doit être déclenché");
 assert.match(graphe.innerHTML, /Ajoute la page/);
 
-// 3. Test sur les 11 exercices Git : chaque solution mène au succès
+// 3. Test sur les 12 exercices Git : chaque solution mène au succès
 const dossierGit = join(RACINE, "exos/git/visuel");
 const fichiersGit = readdirSync(dossierGit).filter((f) => f.endsWith(".md")).sort();
-assert.equal(fichiersGit.length, 11);
+assert.equal(fichiersGit.length, 12);
 
 for (const f of fichiersGit) {
   const contenu = readFileSync(join(dossierGit, f), "utf8");
   const exoObj = lireExo(contenu);
   Object.defineProperty(exoObj, "texteBrut", { value: contenu });
+  Object.defineProperty(exoObj, "type", { value: contenu.match(/^type:\s*(\S+)/m)?.[1] ?? "classique" });
   Object.defineProperty(exoObj, "panneaux", { value: lirePanneaux(contenu) });
 
   let valide = false;
@@ -117,4 +118,4 @@ for (const f of fichiersGit) {
   assert.equal(valide, true, `L'exo ${f} doit être validé avec sa solution`);
 }
 
-console.log("ok   Panneau Git : 11 exos validés en conditions réelles");
+console.log("ok   Panneau Git : 12 exos validés en conditions réelles");
