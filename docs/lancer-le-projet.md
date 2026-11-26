@@ -94,6 +94,42 @@ Sous Windows, avec XAMPP, utilise `C:\xampp\php\php.exe -S localhost:8000` si `p
 
 URL du prototype : http://localhost:8000/src/ ; URL de l'API : http://localhost:8000/api/.
 
+### Sur le serveur de l'IUT
+
+Le serveur de l'IUT fait tourner PHP et MySQL : c'est là que l'API est testée en vrai.
+
+**1. Créer la base** dans phpMyAdmin. Son nom est préfixé par ton identifiant (par exemple `lilian.cornet_piscine`, et pas `piscine`). Tu n'as pas le droit de faire `CREATE DATABASE` : crée-la depuis l'interface, puis importe `base/schema.sql` dans cette base (onglet « Importer »).
+
+**2. Envoyer les fichiers** avec FileZilla dans `public_html/piscine/` : les dossiers `api/` et `base/`.
+
+**3. Créer `api/config.local.php`** sur le serveur, à partir de `config.exemple.php` :
+
+- `hote` : `localhost` (vérifie la ligne « Serveur » de phpMyAdmin) ; `port` : `3306` ;
+- `nom` : le nom **préfixé** de la base ;
+- `utilisateur` et `mot_de_passe` : ceux de phpMyAdmin ;
+- `code_inscription` : un code de test, à changer avant toute mise en ligne.
+
+Prépare ce fichier hors du dépôt, envoie-le avec FileZilla, puis supprime la copie locale : il contient un mot de passe.
+
+**4. Tester l'inscription** avec `curl`. `BASE` est l'URL du dossier `api/` sur le serveur :
+
+```bash
+BASE=https://<serveur>/~<identifiant>/piscine/api
+curl -i -X POST $BASE/inscription.php -H 'Content-Type: application/json' \
+  -d '{"email":"test1@exemple.fr","prenom":"Test","nom":"Un","mot_de_passe":"motdepasse1","code":"TON_CODE"}'
+```
+
+Réponses attendues :
+
+| Requête | Réponse |
+|---|---|
+| inscription valide | `201` `{"ok":true,"id":…}` |
+| même e-mail une deuxième fois | `409` |
+| mot de passe trop court ou code faux | `400` avec les erreurs par champ |
+| `GET` au lieu de `POST` | `405` |
+
+Une erreur `500` « Erreur du serveur » cache la vraie cause, écrite dans `error_log` : le plus souvent le nom de la base (préfixe oublié), l'hôte MySQL ou une table manquante. Après le test, supprime la ligne de test dans la table `users`.
+
 ## En cas de problème
 
 - Page blanche ou rien ne s'affiche : ouvre la console (F12) et lis la première erreur.
