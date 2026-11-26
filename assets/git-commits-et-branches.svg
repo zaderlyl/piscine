@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 470" width="860" height="470" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<title id="t">Les commits et les branches</title>
+<desc id="d">Une ligne main avec trois commits, une branche feature/menu qui part du deuxième commit avec deux commits, puis un merge qui rassemble les deux lignes.</desc>
+<rect width="860" height="470" rx="14" fill="#ffffff"/>
+<path d="M100,130 L690,130" fill="none" stroke="#4a5ea6" stroke-width="6" stroke-linecap="round"/>
+<path d="M250,130 C310,130 340,270 400,270 L550,270" fill="none" stroke="#6f9a45" stroke-width="6" stroke-linecap="round"/>
+<path d="M550,270 C610,270 630,130 690,130" fill="none" stroke="#6f9a45" stroke-width="6" stroke-linecap="round"/>
+<circle cx="100" cy="130" r="17" fill="#4a5ea6" stroke="#ffffff" stroke-width="4"/>
+<text x="100" y="96" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Crée la page</text>
+<circle cx="250" cy="130" r="17" fill="#4a5ea6" stroke="#ffffff" stroke-width="4"/>
+<text x="250" y="96" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Ajoute le titre</text>
+<circle cx="450" cy="130" r="17" fill="#4a5ea6" stroke="#ffffff" stroke-width="4"/>
+<text x="450" y="96" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Ajoute le pied de page</text>
+<circle cx="690" cy="130" r="21" fill="#ee7b22" stroke="#ffffff" stroke-width="4"/>
+<text x="690" y="96" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Merge de feature/menu</text>
+<circle cx="400" cy="270" r="17" fill="#6f9a45" stroke="#ffffff" stroke-width="4"/>
+<text x="400" y="316" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Ajoute le menu</text>
+<circle cx="550" cy="270" r="17" fill="#6f9a45" stroke="#ffffff" stroke-width="4"/>
+<text x="550" y="316" text-anchor="middle" font-size="14" fill="#1f2430" font-weight="600">Style du menu</text>
+<rect x="740" y="114" width="80" height="32" rx="16" fill="#4a5ea6"/>
+<text x="780.0" y="135" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">main</text>
+<rect x="625" y="254" width="140" height="32" rx="16" fill="#6f9a45"/>
+<text x="695.0" y="275" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">feature/menu</text>
+<text x="30" y="40" font-size="14" fill="#5b6070">Le temps passe de gauche à droite : chaque point est un commit.</text>
+<rect x="30" y="340" width="260" height="104" rx="14" fill="#f4f5f8"/>
+<rect x="30" y="340" width="8" height="104" rx="4" fill="#4a5ea6"/>
+<text x="54" y="372" font-size="18" font-weight="700" fill="#4a5ea6">Commit</text>
+<text x="54" y="400" font-size="14" fill="#1f2430">Une photo du projet à un instant,</text>
+<text x="54" y="422" font-size="14" fill="#1f2430">avec un message qui l'explique.</text>
+<rect x="305" y="340" width="260" height="104" rx="14" fill="#f4f5f8"/>
+<rect x="305" y="340" width="8" height="104" rx="4" fill="#6f9a45"/>
+<text x="329" y="372" font-size="18" font-weight="700" fill="#6f9a45">Branche</text>
+<text x="329" y="400" font-size="14" fill="#1f2430">Une ligne de commits parallèle :</text>
+<text x="329" y="422" font-size="14" fill="#1f2430">tu testes sans toucher à main.</text>
+<rect x="580" y="340" width="260" height="104" rx="14" fill="#f4f5f8"/>
+<rect x="580" y="340" width="8" height="104" rx="4" fill="#ee7b22"/>
+<text x="604" y="372" font-size="18" font-weight="700" fill="#ee7b22">Merge</text>
+<text x="604" y="400" font-size="14" fill="#1f2430">On rassemble deux lignes :</text>
+<text x="604" y="422" font-size="14" fill="#1f2430">la branche rejoint main.</text>
+</svg>
