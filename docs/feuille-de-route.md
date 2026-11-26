@@ -91,7 +91,7 @@ Ordre des langages et notions attendues : [programme-par-langage.md](programme-p
 - [ ] `38` : Caractères spéciaux
 - [ ] `39` : Attributs globaux
 - [ ] `40` : Palier : une page complète à cahier des charges
-- [ ] `41` : Projet : page personnelle
+- [x] `41` : Projet : page personnelle (page de présentation, sujet libre)
 
 ---
 
