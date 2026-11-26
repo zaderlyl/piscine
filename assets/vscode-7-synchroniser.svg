@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 480" width="860" height="480" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<title id="t">VS Code : synchroniser</title>
+<desc id="d">Le bouton Synchroniser les modifications récupère puis envoie : 1 commit à envoyer, 0 à récupérer.</desc>
+<rect width="860" height="480" rx="14" fill="#ffffff"/>
+<rect x="30" y="24" width="800" height="330" rx="10" fill="#1e1e1e"/>
+<path d="M30,34 a10,10 0 0 1 10,-10 h780 a10,10 0 0 1 10,10 v22 h-800 z" fill="#323233"/>
+<circle cx="52" cy="40" r="6" fill="#ff5f57"/>
+<circle cx="72" cy="40" r="6" fill="#febc2e"/>
+<circle cx="92" cy="40" r="6" fill="#28c840"/>
+<text x="430.0" y="45" font-size="13" fill="#cccccc" text-anchor="middle">mon-projet — Visual Studio Code</text>
+<rect x="30" y="56" width="48" height="276" fill="#333333"/>
+<g fill="none" stroke="#858585" stroke-width="2"><path d="M45,72 h10 l6,6 v14 h-16 z"/><path d="M51,68 h10 l6,6 v14"/></g>
+<rect x="30" y="110" width="3" height="48" fill="#ffffff"/>
+<g fill="none" stroke="#ffffff" stroke-width="2"><circle cx="48" cy="125" r="3.5"/><circle cx="48" cy="143" r="3.5"/><circle cx="62" cy="131" r="3.5"/><path d="M48,128.5 v11"/><path d="M62,134.5 c0,6 -14,2 -14,8"/></g>
+<rect x="78" y="56" width="262" height="276" fill="#252526"/>
+<text x="96" y="82" font-size="11" fill="#bbbbbb" letter-spacing="0.6">CONTRÔLE DE CODE SOURCE</text>
+<rect x="92" y="96" width="234" height="34" rx="3" fill="#3c3c3c"/>
+<text x="102" y="118" font-size="12" fill="#8c8c8c">Message (Ctrl+Entrée pour valider)</text>
+<rect x="92" y="138" width="234" height="30" rx="3" fill="#0e639c"/>
+<text x="209" y="158" font-size="14" fill="#ffffff" text-anchor="middle">Synchroniser les modifications 1↑</text>
+<rect x="340" y="56" width="490" height="30" fill="#252526"/>
+<rect x="340" y="56" width="140" height="30" fill="#1e1e1e"/>
+<text x="356" y="76" font-size="13" fill="#ffffff">index.html</text>
+<text x="370" y="118" font-size="13" fill="#6e7681" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">1</text>
+<text x="390" y="118" font-size="13" fill="#d4d4d4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">&lt;h1&gt;Bonjour&lt;/h1&gt;</text>
+<text x="370" y="142" font-size="13" fill="#6e7681" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">2</text>
+<text x="390" y="142" font-size="13" fill="#d4d4d4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">&lt;p&gt;Ma première page&lt;/p&gt;</text>
+<path d="M30,332 h800 v12 a10,10 0 0 1 -10,10 h-780 a10,10 0 0 1 -10,-10 z" fill="#007acc"/>
+<g fill="none" stroke="#ffffff" stroke-width="1.4"><circle cx="46" cy="338" r="2"/><circle cx="46" cy="348" r="2"/><circle cx="53" cy="342" r="2"/><path d="M46,340 v6"/><path d="M53,344 c0,3 -7,1 -7,4"/></g>
+<text x="62" y="347" font-size="12" fill="#ffffff">main</text>
+<text x="108" y="347" font-size="12" fill="#ffffff">0↓ 1↑</text>
+<rect x="88" y="136" width="242" height="34" rx="6" fill="none" stroke="#ef5b5b" stroke-width="3"/>
+<circle cx="344" cy="153" r="15" fill="#ef5b5b" stroke="#ffffff" stroke-width="3"/>
+<text x="344" y="159" font-size="17" fill="#ffffff" font-weight="700" text-anchor="middle">1</text>
+<rect x="96" y="331" width="76" height="24" rx="6" fill="none" stroke="#ef5b5b" stroke-width="3"/>
+<circle cx="150" cy="316" r="15" fill="#ef5b5b" stroke="#ffffff" stroke-width="3"/>
+<text x="150" y="322" font-size="17" fill="#ffffff" font-weight="700" text-anchor="middle">2</text>
+<rect x="30" y="372" width="800" height="88" rx="14" fill="#f4f5f8"/>
+<rect x="30" y="372" width="8" height="88" rx="4" fill="#ef5b5b"/>
+<circle cx="64" cy="402" r="12" fill="#ef5b5b"/>
+<text x="64" y="408" font-size="14" fill="#ffffff" font-weight="700" text-anchor="middle">1</text>
+<text x="86" y="407" font-size="15" fill="#1f2430"><tspan font-weight="700">Synchroniser</tspan><tspan> lance </tspan><tspan font-weight="700" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">git pull</tspan><tspan> puis </tspan><tspan font-weight="700" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">git push</tspan><tspan> : tu récupères le travail des autres, puis tu envoies le tien.</tspan></text>
+<circle cx="64" cy="436" r="12" fill="#ef5b5b"/>
+<text x="64" y="442" font-size="14" fill="#ffffff" font-weight="700" text-anchor="middle">2</text>
+<text x="86" y="441" font-size="15" fill="#1f2430"><tspan font-weight="700">1↑</tspan><tspan> : un commit à envoyer. </tspan><tspan font-weight="700">0↓</tspan><tspan> : rien à récupérer sur GitHub.</tspan></text>
+</svg>
