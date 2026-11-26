@@ -1,9 +1,11 @@
-import { EditorView, basicSetup, lineNumbers } from "https://esm.sh/codemirror@6.0.1";
+import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
 import { html } from "https://esm.sh/@codemirror/lang-html@6.4.9";
 import { css } from "https://esm.sh/@codemirror/lang-css@6.3.1";
 import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
 import { php } from "https://esm.sh/@codemirror/lang-php@6.0.1";
 import { sql } from "https://esm.sh/@codemirror/lang-sql@6.8.0";
+// lineNumbers vient de @codemirror/view (codemirror ne le réexporte pas), même principe de copie unique.
+import { lineNumbers } from "https://esm.sh/@codemirror/view@^6.0.0?target=es2022";
 // Même adresse que celle utilisée en interne par codemirror : esm.sh ne charge ainsi qu'une
 // seule copie de @codemirror/autocomplete (sinon acceptCompletion ne voit aucune suggestion).
 import { acceptCompletion } from "https://esm.sh/@codemirror/autocomplete@^6.0.0?target=es2022";
