@@ -8,6 +8,8 @@ import {
   verifierResultat,
   comparerEtats,
   verifierEtat,
+  comparerStructures,
+  verifierStructure,
 } from "./verification.js";
 
 const SOLUTIONS = ["SELECT nom FROM eleves;", "SELECT eleves.nom FROM eleves WHERE nom = 'Alice'"];
@@ -127,4 +129,38 @@ test("verifierEtat refuse une requête qui oublie le WHERE, une lecture seule, u
   assert.equal(verifierEtat({ SQL, base: BASE, requete: "SELECT * FROM eleves", solutions }).reussi, false);
   assert.match(verifierEtat({ SQL, base: BASE, requete: "DELETE FROM profs", solutions }).message, /erreur/);
   assert.match(verifierEtat({ SQL, base: BASE, requete: " ", solutions }).message, /Écris/);
+});
+
+const COL = (nom, type, cle = 0) => ({ nom, type, cle, nonNul: false });
+const STRUCT = (nom, colonnes, etrangeres = []) => ({ nom, colonnes, etrangeres });
+
+test("comparerStructures accepte la même structure, sans tenir compte de la casse", () => {
+  const a = [STRUCT("eleves", [COL("id", "INTEGER", 1), COL("nom", "TEXT")])];
+  const o = [STRUCT("ELEVES", [COL("ID", "integer", 1), COL("Nom", "text")])];
+  assert.equal(comparerStructures(a, o).reussi, true);
+});
+
+test("comparerStructures refuse une table, une colonne, un type, une clé primaire ou une clé étrangère différents", () => {
+  const a = [STRUCT("notes", [COL("id", "INTEGER", 1), COL("eleve_id", "INTEGER")], [{ de: "eleve_id", table: "eleves", vers: "id" }])];
+  const colonnes = a[0].colonnes;
+  assert.match(comparerStructures(a, []).message, /Il manque la table notes/);
+  assert.match(comparerStructures(a, [...a, STRUCT("profs", [])]).message, /profs n'est pas demandée/);
+  assert.match(comparerStructures(a, [STRUCT("notes", [COL("id", "INTEGER", 1)])]).message, /colonnes/);
+  assert.match(comparerStructures(a, [STRUCT("notes", [colonnes[0], COL("eleve_id", "TEXT")], a[0].etrangeres)]).message, /bon type/);
+  assert.match(comparerStructures(a, [STRUCT("notes", [COL("id", "INTEGER"), colonnes[1]], a[0].etrangeres)]).message, /clé primaire/);
+  assert.match(comparerStructures(a, [STRUCT("notes", colonnes)]).message, /clés étrangères/);
+});
+
+test("verifierStructure accepte deux écritures qui créent la même table", options, () => {
+  const solutions = ["CREATE TABLE eleves (id INTEGER PRIMARY KEY, nom TEXT)"];
+  const requete = "create table eleves(\n  id integer primary key,\n  nom text\n);";
+  assert.equal(verifierStructure({ SQL, base: "", requete, solutions }).reussi, true);
+});
+
+test("verifierStructure refuse une table oubliée, un mauvais type, une erreur ou une requête vide", options, () => {
+  const solutions = ["CREATE TABLE eleves (id INTEGER PRIMARY KEY, nom TEXT)"];
+  assert.match(verifierStructure({ SQL, base: "", requete: "SELECT 1", solutions }).message, /Il manque la table/);
+  assert.match(verifierStructure({ SQL, base: "", requete: "CREATE TABLE eleves (id TEXT PRIMARY KEY, nom TEXT)", solutions }).message, /bon type/);
+  assert.match(verifierStructure({ SQL, base: "", requete: "CREATE TABLE eleves (id", solutions }).message, /erreur/);
+  assert.match(verifierStructure({ SQL, base: "", requete: " ", solutions }).message, /Écris/);
 });

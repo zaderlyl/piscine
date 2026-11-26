@@ -1,5 +1,5 @@
 import { lireSql } from "./lecture.js";
-import { verifierRequete, verifierResultat, verifierEtat } from "./verification.js";
+import { verifierRequete, verifierResultat, verifierEtat, verifierStructure } from "./verification.js";
 import { chargerSql, executerRequete } from "./moteur.js";
 
 // Remplit `conteneur` avec le tableau d'un résultat { colonnes, lignes }.
@@ -51,11 +51,39 @@ export function afficherTables(conteneur, tables) {
   }
 }
 
+// Remplit `conteneur` avec la structure de chaque table : [{ nom, colonnes, etrangeres }] (voir moteur.js).
+export function afficherStructure(conteneur, structure) {
+  conteneur.innerHTML = "";
+  const intro = document.createElement("p");
+  intro.textContent = "Structure après ta requête :";
+  conteneur.append(intro);
+  if (structure.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Il n'y a aucune table.";
+    conteneur.append(p);
+    return;
+  }
+  for (const table of structure) {
+    const titre = document.createElement("h3");
+    titre.className = "sql-table-nom";
+    titre.textContent = table.nom;
+    const zone = document.createElement("div");
+    const lignes = table.colonnes.map((c) => {
+      const etrangere = table.etrangeres.find((f) => f.de === c.nom);
+      return [c.nom, c.type || "(aucun)", c.cle > 0 ? "oui" : "", etrangere ? `${etrangere.table}.${etrangere.vers}` : ""];
+    });
+    afficherTableau(zone, { colonnes: ["Colonne", "Type", "Clé primaire", "Clé étrangère"], lignes });
+    conteneur.append(titre, zone);
+  }
+}
+
 // Panneau d'un exo de requêtes : boutons « Exécuter » et « Vérifier », tableau de résultat.
 // exo : sections de l'exo (Base, Solutions). lireRequete() renvoie le texte de l'éditeur.
 // verification : « texte » (la requête ressemble à une solution), « resultat » (le tableau obtenu
-// est celui d'une solution) ou « etat » (les tables après la requête sont celles d'une solution).
-// Une requête d'écriture (INSERT, UPDATE, DELETE) affiche le contenu des tables après son exécution.
+// est celui d'une solution), « etat » (les tables après la requête sont celles d'une solution) ou
+// « structure » (les tables créées ont la structure d'une solution).
+// Une requête d'écriture (INSERT, UPDATE, DELETE) affiche le contenu des tables après son exécution ;
+// une requête qui modifie la structure (CREATE, ALTER, DROP) affiche la structure des tables.
 // onSucces() est appelée quand la requête est jugée correcte.
 // charger : fournit l'objet sql.js (remplaçable dans les tests).
 export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verification = "texte", charger = chargerSql }) {
@@ -112,6 +140,8 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
     if (r.erreur) {
       resultat.innerHTML = "";
       message("Erreur SQL : " + r.erreur);
+    } else if (r.structureModifiee) {
+      afficherStructure(resultat, r.structure);
     } else if (r.ecriture) {
       afficherTables(resultat, r.tables);
     } else {
@@ -121,7 +151,8 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
 
   async function verifierLaRequete() {
     let r;
-    if (verification === "resultat" || verification === "etat") {
+    const verificateurs = { resultat: verifierResultat, etat: verifierEtat, structure: verifierStructure };
+    if (verification in verificateurs) {
       let SQL;
       try {
         SQL = await charger();
@@ -129,8 +160,7 @@ export function monterPanneauSql({ conteneur, exo, lireRequete, onSucces, verifi
         message(erreur.message);
         return;
       }
-      const verifier = verification === "etat" ? verifierEtat : verifierResultat;
-      r = verifier({ SQL, base: sql.base, requete: lireRequete(), solutions: sql.solutions });
+      r = verificateurs[verification]({ SQL, base: sql.base, requete: lireRequete(), solutions: sql.solutions });
     } else {
       r = verifierRequete(lireRequete(), sql.solutions);
     }

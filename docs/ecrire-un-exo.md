@@ -229,15 +229,15 @@ SELECT eleves.nom FROM eleves;
 - `## Solutions` : un bloc de code par requête acceptée. Mets plusieurs solutions quand le palier ou le projet en accepte plusieurs écritures.
 - `node scripts/valider-exos.js` exécute chaque solution sur la base (il faut le paquet `sql.js` installé, sinon un avertissement s'affiche).
 
-### Trois modes de vérification
+### Quatre modes de vérification
 
-Le champ `verification:` du front matter choisit comment la requête de l'élève est jugée : `texte` (défaut), `resultat` ou `etat`. Une autre valeur est refusée par le validateur.
+Le champ `verification:` du front matter choisit comment la requête de l'élève est jugée : `texte` (défaut), `resultat`, `etat` ou `structure`. Une autre valeur est refusée par le validateur.
 
-| | `verification: texte` | `verification: resultat` | `verification: etat` |
-|---|---|---|---|
-| Idée | Faire utiliser l'outil demandé (exos classiques) | Obtenir le bon tableau, par n'importe quel chemin (paliers et projets de lecture) | Obtenir les bonnes données, par n'importe quel chemin (paliers et projets d'écriture) |
-| Comment | Le **texte** de la requête est comparé à chaque solution | La requête et les solutions sont exécutées sur la même base, et les **tableaux** sont comparés | La requête et les solutions sont exécutées sur la même base, et le **contenu des tables** après exécution est comparé |
-| `## Solutions` | Un bloc par écriture acceptée | Une seule solution suffit, les autres écritures qui donnent le même tableau sont acceptées | Une seule solution suffit, les autres façons d'arriver aux mêmes données sont acceptées |
+| | `verification: texte` | `verification: resultat` | `verification: etat` | `verification: structure` |
+|---|---|---|---|---|
+| Idée | Faire utiliser l'outil demandé (exos classiques) | Obtenir le bon tableau, par n'importe quel chemin (paliers et projets de lecture) | Obtenir les bonnes données, par n'importe quel chemin (paliers et projets d'écriture) | Obtenir les bonnes tables, par n'importe quel chemin (exos de création de tables) |
+| Comment | Le **texte** de la requête est comparé à chaque solution | La requête et les solutions sont exécutées sur la même base, et les **tableaux** sont comparés | La requête et les solutions sont exécutées sur la même base, et le **contenu des tables** après exécution est comparé | La requête et les solutions sont exécutées sur la même base, et la **structure des tables** est comparée |
+| `## Solutions` | Un bloc par écriture acceptée | Une seule solution suffit, les autres écritures qui donnent le même tableau sont acceptées | Une seule solution suffit, les autres façons d'arriver aux mêmes données sont acceptées | Une seule solution suffit, les autres écritures qui créent les mêmes tables sont acceptées |
 
 En mode `texte`, sont ignorés : majuscules/minuscules (sauf dans le texte entre guillemets), espaces (y compris autour de `=`, `<`, `>`, `<=`, `>=`, `<>`, `!=`), retours à la ligne, commentaires `--` et `;` final. Le reste doit être identique : si l'exo accepte plusieurs écritures (`INNER JOIN` ou `JOIN`, conditions dans un autre ordre), mets un bloc par écriture.
 
@@ -251,6 +251,11 @@ En mode `etat` :
 - Toutes les tables sont comparées après l'exécution : mêmes tables, mêmes colonnes, mêmes lignes. L'ordre des lignes est ignoré (une table n'a pas d'ordre).
 - L'élève peut écrire plusieurs requêtes à la suite, dans n'importe quel ordre : seul compte l'état final.
 - Le validateur refuse une solution qui ne modifie aucune table.
+
+En mode `structure` :
+- Sont comparés : les tables, le nom et l'**ordre** des colonnes, leur type, la clé primaire et les clés étrangères. La casse est ignorée. `NOT NULL` n'est pas comparé.
+- Dans l'énoncé, donne le nom de chaque table et de chaque colonne, ainsi que le type attendu : ils sont comparés.
+- Le validateur refuse une solution qui ne modifie la structure d'aucune table.
 
 Extrait de l'en-tête d'un palier (les autres champs restent obligatoires) :
 
@@ -318,6 +323,13 @@ Le cahier des charges, en liste : ce que l'application doit pouvoir faire, plus 
 - **Le minimum automatique au rendu** est volontairement léger : l'élève a modifié des fichiers, et la page se charge sans erreur JavaScript. Aucun critère du cahier des charges n'est testé par la machine : ce qui n'est pas testable est jugé par les profs sur trois axes (code, fonctionnalités, pertinence).
 - L'énoncé reste **libre** : il décrit ce qu'on attend, pas comment le faire, et ne fixe pas d'`id` précis.
 - Le bouton « Rendre mon projet » (rendu, fichiers figés, évaluation) dépend du serveur et des comptes : il n'est **pas encore développé**. En attendant, un projet se joue comme un exo, sans rendu.
+
+## Exos de création de tables SQL
+
+Dans `exos/sql/tables/`, l'élève crée des tables (`CREATE TABLE`, types, `PRIMARY KEY`, `FOREIGN KEY`). Le format est celui des exos de requêtes (`## Base` et `## Solutions`, `panneaux: [enonce, sql]`), avec `verification: structure` :
+- Après **Exécuter**, le panneau affiche la **structure** de toutes les tables (colonnes, types, clé primaire, clé étrangère), puisqu'une création n'a pas de tableau de résultat.
+- La `## Base` peut contenir les tables déjà créées dont l'exo a besoin (par exemple `eleves` pour y relier `notes`).
+- Le validateur refuse, dans ce dossier, une solution qui ne modifie la structure d'aucune table.
 
 ## Les règles à respecter
 
