@@ -136,9 +136,9 @@ Le module JS a **deux familles** sous la même ressource : `js/vanilla` (JavaScr
 - [x] `08` : Retours sonores légers avec HTML5 `new Audio()`
 - [x] `09` : Animation d'apparition au défilement avec `IntersectionObserver`
 - [x] `10` : Modularité native : découper son code avec `<script type="module">` (`import` / `export`)
-- [ ] `11` : Requêtes réseau modernes avec `fetch()` et `async / await`
-- [ ] `12` : Formulaires automatiques avec l'objet `FormData`
-- [ ] `13` : Chargement simultané de ressources avec `Promise.all()`
+- [x] `11` : Requêtes réseau modernes avec `fetch()` et `async / await`
+- [x] `12` : Formulaires automatiques avec l'objet `FormData`
+- [x] `13` : Chargement simultané de ressources avec `Promise.all()`
 *Les exos `01` à `09` ont une page cachée. Le `10` garde son propre `index.html` : il enseigne la balise `<script type="module">`, que l'élève doit donc écrire lui-même (la page cachée n'accepte pas encore les modules).*
 
 **4. Graphisme 2D Canvas (canvas)**
