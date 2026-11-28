@@ -207,25 +207,35 @@ Programme calibré en 20 séances de TP complètes : [programme-par-langage.md](
 
 **4. Programmation Orientée Objet (POO) & Autoloading (R2.13, R3.12)**
 *Transition directe depuis la POO JavaScript (séance 27) pour structurer le code avant la persistance.*
-- [ ] `09` : Classes PHP 8, constructeur avec promotion de propriétés, typage strict et instanciation `new`
-- [ ] `10` : Encapsulation (`public`, `private`, accesseurs) et héritage (`extends`, `parent::__construct()`)
-- [ ] `11` : Autoloading de classes sans dépendance avec `spl_autoload_register()` (fin de la forêt de `require_once`)
+- [x] `09` : Les classes, créer un objet avec ses attributs et ses méthodes
+- [x] `10` : Le constructeur
+- [x] `11` : Un objet qui en contient un autre
+- [x] `12` : Encapsulation avec `private` et getters
+- [x] `13` : Des setters qui refusent les valeurs invalides
+- [x] `14` : L'héritage avec `extends`
+- [x] `15` : `protected` et redéfinition de méthode
+- [x] `16` : Charger les classes avec l'autoloading (`spl_autoload_register`)
 
 **5. Base de données avec PDO, Relations SQL & Transactions (R2.13, R2.14)**
-*Sécurisation des identifiants (config.local.php + .gitignore), try/catch et requêtes préparées systématiques.*
-- [ ] `12` : Configuration locale et connexion sécurisée `PDO` enrobée dans un `try / catch`
-- [ ] `13` : Requêtes préparées PDO (`prepare`, `execute`) et opérations CRUD fondamentales
-- [ ] `14` : Pagination SQL : clauses `LIMIT` et `OFFSET` avec typage obligatoire (`bindValue(..., PDO::PARAM_INT)`) et décompte `COUNT(*)`
-- [ ] `15` : Relations SQL et jointures (`INNER JOIN`, `LEFT JOIN`) pour éliminer l'anti-pattern des requêtes N+1
-- [ ] `16` : Transactions PDO (`beginTransaction`, `commit`, `rollBack`) pour l'intégrité des opérations multi-tables
+*Les exos PDO s'exécutent sur une base SQLite en mémoire dans le navigateur. Requêtes préparées systématiques.*
+- [x] `17` : PDO, se connecter à une base et gérer l'erreur (`try / catch`)
+- [x] `18` : PDO, créer une table
+- [x] `19` : PDO, insérer avec une requête préparée
+- [x] `20` : PDO, lire des lignes avec `SELECT`
+- [x] `21` : PDO, modifier et supprimer avec `UPDATE` et `DELETE`
+- [x] `22` : PDO, paginer les résultats avec `LIMIT` et `OFFSET`
+- [x] `23` : PDO, relier deux tables avec une jointure
+- [x] `24` : PDO, les transactions pour tout ou rien
 
 **6. Architecture MVC & Routage (R2.13, SAÉ)**
-- [ ] `17` : Séparation des responsabilités : isoler Modèle (classes PDO), Vue (HTML) et Contrôleur
-- [ ] `18` : Point d'entrée unique `index.php`, routage par action et fallback 404 obligatoire (`http_response_code(404)` et vue dédiée)
+- [x] `25` : MVC, le modèle qui s'occupe des données
+- [x] `26` : MVC, la vue qui s'occupe de l'affichage
+- [x] `27` : MVC, le contrôleur et le routage avec une page 404
 
 **7. API Back-End JSON & Communication avec le Front-End (R2.13, R3.12)**
-- [ ] `19` : Réception de requêtes JSON du client JS via le flux brut `php://input` (contournement du piège de `$_POST` vide)
-- [ ] `20` : Renvoyer du JSON avec `json_encode()`, codes HTTP réels (`http_response_code`) et gestion du CORS avec requêtes Preflight `OPTIONS`
+- [x] `28` : API JSON, lire le JSON envoyé par le client
+- [x] `29` : API JSON, répondre en JSON avec le bon code HTTP
+- [x] `30` : API JSON, le CORS et la requête préliminaire `OPTIONS`
 
 ---
 
