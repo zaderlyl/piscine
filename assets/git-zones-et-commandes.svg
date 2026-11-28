@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 834" width="860" height="834" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<title id="t">Les zones de Git et les commandes qui les relient</title>
+<desc id="d">Schéma : le dossier de travail, la zone d'index, le dépôt local et le dépôt GitHub, reliés par les commandes clone, add, commit, push, fetch, pull, checkout et merge.</desc>
+<rect width="860" height="834" rx="14" fill="#ffffff"/>
+<rect x="620" y="14" width="220" height="806" rx="10" fill="#fbe3c8"/>
+<text x="310" y="48" text-anchor="middle" font-size="30" font-weight="700" fill="#1f2430">Local</text>
+<text x="730" y="48" text-anchor="middle" font-size="30" font-weight="700" fill="#1f2430">GitHub</text>
+<line x1="110" y1="140" x2="110" y2="810" stroke="#8a8f9c" stroke-width="2"/>
+<rect x="18" y="72" width="184" height="64" rx="20" fill="#4a5ea6"/>
+<text x="110" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">Dossier de travail</text>
+<line x1="310" y1="140" x2="310" y2="810" stroke="#8a8f9c" stroke-width="2"/>
+<rect x="218" y="72" width="184" height="64" rx="20" fill="#1a8fb5"/>
+<text x="310" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">Zone d'index</text>
+<line x1="510" y1="140" x2="510" y2="810" stroke="#8a8f9c" stroke-width="2"/>
+<rect x="418" y="72" width="184" height="64" rx="20" fill="#6f9a45"/>
+<text x="510" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">Dépôt local</text>
+<line x1="730" y1="140" x2="730" y2="810" stroke="#8a8f9c" stroke-width="2"/>
+<rect x="638" y="72" width="184" height="64" rx="20" fill="#ee7b22"/>
+<text x="730" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">Dépôt GitHub</text>
+<path d="M730,168 L144,168 L144,162 L110,190 L144,218 L144,212 L730,212 Z" fill="#ef5b5b"/>
+<text x="437.0" y="196" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git clone</text>
+<text x="420.0" y="232" text-anchor="middle" font-size="13" fill="#3b4150">copie le dépôt chez toi (une seule fois)</text>
+<path d="M110,246 L276,246 L276,240 L310,268 L276,296 L276,290 L110,290 Z" fill="#ef5b5b"/>
+<text x="193.0" y="274" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git add</text>
+<text x="210.0" y="310" text-anchor="middle" font-size="13" fill="#3b4150">prépare les fichiers à enregistrer</text>
+<path d="M310,324 L476,324 L476,318 L510,346 L476,374 L476,368 L310,368 Z" fill="#ef5b5b"/>
+<text x="393.0" y="352" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git commit</text>
+<text x="410.0" y="388" text-anchor="middle" font-size="13" fill="#3b4150">enregistre une version</text>
+<path d="M510,402 L696,402 L696,396 L730,424 L696,452 L696,446 L510,446 Z" fill="#ef5b5b"/>
+<text x="603.0" y="430" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git push</text>
+<text x="620.0" y="466" text-anchor="middle" font-size="13" fill="#3b4150">envoie tes commits sur GitHub</text>
+<path d="M730,480 L544,480 L544,474 L510,502 L544,530 L544,524 L730,524 Z" fill="#ef5b5b"/>
+<text x="637.0" y="508" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git fetch</text>
+<text x="620.0" y="544" text-anchor="middle" font-size="13" fill="#3b4150">récupère sans toucher à tes fichiers</text>
+<path d="M730,558 L144,558 L144,552 L110,580 L144,608 L144,602 L730,602 Z" fill="#ef5b5b"/>
+<text x="437.0" y="586" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git pull</text>
+<text x="420.0" y="622" text-anchor="middle" font-size="13" fill="#3b4150">fetch + merge : récupère et met à jour tes fichiers</text>
+<path d="M510,636 L144,636 L144,630 L110,658 L144,686 L144,680 L510,680 Z" fill="#ef5b5b"/>
+<text x="327.0" y="664" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git checkout</text>
+<text x="310.0" y="700" text-anchor="middle" font-size="13" fill="#3b4150">change de branche (ou git switch)</text>
+<path d="M510,714 L144,714 L144,708 L110,736 L144,764 L144,758 L510,758 Z" fill="#ef5b5b"/>
+<text x="327.0" y="742" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">git merge</text>
+<text x="310.0" y="778" text-anchor="middle" font-size="13" fill="#3b4150">fusionne une autre branche dans la tienne</text>
+</svg>
